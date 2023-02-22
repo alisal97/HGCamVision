@@ -1,25 +1,35 @@
 //
-//  videorecorder.swift
-//  HandPoseCamera
+//  VideoRecorderViewController.swift
+//  HGCam
 //
 //  Created by Aly Salman on 21/02/23.
 //  Copyright © 2023 CB Gang. All rights reserved.
+//
 
 import AVFoundation
-import Photos
 import SnapKit
+import Photos
+import SwiftUI
+import Foundation
+import UIKit
 
-class VideoRecorder: NSObject {
+class VideoRecorderViewController: UIViewController {
     
     private let captureSession = AVCaptureSession()
     private let movieOutput = AVCaptureMovieFileOutput()
     private var videoDeviceInput: AVCaptureDeviceInput!
     private var previewLayer: AVCaptureVideoPreviewLayer?
+    private let recordButton = UIButton()
+    private var isRecording = false
     
-    override init() {
-        super.init()
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        view.backgroundColor = .white
         
         setupCaptureSession()
+        setupPreviewLayer()
+        setupRecordButton()
     }
     
     private func setupCaptureSession() {
@@ -64,7 +74,41 @@ class VideoRecorder: NSObject {
         captureSession.commitConfiguration()
     }
     
-    func startRecording() {
+    private func setupPreviewLayer() {
+        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        previewLayer?.videoGravity = .resizeAspectFill
+        
+        view.layer.addSublayer(previewLayer!)
+        
+        
+    }
+    
+    private func setupRecordButton() {
+        recordButton.backgroundColor = .red
+        recordButton.addTarget(self, action: #selector(recordButtonTapped), for: .touchUpInside)
+        
+        view.addSubview(recordButton)
+        
+        recordButton.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottomMargin).offset(-16)
+            make.width.height.equalTo(80)
+        }
+    }
+    
+    @objc private func recordButtonTapped() {
+        if !isRecording {
+            startRecording()
+            isRecording = true
+            recordButton.backgroundColor = .green
+        } else {
+            stopRecording()
+            isRecording = false
+            recordButton.backgroundColor = .red
+        }
+    }
+    
+     func startRecording() {
         if !movieOutput.isRecording {
             let outputPath = NSTemporaryDirectory() + "output.mov"
             let outputFileURL = URL(fileURLWithPath: outputPath)
@@ -73,14 +117,14 @@ class VideoRecorder: NSObject {
         }
     }
     
-    func stopRecording() {
+     func stopRecording() {
         if movieOutput.isRecording {
             movieOutput.stopRecording()
         }
     }
 }
 
-extension VideoRecorder: AVCaptureFileOutputRecordingDelegate {
+extension VideoRecorderViewController: AVCaptureFileOutputRecordingDelegate {
     
     func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
         print("Started recording to \(fileURL)")
@@ -90,19 +134,19 @@ extension VideoRecorder: AVCaptureFileOutputRecordingDelegate {
         if let error = error {
             print("Error recording video: \(error.localizedDescription)")
         } else {
-            print("Finished recording to \(outputFileURL)")
-            
             PHPhotoLibrary.requestAuthorization { status in
                 if status == .authorized {
                     PHPhotoLibrary.shared().performChanges({
                         PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
                     }) { success, error in
-                        if let error = error {
-                            print("Error saving video to photo library: \(error.localizedDescription)")
+                        if success {
+                            print("Video saved to photos")
                         } else {
-                            print("Saved video to photo library")
+                            print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
                         }
                     }
+                } else {
+                    print("Access to photo library denied")
                 }
             }
         }

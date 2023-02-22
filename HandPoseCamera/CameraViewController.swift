@@ -10,9 +10,14 @@ class CameraViewController: UIViewController {
     private var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     
+    private let movieOutput = AVCaptureMovieFileOutput()
+    private var videoDeviceInput: AVCaptureDeviceInput!
+
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
     private let handGestureProcessor = HandGestureProcessor()
-    
+    private let recordButton = UIButton()
+    private var isRecording = false
+
     private weak var timerLabel: UILabel?
     
     private var isTimerRunning = false
@@ -21,7 +26,8 @@ class CameraViewController: UIViewController {
         super.viewDidLoad()
         prepareCaptureSession()
         prepareCaptureUI()
-        
+        setupRecordButton()
+
         prepareTimerView()
 //        prepareBottomControls()
         
@@ -47,6 +53,44 @@ class CameraViewController: UIViewController {
         captureSession.addOutput(photoOutput)
         
         
+        guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
+            fatalError("Could not get video device")
+        }
+
+        do {
+            let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
+            if captureSession.canAddInput(videoDeviceInput) {
+                captureSession.addInput(videoDeviceInput)
+            }
+        } catch {
+        fatalError("Could not create video device input: \(error.localizedDescription)")
+        
+        
+//        // Add audio input
+//        guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
+//            fatalError("Could not get audio device")
+//        }
+//
+//        do {
+//            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
+//
+//            if captureSession.canAddInput(audioDeviceInput) {
+//                captureSession.addInput(audioDeviceInput)
+//            }
+//        } catch {
+//            fatalError("Could not create audio device input: \(error.localizedDescription)")
+//        }
+        
+        // Add video output
+        if captureSession.canAddOutput(movieOutput) {
+            captureSession.addOutput(movieOutput)
+            addAudioInput()
+        }
+        
+        captureSession.commitConfiguration()
+
+    }
+        
         self.captureSession?.sessionPreset = .high
         self.captureSession = captureSession
         self.captureSession?.startRunning()
@@ -61,6 +105,63 @@ class CameraViewController: UIViewController {
         
         self.videoPreviewLayer = videoPreviewLayer
     }
+    private func setupRecordButton() {
+        recordButton.backgroundColor = .red
+        recordButton.addTarget(self, action: #selector(recordButtonTapped), for: .touchUpInside)
+        
+        view.addSubview(recordButton)
+        
+        recordButton.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottomMargin).offset(-16)
+            make.width.height.equalTo(80)
+        }
+    }
+    @objc private func recordButtonTapped() {
+        if !isRecording {
+            startRecording()
+            isRecording = true
+            recordButton.backgroundColor = .green
+        } else {
+            stopRecording()
+            isRecording = false
+            recordButton.backgroundColor = .red
+        }
+    }
+    func addAudioInput() {
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.playAndRecord, mode: .default)
+            try audioSession.setActive(true, options: .init())
+            let audioDevice = AVCaptureDevice.default(for: AVMediaType.audio)!
+            let audioInput = try AVCaptureDeviceInput(device: audioDevice)
+            if ((captureSession?.canAddInput(audioInput)) != nil) {
+                captureSession!.addInput(audioInput)
+            }
+        } catch {
+            print("Error setting up audio input: \(error.localizedDescription)")
+        }
+    }
+
+    
+    func startRecording() {
+       if !movieOutput.isRecording {
+           let outputPath = NSTemporaryDirectory() + "output.mov"
+           let outputFileURL = URL(fileURLWithPath: outputPath)
+     
+           self.captureSession?.addOutput(movieOutput)
+           movieOutput.startRecording(to: outputFileURL, recordingDelegate: self)
+           
+       }
+   }
+    func stopRecording() {
+       if movieOutput.isRecording {
+           movieOutput.stopRecording()
+       }
+   }
+
+
+
     
     private func prepareTimerView() {
         let timerLabel = UILabel()
@@ -75,21 +176,7 @@ class CameraViewController: UIViewController {
         self.timerLabel = timerLabel
     }
     
-//    private func prepareBottomControls() {
-//        let captureButton = UIButton()
-//        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 100, weight: .bold, scale: .large)
-//        let symbolImage = UIImage(systemName: "camera.circle", withConfiguration: symbolConfig)
-//        captureButton.setImage(symbolImage, for: .normal)
-//        captureButton.tintColor = .systemYellow
-//        captureButton.addTarget(self, action: #selector(captureButtonDidTap), for: .touchUpInside)
-//
-//        view.addSubview(captureButton)
-//        captureButton.snp.makeConstraints { maker in
-//            maker.bottom.equalToSuperview().offset(-40)
-//            maker.centerX.equalToSuperview()
-//            maker.width.height.equalTo(100)
-//        }
-//    }
+
     
 
     
@@ -177,7 +264,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint, ringTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.9 && indexTipPoint.confidence > 0.9 && middleDIPPoint.confidence > 0.9 && ringTipPoint.confidence > 0.85 && littleDIPPoint.confidence > 0.89
+        guard thumbTipPoint.confidence > 0.9 && indexTipPoint.confidence > 0.9 && middleDIPPoint.confidence > 0.9 && ringTipPoint.confidence > 0.87 && littleDIPPoint.confidence > 0.9
         else {
             return
         }
@@ -226,7 +313,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             if isTimerRunning == false {
                 runTimer(seconds: 3, completion: {
                     print("pinched to start vid")
-                    VideoRecorder().startRecording()
+                        self.startRecording()
                     
                 })
             }
@@ -244,7 +331,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             if isTimerRunning == false {
                 runTimer(seconds: 3, completion: {
                     print("pinched to stop vid")
-                    VideoRecorder().stopRecording()
+                    self.stopRecording()
                     
                 })
             }
@@ -267,3 +354,31 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
     }
 }
 
+extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
+    
+    func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
+        print("Started recording to \(fileURL)")
+    }
+    
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        if let error = error {
+            print("Error recording video: \(error.localizedDescription)")
+        } else {
+            PHPhotoLibrary.requestAuthorization { status in
+                if status == .authorized {
+                    PHPhotoLibrary.shared().performChanges({
+                        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
+                    }) { success, error in
+                        if success {
+                            print("Video saved to photos")
+                        } else {
+                            print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
+                        }
+                    }
+                } else {
+                    print("Access to photo library denied")
+                }
+            }
+        }
+    }
+}
