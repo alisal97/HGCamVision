@@ -5,7 +5,6 @@ import Vision
 import Photos
 import SnapKit
 
-var isRecording = false
 
 class CameraViewController: UIViewController {
 
@@ -14,11 +13,10 @@ class CameraViewController: UIViewController {
     
     private let movieOutput = AVCaptureMovieFileOutput()
     private var videoDeviceInput: AVCaptureDeviceInput!
-
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
     private let handGestureProcessor = HandGestureProcessor()
 //    private let recordButton = UIButton()
-    private var isRecording = false
+    static var isRecording = false
 
     private weak var timerLabel: UILabel?
     
@@ -132,7 +130,7 @@ class CameraViewController: UIViewController {
 
     func startRecording() {
        if !movieOutput.isRecording {
-           isRecording = true
+           CameraViewController.isRecording = true
            let outputPath = NSTemporaryDirectory() + "output.mov"
            let outputFileURL = URL(fileURLWithPath: outputPath)
            movieOutput.startRecording(to: outputFileURL, recordingDelegate: self)
@@ -142,7 +140,7 @@ class CameraViewController: UIViewController {
     func stopRecording() {
        if movieOutput.isRecording {
            movieOutput.stopRecording()
-           isRecording = false
+           CameraViewController.isRecording = false
        }
    }
     
@@ -216,8 +214,8 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 return
             }
             
-            let middlePoints = try observation.recognizedPoints(.middleFinger)
-            guard let middleTipPoint = middlePoints[.middleTip] else {
+            let littlePoints = try observation.recognizedPoints(.littleFinger)
+            guard let littleDIPPoint = littlePoints[.littleDIP] else {
                 return
             }
             
@@ -233,7 +231,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             
             self.processPoints(thumbTipPoint: thumbTipPoint,
                                indexTipPoint: indexTipPoint,
-                               middleTipPoint: middleTipPoint,
+                               littleDIPPoint: littleDIPPoint,
                                ringDIPPoint: ringDIPPoint,
                                middleDIPPoint: middleDIPPoint)
         } catch {
@@ -241,10 +239,10 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
     }
     
-    private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, middleTipPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
+    private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.9 && indexTipPoint.confidence > 0.9 && middleTipPoint.confidence > 0.9 && ringDIPPoint.confidence > 0.9 && middleDIPPoint.confidence > 0.9
+        guard thumbTipPoint.confidence > 0.9 && indexTipPoint.confidence > 0.9 && littleDIPPoint.confidence > 0.9 && ringDIPPoint.confidence > 0.9 && middleDIPPoint.confidence > 0.9
         else {
             return
         }
@@ -257,7 +255,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
         
-        guard let middleTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: middleTipPoint.toAVFoundationPoint) else {
+        guard let littleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleDIPPoint.toAVFoundationPoint) else {
             return
         }
         
@@ -269,7 +267,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
 
-        let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, middleTip: middleTipUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint)
+        let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint)
         
         switch state {
         case .pinchedPhoto:
@@ -286,7 +284,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             break
         }
         
-        let startVid = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, middleTip: middleTipUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint)
+        let startVid = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint)
 
         switch startVid {
         case .pinchedVidRec:
@@ -305,7 +303,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             break
         }
         
-        let stopVid = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, middleTip: middleTipUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint)
+        let stopVid = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint)
         switch stopVid {
         case .pinchedVidStop:
             if isTimerRunning == false {
