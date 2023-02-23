@@ -58,18 +58,22 @@ class CameraViewController: UIViewController {
 
     }
     @objc func openGallery() {
-//        PHPhotoLibrary.r
         PHPhotoLibrary.requestAuthorization(for:.readWrite){ status in
             if status == .authorized {
-                print("gallery tapped")
                 let fetchOptions = PHFetchOptions()
                 fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
                 let allPhotos = PHAsset.fetchAssets(with: fetchOptions)
-                guard let asset = allPhotos.firstObject else { return }
+                guard allPhotos.count > 0 else { return }
 
-                // Open asset in a viewer
+                // Create an array of assets to display
+                var assets = [PHAsset]()
+                allPhotos.enumerateObjects { (asset, _, _) in
+                    assets.append(asset)
+                }
+
+                // Create a scrolling view controller with the assets
                 DispatchQueue.main.async {
-                    let viewer = AssetViewerViewController(asset: asset)
+                    let viewer = AssetScrollViewController(assets: assets)
                     self.navigationController?.pushViewController(viewer, animated: true)
                 }
             } else if status == .denied || status == .restricted {
@@ -81,7 +85,6 @@ class CameraViewController: UIViewController {
             }
         }
     }
-
     private func prepareCaptureSession() {
         captureSession?.beginConfiguration()
         let captureSession = AVCaptureSession()

@@ -17,17 +17,17 @@ class HandGestureProcessor {
         
         let isRec = CameraViewController.isRecording
         
-        if distanceY < 19 {
+        if distanceY < 23 {
             print (isRec)
             return .pinchedPhoto
                 
-        } else if distanceX < 15 && isRec == false {
+        } else if distanceX < 19 && isRec == false {
             return .pinchedVidRec
              
-        } else if distanceZ < 15 && isRec == true {
+        } else if distanceZ < 19 && isRec == true {
             return .pinchedVidStop
             
-            } else if distanceY < 200 && distanceX < 200 && distanceZ < 200
+            } else if distanceY < 50 && distanceX < 50 && distanceZ < 50
                     {
             //                if indexTip.y > middleTipDIP.y && indexTip.y > ringTip.y && indexTip.y > littleDIP.y {
             //                return .pinched
