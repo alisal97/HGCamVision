@@ -29,12 +29,12 @@ class CameraViewController: UIViewController {
         setupRecordButton()
 
         prepareTimerView()
-//        prepareBottomControls()
         
         handPoseRequest.maximumHandCount = 1
     }
 
     private func prepareCaptureSession() {
+        captureSession?.beginConfiguration()
         let captureSession = AVCaptureSession()
         
         // Select a front facing camera, make an input.
@@ -42,55 +42,53 @@ class CameraViewController: UIViewController {
         guard let input = try? AVCaptureDeviceInput(device: captureDevice) else { return }
         
         captureSession.addInput(input)
-
+        
         let videoOutput = AVCaptureVideoDataOutput()
         videoOutput.setSampleBufferDelegate(self, queue: .main)
-        captureSession.addOutput(videoOutput)
         
-    
-
+        
+        
         let photoOutput = AVCapturePhotoOutput()
         captureSession.addOutput(photoOutput)
         
+        // Add video input
         
         guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
             fatalError("Could not get video device")
         }
-
+        
         do {
             let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
             if captureSession.canAddInput(videoDeviceInput) {
                 captureSession.addInput(videoDeviceInput)
             }
         } catch {
-        fatalError("Could not create video device input: \(error.localizedDescription)")
+            fatalError("Could not create video device input: \(error.localizedDescription)")
+        }
+        // Add audio input
+        guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
+            fatalError("Could not get audio device")
+        }
         
-        
-//        // Add audio input
-//        guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
-//            fatalError("Could not get audio device")
-//        }
-//
-//        do {
-//            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
-//
-//            if captureSession.canAddInput(audioDeviceInput) {
-//                captureSession.addInput(audioDeviceInput)
-//            }
-//        } catch {
-//            fatalError("Could not create audio device input: \(error.localizedDescription)")
-//        }
+        do {
+            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
+            
+            if captureSession.canAddInput(audioDeviceInput) {
+                captureSession.addInput(audioDeviceInput)
+            }
+        } catch {
+            fatalError("Could not create audio device input: \(error.localizedDescription)")
+        }
         
         // Add video output
         if captureSession.canAddOutput(movieOutput) {
             captureSession.addOutput(movieOutput)
-            addAudioInput()
         }
         
         captureSession.commitConfiguration()
-
-    }
         
+        
+
         self.captureSession?.sessionPreset = .high
         self.captureSession = captureSession
         self.captureSession?.startRunning()
@@ -108,9 +106,9 @@ class CameraViewController: UIViewController {
     private func setupRecordButton() {
         recordButton.backgroundColor = .red
         recordButton.addTarget(self, action: #selector(recordButtonTapped), for: .touchUpInside)
-        
+
         view.addSubview(recordButton)
-        
+
         recordButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottomMargin).offset(-16)
@@ -128,28 +126,12 @@ class CameraViewController: UIViewController {
             recordButton.backgroundColor = .red
         }
     }
-    func addAudioInput() {
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.playAndRecord, mode: .default)
-            try audioSession.setActive(true, options: .init())
-            let audioDevice = AVCaptureDevice.default(for: AVMediaType.audio)!
-            let audioInput = try AVCaptureDeviceInput(device: audioDevice)
-            if ((captureSession?.canAddInput(audioInput)) != nil) {
-                captureSession!.addInput(audioInput)
-            }
-        } catch {
-            print("Error setting up audio input: \(error.localizedDescription)")
-        }
-    }
 
-    
     func startRecording() {
        if !movieOutput.isRecording {
            let outputPath = NSTemporaryDirectory() + "output.mov"
            let outputFileURL = URL(fileURLWithPath: outputPath)
-     
-           self.captureSession?.addOutput(movieOutput)
+//           self.captureSession?.addOutput(movieOutput)
            movieOutput.startRecording(to: outputFileURL, recordingDelegate: self)
            
        }
@@ -264,7 +246,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint, ringTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.9 && indexTipPoint.confidence > 0.9 && middleDIPPoint.confidence > 0.9 && ringTipPoint.confidence > 0.87 && littleDIPPoint.confidence > 0.9
+        guard thumbTipPoint.confidence > 0.9 && indexTipPoint.confidence > 0.9 && middleDIPPoint.confidence > 0.9 && ringTipPoint.confidence > 0.85 && littleDIPPoint.confidence > 0.87
         else {
             return
         }
@@ -354,6 +336,7 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
     }
 }
 
+
 extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     
     func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
@@ -382,3 +365,4 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
         }
     }
 }
+

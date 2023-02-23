@@ -24,8 +24,6 @@
 	<string>We need Camera access in order to launch the app!</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need Photos access in order to save media!</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>We need Microphone access in order to record videos!</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -45,6 +43,8 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>we need mic access in ordrr to recrod videos!</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

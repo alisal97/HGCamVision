@@ -25,10 +25,10 @@ class HandGestureProcessor {
         if distanceY < 33 {
             return .pinchedPhoto
                 
-        } else if distanceX < 45 {
+        } else if distanceX < 41 {
             return .pinchedVidRec
             
-        } else if distanceZ < 51 {
+        } else if distanceZ < 41 {
             
             return .pinchedVidStop
             
