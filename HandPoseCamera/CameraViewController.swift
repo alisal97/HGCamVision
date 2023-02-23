@@ -15,7 +15,7 @@ class CameraViewController: UIViewController {
     private var videoDeviceInput: AVCaptureDeviceInput!
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
     private let handGestureProcessor = HandGestureProcessor()
-//    private let recordButton = UIButton()
+    private let recordButton = UIButton()
     static var isRecording = false
 
     private weak var timerLabel: UILabel?
@@ -26,7 +26,7 @@ class CameraViewController: UIViewController {
         super.viewDidLoad()
         prepareCaptureSession()
         prepareCaptureUI()
-//        setupRecordButton()
+        setupRecordButton()
 
         prepareTimerView()
         
@@ -104,29 +104,29 @@ class CameraViewController: UIViewController {
         
         self.videoPreviewLayer = videoPreviewLayer
     }
-//    private func setupRecordButton() {
-//        recordButton.backgroundColor = .red
-//        recordButton.addTarget(self, action: #selector(recordButtonTapped), for: .touchUpInside)
-//
-//        view.addSubview(recordButton)
-//
-//        recordButton.snp.makeConstraints { make in
-//            make.centerX.equalToSuperview()
-//            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottomMargin).offset(-16)
-//            make.width.height.equalTo(80)
-//        }
-//    }
-//    @objc private func recordButtonTapped() {
-//        if !isRecording {
-//            startRecording()
-//            isRecording = true
-//            recordButton.backgroundColor = .green
-//        } else {
-//            stopRecording()
-//            isRecording = false
-//            recordButton.backgroundColor = .red
-//        }
-//    }
+    private func setupRecordButton() {
+        recordButton.backgroundColor = .red
+        recordButton.addTarget(self, action: #selector(recordButtonTapped), for: .touchUpInside)
+
+        view.addSubview(recordButton)
+
+        recordButton.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottomMargin).offset(-16)
+            make.width.height.equalTo(80)
+        }
+    }
+    @objc private func recordButtonTapped() {
+        if !CameraViewController.isRecording {
+            startRecording()
+            CameraViewController.isRecording = true
+            recordButton.backgroundColor = .green
+        } else {
+            stopRecording()
+            CameraViewController.isRecording = false
+            recordButton.backgroundColor = .red
+        }
+    }
 
     func startRecording() {
        if !movieOutput.isRecording {
@@ -242,7 +242,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.9 && indexTipPoint.confidence > 0.9 && littleDIPPoint.confidence > 0.9 && ringDIPPoint.confidence > 0.9 && middleDIPPoint.confidence > 0.9
+        guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.91 && littleDIPPoint.confidence > 0.91 && ringDIPPoint.confidence > 0.91 && middleDIPPoint.confidence > 0.91
         else {
             return
         }
@@ -336,31 +336,95 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
 
 extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     
-    func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
-        print("Started recording to \(fileURL)")
-    }
-    
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if let error = error {
             print("Error recording video: \(error.localizedDescription)")
-        } else {
-            PHPhotoLibrary.requestAuthorization { status in
-                if status == .authorized {
-                    PHPhotoLibrary.shared().performChanges({
-                        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
-                    }) { success, error in
-                        if success {
-                            print("Video saved to photos")
-                        } else {
-                            print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
+            return
+        }
+        
+        let asset = AVAsset(url: outputFileURL)
+        guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
+            print("Export session could not be created")
+            return
+        }
+        
+        guard FileManager.default.fileExists(atPath: outputFileURL.path) else {
+            print("Output file does not exist")
+            return
+        }
+        
+        let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("trimmedVideo.mp4")
+        
+        if FileManager.default.fileExists(atPath: outputURL.path) {
+            do {
+                try FileManager.default.removeItem(at: outputURL)
+            } catch {
+                print("Error removing file at path: \(outputURL.path)")
+            }
+        }
+        
+        exportSession.outputURL = outputURL
+        exportSession.outputFileType = .mp4
+        exportSession.shouldOptimizeForNetworkUse = true
+        
+        let duration = asset.duration
+        let startTime = CMTime.zero
+        let endTime = CMTimeSubtract(duration, CMTimeMake(value: 2, timescale: 1))
+        let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
+        exportSession.timeRange = timeRange
+        
+        exportSession.exportAsynchronously {
+            switch exportSession.status {
+            case .completed:
+                PHPhotoLibrary.requestAuthorization { status in
+                    if status == .authorized {
+                        PHPhotoLibrary.shared().performChanges({
+                            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)
+                        }) { success, error in
+                            if success {
+                                print("Video saved to photos")
+                            } else {
+                                print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
+                            }
                         }
+                    } else {
+                        print("Access to photo library denied")
                     }
-                } else {
-                    print("Access to photo library denied")
                 }
+            case .failed:
+                print("Export failed: \(exportSession.error?.localizedDescription ?? "unknown error")")
+            case .cancelled:
+                print("Export cancelled")
+            default:
+                break
             }
         }
     }
+    
 }
+    
+
+//    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+//        if let error = error {
+//            print("Error recording video: \(error.localizedDescription)")
+//        } else {
+//            PHPhotoLibrary.requestAuthorization { status in
+//                if status == .authorized {
+//                    PHPhotoLibrary.shared().performChanges({
+//                        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
+//                    }) { success, error in
+//                        if success {
+//                            print("Video saved to photos")
+//                        } else {
+//                            print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
+//                        }
+//                    }
+//                } else {
+//                    print("Access to photo library denied")
+//                }
+//            }
+//        }
+
+
 
 

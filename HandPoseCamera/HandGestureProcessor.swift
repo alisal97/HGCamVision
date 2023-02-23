@@ -12,18 +12,19 @@ class HandGestureProcessor {
     func getHandState(thumbTip: CGPoint, indexTip: CGPoint, littleDIP: CGPoint, ringDIP: CGPoint, middleDIP: CGPoint) -> State {
         let distanceY = abs(indexTip.y - thumbTip.y)
         let distanceX = abs((thumbTip.y - middleDIP.y) + (ringDIP.x - middleDIP.x))
+//        let distanceX = abs((thumbTip.y - ringDIP.y) + (ringDIP.x - littleDIP.x))
         let distanceZ = abs((thumbTip.y - ringDIP.y) + (ringDIP.x - littleDIP.x))
         
         let isRec = CameraViewController.isRecording
         
-        if distanceY < 30 {
+        if distanceY < 19 {
             print (isRec)
             return .pinchedPhoto
                 
-        } else if distanceX < 35 && isRec == false {
+        } else if distanceX < 15 && isRec == false {
             return .pinchedVidRec
              
-        } else if distanceZ < 37 && isRec == true {
+        } else if distanceZ < 15 && isRec == true {
             return .pinchedVidStop
             
             } else if distanceY < 200 && distanceX < 200 && distanceZ < 200
