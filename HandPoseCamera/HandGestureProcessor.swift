@@ -1,11 +1,3 @@
-//
-//  VideoRec.swift
-//  HandPoseCamera
-//
-//  Created by Aly Salman on 20/02/23.
-//  Copyright © 2023 CB Gang. All rights reserved.
-//
-
 import UIKit
 
 class HandGestureProcessor {
@@ -17,24 +9,25 @@ class HandGestureProcessor {
         case unknown
     }
 
-    func getHandState(thumbTip: CGPoint, indexTip: CGPoint, middleDIP: CGPoint, ringTip: CGPoint, littleDIP: CGPoint) -> State {
+    func getHandState(thumbTip: CGPoint, indexTip: CGPoint, middleTip: CGPoint, ringDIP: CGPoint, middleDIP: CGPoint) -> State {
         let distanceY = abs(indexTip.y - thumbTip.y)
-        let distanceX = abs(ringTip.y - thumbTip.y)
-        let distanceZ = abs(littleDIP.y - thumbTip.y)
-//        
-        if distanceY < 33 {
+        let distanceX = abs((thumbTip.y - middleDIP.y) + (ringDIP.x - middleDIP.x))
+        let distanceZ = abs(thumbTip.y - ringDIP.y)
+        
+        
+        if distanceY < 35 {
             return .pinchedPhoto
                 
-        } else if distanceX < 41 {
+        } else if distanceX < 69 {
             return .pinchedVidRec
-            
-        } else if distanceZ < 41 {
+             
+        } else if distanceZ < 35 {
             
             return .pinchedVidStop
             
-                        } else if distanceY < 200 && distanceX < 200 && distanceZ < 200
+            } else if distanceY < 200 && distanceX < 200 && distanceZ < 200
                     {
-            //                if indexTip.y > middleDIP.y && indexTip.y > ringTip.y && indexTip.y > littleDIP.y {
+            //                if indexTip.y > middleTipDIP.y && indexTip.y > ringTip.y && indexTip.y > littleDIP.y {
             //                return .pinched
             //            } else {
                             return .unknown
