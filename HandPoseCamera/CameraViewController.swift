@@ -4,7 +4,7 @@ import AVFoundation
 import Vision
 import Photos
 import SnapKit
-
+import PhotosUI
 
 class CameraViewController: UIViewController {
 
@@ -15,22 +15,71 @@ class CameraViewController: UIViewController {
     private var videoDeviceInput: AVCaptureDeviceInput!
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
     private let handGestureProcessor = HandGestureProcessor()
-    private let recordButton = UIButton()
+//    private let recordButton = UIButton()
     static var isRecording = false
 
     private weak var timerLabel: UILabel?
     
     private var isTimerRunning = false
     
+    
+    // gallery button
+    private lazy var galleryButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(systemName: "square.grid.2x2.fill"), for: .normal)
+        button.tintColor = .white
+        button.addTarget(self, action: #selector(openGallery), for: .touchUpInside)
+        return button
+    }()
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         prepareCaptureSession()
         prepareCaptureUI()
-        setupRecordButton()
+//        setupRecordButton()
 
         prepareTimerView()
         
         handPoseRequest.maximumHandCount = 1
+        
+        // Add the gallery thumbnail button to the view
+        
+        view.addSubview(galleryButton)
+        
+        // Position the gallery thumbnail button in the bottom left corner
+        galleryButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            galleryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            galleryButton.widthAnchor.constraint(equalToConstant: 44),
+            galleryButton.heightAnchor.constraint(equalToConstant: 44)
+        ])
+
+    }
+    @objc func openGallery() {
+//        PHPhotoLibrary.r
+        PHPhotoLibrary.requestAuthorization(for:.readWrite){ status in
+            if status == .authorized {
+                print("gallery tapped")
+                let fetchOptions = PHFetchOptions()
+                fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+                let allPhotos = PHAsset.fetchAssets(with: fetchOptions)
+                guard let asset = allPhotos.firstObject else { return }
+
+                // Open asset in a viewer
+                DispatchQueue.main.async {
+                    let viewer = AssetViewerViewController(asset: asset)
+                    self.navigationController?.pushViewController(viewer, animated: true)
+                }
+            } else if status == .denied || status == .restricted {
+                // Handle access denied or restricted
+                print("Access to photo library denied or restricted")
+            } else if status == .notDetermined {
+                // Handle not determined
+                print("Access to photo library not determined")
+            }
+        }
     }
 
     private func prepareCaptureSession() {
@@ -86,11 +135,17 @@ class CameraViewController: UIViewController {
         }
         
         
-        
+
+
 
         self.captureSession?.sessionPreset = .high
         self.captureSession = captureSession
-        self.captureSession?.startRunning()
+        
+        DispatchQueue.global(qos: .background).async {
+            self.captureSession?.startRunning()
+        }
+
+        
         captureSession.commitConfiguration()
 
     }
@@ -104,29 +159,33 @@ class CameraViewController: UIViewController {
         
         self.videoPreviewLayer = videoPreviewLayer
     }
-    private func setupRecordButton() {
-        recordButton.backgroundColor = .red
-        recordButton.addTarget(self, action: #selector(recordButtonTapped), for: .touchUpInside)
+    
+    
 
-        view.addSubview(recordButton)
-
-        recordButton.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottomMargin).offset(-16)
-            make.width.height.equalTo(80)
-        }
-    }
-    @objc private func recordButtonTapped() {
-        if !CameraViewController.isRecording {
-            startRecording()
-            CameraViewController.isRecording = true
-            recordButton.backgroundColor = .green
-        } else {
-            stopRecording()
-            CameraViewController.isRecording = false
-            recordButton.backgroundColor = .red
-        }
-    }
+//
+//    private func setupRecordButton() {
+//        recordButton.backgroundColor = .red
+//        recordButton.addTarget(self, action: #selector(recordButtonTapped), for: .touchUpInside)
+//
+//        view.addSubview(recordButton)
+//
+//        recordButton.snp.makeConstraints { make in
+//            make.centerX.equalToSuperview()
+//            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottomMargin).offset(-16)
+//            make.width.height.equalTo(80)
+//        }
+//    }
+//    @objc private func recordButtonTapped() {
+//        if !CameraViewController.isRecording {
+//            startRecording()
+//            CameraViewController.isRecording = true
+//            recordButton.backgroundColor = .green
+//        } else {
+//            stopRecording()
+//            CameraViewController.isRecording = false
+//            recordButton.backgroundColor = .red
+//        }
+//    }
 
     func startRecording() {
        if !movieOutput.isRecording {
@@ -376,7 +435,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
         exportSession.exportAsynchronously {
             switch exportSession.status {
             case .completed:
-                PHPhotoLibrary.requestAuthorization { status in
+                PHPhotoLibrary.requestAuthorization(for: .readWrite ) { status in
                     if status == .authorized {
                         PHPhotoLibrary.shared().performChanges({
                             PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)
@@ -403,27 +462,6 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     
 }
     
-
-//    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-//        if let error = error {
-//            print("Error recording video: \(error.localizedDescription)")
-//        } else {
-//            PHPhotoLibrary.requestAuthorization { status in
-//                if status == .authorized {
-//                    PHPhotoLibrary.shared().performChanges({
-//                        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
-//                    }) { success, error in
-//                        if success {
-//                            print("Video saved to photos")
-//                        } else {
-//                            print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
-//                        }
-//                    }
-//                } else {
-//                    print("Access to photo library denied")
-//                }
-//            }
-//        }
 
 
 
