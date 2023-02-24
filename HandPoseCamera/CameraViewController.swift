@@ -10,7 +10,8 @@ class CameraViewController: UIViewController {
 
     private var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
-    
+    let redBorder = CALayer()
+    var audioPlayer: AVAudioPlayer?
     private let movieOutput = AVCaptureMovieFileOutput()
     private var videoDeviceInput: AVCaptureDeviceInput!
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
@@ -27,7 +28,7 @@ class CameraViewController: UIViewController {
     private lazy var galleryButton: UIButton = {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(systemName: "square.grid.2x2.fill"), for: .normal)
-        button.tintColor = .white
+        button.tintColor = .blue
         button.addTarget(self, action: #selector(openGallery), for: .touchUpInside)
         return button
     }()
@@ -35,10 +36,19 @@ class CameraViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        UIApplication.shared.isIdleTimerDisabled = true
         prepareCaptureSession()
         prepareCaptureUI()
-//        setupRecordButton()
-
+        
+        if let sound = Bundle.main.path(forResource: "shutter", ofType: "mp3") {
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: sound))
+            } catch {
+                print("Error loading sound file: \(error.localizedDescription)")
+            }
+        } else {
+            print("Error: Sound file not found.")
+        }
         prepareTimerView()
         
         handPoseRequest.maximumHandCount = 1
@@ -57,34 +67,39 @@ class CameraViewController: UIViewController {
         ])
 
     }
-    @objc func openGallery() {
-        PHPhotoLibrary.requestAuthorization(for:.readWrite){ status in
-            if status == .authorized {
-                let fetchOptions = PHFetchOptions()
-                fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-                let allPhotos = PHAsset.fetchAssets(with: fetchOptions)
-                guard allPhotos.count > 0 else { return }
-
-                // Create an array of assets to display
-                var assets = [PHAsset]()
-                allPhotos.enumerateObjects { (asset, _, _) in
-                    assets.append(asset)
-                }
-
-                // Create a scrolling view controller with the assets
-                DispatchQueue.main.async {
-                    let viewer = AssetScrollViewController(assets: assets)
-                    self.navigationController?.pushViewController(viewer, animated: true)
-                }
-            } else if status == .denied || status == .restricted {
-                // Handle access denied or restricted
-                print("Access to photo library denied or restricted")
-            } else if status == .notDetermined {
-                // Handle not determined
-                print("Access to photo library not determined")
-            }
-        }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        // Re-enable idle timer when the app goes into the background or is closed
+        UIApplication.shared.isIdleTimerDisabled = false
     }
+
+                        @objc func openGallery() {
+                            PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+                                guard status == .authorized else {
+                                    // Handle access denied or restricted
+                                    print("Access to photo library denied or restricted")
+                                    return
+                                }
+
+                                let fetchOptions = PHFetchOptions()
+                                fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+                                let allPhotos = PHAsset.fetchAssets(with: fetchOptions)
+                                guard allPhotos.count > 0 else { return }
+
+                                // Create an array of assets to display
+                                var assets = [PHAsset]()
+                                allPhotos.enumerateObjects { (asset, _, _) in
+                                    assets.append(asset)
+                                }
+
+                                DispatchQueue.main.async {
+                                    // Create a scrolling view controller with the assets
+                                    let viewer = AssetScrollViewController(assets: assets)
+                                    self.navigationController?.pushViewController(viewer, animated: true)
+                                }
+                            }
+                        }
     private func prepareCaptureSession() {
         captureSession?.beginConfiguration()
         let captureSession = AVCaptureSession()
@@ -196,6 +211,12 @@ class CameraViewController: UIViewController {
            let outputPath = NSTemporaryDirectory() + "output.mov"
            let outputFileURL = URL(fileURLWithPath: outputPath)
            movieOutput.startRecording(to: outputFileURL, recordingDelegate: self)
+           redBorder.borderColor = UIColor.red.cgColor
+           redBorder.borderWidth = 13
+           redBorder.frame = CGRect(x: 0, y: 0, width: view.frame.width - view.frame.width * 0.03, height: view.frame.height - view.frame.height * 0.03)
+           redBorder.position = CGPoint(x: view.frame.width / 2, y: view.frame.height / 2)
+           view.layer.addSublayer(redBorder)
+
            
        }
    }
@@ -203,13 +224,15 @@ class CameraViewController: UIViewController {
        if movieOutput.isRecording {
            movieOutput.stopRecording()
            CameraViewController.isRecording = false
+           redBorder.removeFromSuperlayer()
+
        }
    }
     
     private func prepareTimerView() {
         let timerLabel = UILabel()
         timerLabel.textAlignment = .center
-        timerLabel.font = UIFont.systemFont(ofSize: 300)
+        timerLabel.font = UIFont.systemFont(ofSize: 41)
         
         view.addSubview(timerLabel)
         timerLabel.snp.makeConstraints { maker in
@@ -223,6 +246,23 @@ class CameraViewController: UIViewController {
         guard let photoOutput = captureSession?.outputs.first(where: { $0 is AVCapturePhotoOutput }) as? AVCapturePhotoOutput else { return }
         let settings = AVCapturePhotoSettings()
         photoOutput.capturePhoto(with: settings, delegate: self)
+        
+        let shutterView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
+        shutterView.backgroundColor = UIColor.black
+        shutterView.alpha = 0.0
+        view.addSubview(shutterView)
+
+        UIView.animate(withDuration: 0.1, animations: {
+            shutterView.alpha = 1.0
+        }, completion: { _ in
+            UIView.animate(withDuration: 0.13, animations: {
+                shutterView.alpha = 0.0
+            }, completion: { _ in
+                shutterView.removeFromSuperview()
+            })
+        })
+        audioPlayer?.play()
+
     }
 
     private func runTimer(seconds: Int, completion: @escaping () -> Void) {
@@ -231,7 +271,7 @@ class CameraViewController: UIViewController {
         var timeLeft = seconds
         
         let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { timer in
-            self.timerLabel?.text = "\(timeLeft)"
+            self.timerLabel?.text = "Action in... \(timeLeft) "
             timeLeft -= 1
             
             if timeLeft < 0 {
@@ -304,7 +344,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.91 && littleDIPPoint.confidence > 0.91 && ringDIPPoint.confidence > 0.91 && middleDIPPoint.confidence > 0.91
+        guard thumbTipPoint.confidence > 0.93 && indexTipPoint.confidence > 0.91 && littleDIPPoint.confidence > 0.91 && ringDIPPoint.confidence > 0.93 && middleDIPPoint.confidence > 0.87
         else {
             return
         }
@@ -431,7 +471,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
         
         let duration = asset.duration
         let startTime = CMTime.zero
-        let endTime = CMTimeSubtract(duration, CMTimeMake(value: 2, timescale: 1))
+        let endTime = CMTimeSubtract(duration, CMTimeMake(value: 3, timescale: 1))
         let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
         exportSession.timeRange = timeRange
         
