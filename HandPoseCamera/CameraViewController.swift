@@ -268,6 +268,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     }
     @objc func handleBackgroundTask(_ notification: Notification) {
        UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
+        
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -587,7 +588,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.83 && indexTipPoint.confidence > 0.83 && littleDIPPoint.confidence > 0.79 && ringDIPPoint.confidence > 0.79 && middleDIPPoint.confidence > 0.81
+        guard thumbTipPoint.confidence > 0.8 && indexTipPoint.confidence > 0.8 && littleDIPPoint.confidence > 0.75 && ringDIPPoint.confidence > 0.75 && middleDIPPoint.confidence > 0.77
         else {
             return
         }
