@@ -19,7 +19,7 @@ class HandGestureProcessor {
         
         let isRec = CameraViewController.isRecording
         
-        if distanceY <= 23 && distanceIM >= 9 {
+        if distanceY <= 23 && distanceIM >= 9 && isRec == false{
             return .pinchedPhoto
             
         } else if distanceX <= 25 && distanceRM <= 25 && distanceRL > 3 && isRec == false {

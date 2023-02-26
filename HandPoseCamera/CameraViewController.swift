@@ -7,7 +7,8 @@ import Photos
 import SnapKit
 
 class CameraViewController: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
-
+    
+    let videoQueue = DispatchQueue(label: "com.example.videoQueue")
     private var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     var audioPlayer: AVAudioPlayer?
@@ -179,20 +180,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         UIApplication.shared.isIdleTimerDisabled = true
         prepareCaptureSession()
         prepareCaptureUI()
-        let status = PHPhotoLibrary.authorizationStatus()
-        if status == .notDetermined {
-            PHPhotoLibrary.requestAuthorization { status in
-                if status == .authorized {
-                    print("Access to photo library granted")
-                } else {
-                    print("Access to photo library denied")
-                }
-            }
-        } else if status == .authorized {
-            print("Access to photo library granted")
-        } else {
-            print("Access to photo library denied")
-        }
         
         if let sound = Bundle.main.path(forResource: "shutter", ofType: "mp3") {
             do {
@@ -306,69 +293,70 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         UIApplication.shared.isIdleTimerDisabled = false
     }
 
-
     private func prepareCaptureSession() {
-        captureSession?.beginConfiguration()
-        let captureSession = AVCaptureSession()
-        
-        // Select a front facing camera, make an input.
-        
-        guard let captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: currentCameraPosition) else { return }
-        guard let input = try? AVCaptureDeviceInput(device: captureDevice) else { return }
-        
-        captureSession.addInput(input)
-        
-        let videoOutput = AVCaptureVideoDataOutput()
-        videoOutput.setSampleBufferDelegate(self, queue: .main)
-        captureSession.addOutput(videoOutput)
-        
-        
-        let photoOutput = AVCapturePhotoOutput()
-        captureSession.addOutput(photoOutput)
-        
-        // Add video input
-
-        do {
-            let videoDeviceInput = try AVCaptureDeviceInput(device: captureDevice)
-            if captureSession.canAddInput(videoDeviceInput) {
-                captureSession.addInput(videoDeviceInput)
-            }
-        } catch {
-            fatalError("Could not create video device input: \(error.localizedDescription)")
-        }
-        // Add audio input
-        guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
-            fatalError("Could not get audio device")
-        }
-        
-        do {
-            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
+            captureSession?.beginConfiguration()
+            let captureSession = AVCaptureSession()
             
-            if captureSession.canAddInput(audioDeviceInput) {
-                captureSession.addInput(audioDeviceInput)
+            // Select a front facing camera, make an input.
+            
+            guard let captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: currentCameraPosition) else { return }
+            guard let input = try? AVCaptureDeviceInput(device: captureDevice) else { return }
+            
+            captureSession.addInput(input)
+            
+            let videoOutput = AVCaptureVideoDataOutput()
+            videoOutput.setSampleBufferDelegate(self, queue: .main)
+            captureSession.addOutput(videoOutput)
+            
+            
+            let photoOutput = AVCapturePhotoOutput()
+            captureSession.addOutput(photoOutput)
+            
+            // Add video input
+
+            do {
+                let videoDeviceInput = try AVCaptureDeviceInput(device: captureDevice)
+                if captureSession.canAddInput(videoDeviceInput) {
+                    captureSession.addInput(videoDeviceInput)
+                }
+            } catch {
+                fatalError("Could not create video device input: \(error.localizedDescription)")
             }
-        } catch {
-            fatalError("Could not create audio device input: \(error.localizedDescription)")
-        }
-        
-        // Add video output
-        if captureSession.canAddOutput(movieOutput) {
-            captureSession.addOutput(movieOutput)
-        }
-        
-        self.captureSession?.sessionPreset = .high
-        self.captureSession = captureSession
-        
-        DispatchQueue.global(qos: .background).async {
-            self.captureSession?.startRunning()
+            // Add audio input
+            guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
+                fatalError("Could not get audio device")
+            }
+            
+            do {
+                let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
+                
+                if captureSession.canAddInput(audioDeviceInput) {
+                    captureSession.addInput(audioDeviceInput)
+                }
+            } catch {
+                fatalError("Could not create audio device input: \(error.localizedDescription)")
+            }
+            
+            // Add video output
+            if captureSession.canAddOutput(movieOutput) {
+                captureSession.addOutput(movieOutput)
+            }
+            
+            self.captureSession?.sessionPreset = .high
+            self.captureSession = captureSession
+            
+            DispatchQueue.global(qos: .background).async {
+                self.captureSession?.startRunning()
+            }
+
+            
+            captureSession.commitConfiguration()
+
         }
 
-        
-        captureSession.commitConfiguration()
-
-    }
     
     @objc private func toggleCamera() {
+        
         // Toggle the camera position
         currentCameraPosition = (currentCameraPosition == .front) ? .back : .front
         
@@ -382,6 +370,19 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         guard let captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: currentCameraPosition) else { return }
         guard let input = try? AVCaptureDeviceInput(device: captureDevice) else { return }
         captureSession?.addInput(input)
+        
+        // Add audio input
+        guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
+            fatalError("Could not get audio device")
+        }
+        
+        do {
+            let audioDeviceInput = try? AVCaptureDeviceInput(device: audioDevice)
+            
+            if captureSession!.canAddInput(audioDeviceInput!) {
+                captureSession!.addInput(audioDeviceInput!)
+            }
+        }
         
         // Restart the capture session
         
@@ -434,7 +435,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
            CameraViewController.isRecording = true
            let outputPath = NSTemporaryDirectory() + "output.mov"
            let outputFileURL = URL(fileURLWithPath: outputPath)
-           
            startTimer()
            movieOutput.startRecording(to: outputFileURL, recordingDelegate: self)
 
@@ -509,8 +509,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
 
 extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     
-    
-
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         
         let handler = VNImageRequestHandler(cmSampleBuffer: sampleBuffer, orientation: .up, options: [:])
@@ -650,75 +648,76 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
 
 
 extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
-    
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-        if let error = error {
-            print("Error recording video: \(error.localizedDescription)")
-            return
-        }
-        
-        let asset = AVAsset(url: outputFileURL)
-        guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
-            print("Export session could not be created")
-            return
-        }
-        
-        guard FileManager.default.fileExists(atPath: outputFileURL.path) else {
-            print("Output file does not exist")
-            return
-        }
-        
-        let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("trimmedVideo.mp4")
-        
-        if FileManager.default.fileExists(atPath: outputURL.path) {
-            do {
-                try FileManager.default.removeItem(at: outputURL)
-            } catch {
-                print("Error removing file at path: \(outputURL.path)")
+        videoQueue.async {
+            if let error = error {
+                print("Error recording video: \(error.localizedDescription)")
+                return
             }
-        }
-        
-        exportSession.outputURL = outputURL
-        exportSession.outputFileType = .mp4
-        exportSession.shouldOptimizeForNetworkUse = true
-        
-        let duration = asset.duration
-        let startTime = CMTime.zero
-        let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds(3, preferredTimescale: 1))
-        let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
-        exportSession.timeRange = timeRange
-
-        exportSession.exportAsynchronously {
-            switch exportSession.status {
-            case .completed:
-                PHPhotoLibrary.requestAuthorization { status in
-                    if status == .authorized {
-                        PHPhotoLibrary.shared().performChanges({
-                            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)
-                        }) { success, error in
-                            if success {
-                                print("Video saved to photos")
-                            } else {
-                                print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
-                            }
-                        }
-                    } else {
-                        print("Access to photo library denied")
-                    }
+            
+            let asset = AVAsset(url: outputFileURL)
+            guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
+                print("Export session could not be created")
+                return
+            }
+            
+            guard FileManager.default.fileExists(atPath: outputFileURL.path) else {
+                print("Output file does not exist")
+                return
+            }
+            
+            let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("trimmedVideo.mp4")
+            
+            if FileManager.default.fileExists(atPath: outputURL.path) {
+                do {
+                    try FileManager.default.removeItem(at: outputURL)
+                } catch {
+                    print("Error removing file at path: \(outputURL.path)")
                 }
-            case .failed:
-                print("Export failed: \(exportSession.error?.localizedDescription ?? "unknown error")")
-                print("Export error: \(String(describing: exportSession.error))")
-            case .cancelled:
-                print("Export cancelled")
-            case .exporting:
-                print("Exporting...")
-            case .waiting:
-                print("Waiting...")
-            case .unknown:
-                print("Unknown status...")
-            @unknown default:
-                print("Fatal Error")
+            }
+            
+            exportSession.outputURL = outputURL
+            exportSession.outputFileType = .mp4
+            exportSession.shouldOptimizeForNetworkUse = true
+            
+            let duration = asset.duration
+            let startTime = CMTime.zero
+            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds(3, preferredTimescale: 1))
+            let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
+            exportSession.timeRange = timeRange
+            
+            exportSession.exportAsynchronously {
+                switch exportSession.status {
+                case .completed:
+                    PHPhotoLibrary.requestAuthorization { status in
+                        if status == .authorized {
+                            PHPhotoLibrary.shared().performChanges({
+                                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)
+                            }) { success, error in
+                                if success {
+                                    print("Video saved to photos")
+                                } else {
+                                    print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
+                                }
+                            }
+                        } else {
+                            print("Access to photo library denied")
+                        }
+                    }
+                case .failed:
+                    print("Export failed: \(exportSession.error?.localizedDescription ?? "unknown error")")
+                    print("Export error: \(String(describing: exportSession.error))")
+                case .cancelled:
+                    print("Export cancelled")
+                case .exporting:
+                    print("Exporting...")
+                case .waiting:
+                    print("Waiting...")
+                case .unknown:
+                    print("Unknown status...")
+                @unknown default:
+                    print("Fatal Error")
+                }
             }
         }
     }
