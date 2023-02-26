@@ -6,22 +6,22 @@ import Photos
 import SnapKit
 import PhotosUI
 
-class CameraViewController: UIViewController {
+class CameraViewController: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
 
     private var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
-    let redBorder = CALayer()
     var audioPlayer: AVAudioPlayer?
     private let movieOutput = AVCaptureMovieFileOutput()
     private var videoDeviceInput: AVCaptureDeviceInput!
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
     private let handGestureProcessor = HandGestureProcessor()
     static var isRecording = false
-
     private weak var timerLabel: UILabel?
     
     private var isTimerRunning = false
     
+    let switchCameraButton = UIButton()
+
     
     // Declare a timer and a counter variable to track elapsed time
     var timer: Timer?
@@ -39,17 +39,29 @@ class CameraViewController: UIViewController {
     }()
 
     
-    // gallery button
-//    private lazy var galleryButton: UIButton = {
-//        let button = UIButton(type: .custom)
-//        button.setImage(UIImage(systemName: "square.grid.2x2.fill"), for: .normal)
-//        button.tintColor = .blue
-//        button.addTarget(self, action: #selector(openGallery), for: .touchUpInside)
-//        return button
-//    }()
-    
-    
+//     gallery button
+    let galleryButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        let config = UIImage.SymbolConfiguration(pointSize: 50)
+        button.setImage(UIImage(systemName: "photo.fill", withConfiguration: config), for: .normal)
+        return button
+    }()
 
+    
+    @objc func onGalleryButtonClick(sender: UIButton){
+        let assetViewer = AssetViewerViewController() // or get a reference to an existing instance
+        
+        self.addChild(assetViewer)
+        view.addSubview(assetViewer.view)
+        assetViewer.didMove(toParent: self)
+        let imagePicker = UIImagePickerController()
+        imagePicker.sourceType = .photoLibrary
+        imagePicker.mediaTypes = ["public.image", "public.movie"] // Set supported media types
+        imagePicker.delegate = assetViewer.self
+        assetViewer.present(imagePicker, animated: true, completion: nil)
+        
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         UIApplication.shared.isIdleTimerDisabled = true
@@ -93,26 +105,37 @@ class CameraViewController: UIViewController {
         ])
         
 
+
         
+        // Configure the switch camera button
+        switchCameraButton.setImage(UIImage(systemName: "camera.rotate"), for: .normal)
+//        switchCameraButton.addTarget(self, action: #selector(switchCamera), for: .touchUpInside)
+        switchCameraButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(switchCameraButton)
+
+        // Position the button in the bottom right corner
+        NSLayoutConstraint.activate([
+            switchCameraButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            switchCameraButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
+            switchCameraButton.widthAnchor.constraint(equalToConstant: 44),
+            switchCameraButton.heightAnchor.constraint(equalToConstant: 44)
+        ])
         
-        // Add the gallery thumbnail button to the view
-        
-//        view.addSubview(galleryButton)
-//
-//        // Position the gallery thumbnail button in the bottom left corner
-//        galleryButton.translatesAutoresizingMaskIntoConstraints = false
-//        NSLayoutConstraint.activate([
-//            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-//            galleryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-//            galleryButton.widthAnchor.constraint(equalToConstant: 44),
-//            galleryButton.heightAnchor.constraint(equalToConstant: 44)
-//        ])
+
+        view.addSubview(galleryButton)
+
+        NSLayoutConstraint.activate([
+            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            galleryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            galleryButton.widthAnchor.constraint(equalToConstant: 44),
+            galleryButton.heightAnchor.constraint(equalToConstant: 44)
+        ])
+        galleryButton.addTarget(self, action: #selector(onGalleryButtonClick), for: .touchUpInside)
 
     }
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return [.portrait, .landscapeLeft, .landscapeRight]
     }
-
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
@@ -132,8 +155,6 @@ class CameraViewController: UIViewController {
             recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 13).isActive = true
         }
     }
-
-
     func startTimer() {
         recordLabel.isHidden = false
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -163,37 +184,13 @@ class CameraViewController: UIViewController {
         UIApplication.shared.isIdleTimerDisabled = false
     }
 
-//    @objc func openGallery() {
-//        PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
-//            guard status == .authorized else {
-//                // Handle access denied or restricted
-//                print("Access to photo library denied or restricted")
-//                return
-//            }
-//
-//            let fetchOptions = PHFetchOptions()
-//            fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-//            let allPhotos = PHAsset.fetchAssets(with: fetchOptions)
-//            guard allPhotos.count > 0 else { return }
-//
-//            // Create an array of assets to display
-//            var assets = [PHAsset]()
-//            allPhotos.enumerateObjects { (asset, _, _) in
-//                assets.append(asset)
-//            }
-//
-//            DispatchQueue.main.async {
-//                // Create a scrolling view controller with the assets
-//                let viewer = AssetScrollViewController(assets: assets)
-//                self.navigationController?.pushViewController(viewer, animated: true)
-//            }
-//        }
-//    }
+
     private func prepareCaptureSession() {
         captureSession?.beginConfiguration()
         let captureSession = AVCaptureSession()
         
         // Select a front facing camera, make an input.
+        
         guard let captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else { return }
         guard let input = try? AVCaptureDeviceInput(device: captureDevice) else { return }
         
@@ -423,7 +420,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.93 && indexTipPoint.confidence > 0.91 && littleDIPPoint.confidence > 0.89 && ringDIPPoint.confidence > 0.91 && middleDIPPoint.confidence > 0.89
+        guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.85 && littleDIPPoint.confidence > 0.83 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.85
         else {
             return
         }

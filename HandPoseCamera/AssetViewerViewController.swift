@@ -4,159 +4,79 @@
 //
 //  Created by Aly Salman on 23/02/23.
 //  Copyright © 2023 CB Gang. All rights reserved.
-//
-
+////
 import UIKit
-import Photos
-import PhotosUI
+import AVKit
 
-class AssetViewerViewController: UIViewController {
+class AssetViewerViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
-    var asset: PHAsset?
-    var imageView: UIImageView!
+    private let playerViewController = AVPlayerViewController()
+    @IBOutlet weak var playerView: UIView!
+    @IBOutlet weak var imageView: UIImageView! // add this line
 
-    init(asset: PHAsset) {
-        self.asset = asset
-        super.init(nibName: nil, bundle: nil)
-    }
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    let button:UIButton = {
+        let view = UIButton()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        let config = UIImage.SymbolConfiguration(pointSize: 50)
+        view.setImage(UIImage(systemName: "play.fill", withConfiguration: config), for: .normal)
+
+        return view
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        imageView = UIImageView(frame: view.bounds)
-        imageView.contentMode = .scaleAspectFit
-        view.addSubview(imageView)
-
-        let options = PHImageRequestOptions()
-        options.isSynchronous = true
-
-        PHImageManager.default().requestImage(for: asset!, targetSize: view.bounds.size, contentMode: .aspectFit, options: options) { (image, info) in
-            self.imageView.image = image
-        }
-    }
-    func configure(with asset: PHAsset) {
-        self.asset = asset
-        
-        let options = PHImageRequestOptions()
-        options.isSynchronous = true
-
-        PHImageManager.default().requestImage(for: asset, targetSize: view.bounds.size, contentMode: .aspectFit, options: options) { (image, info) in
-            self.imageView.image = image
-        }
+        setupPlayerView()
+        setupButton()
     }
 
-}
+    func setupButton() {
+        self.view.addSubview(button)
 
-class AssetScrollViewController: UIViewController, UIScrollViewDelegate {
-    
-    let scrollView = UIScrollView()
-    let stackView = UIStackView()
-    var assets = [PHAsset]()
-    
-    convenience init(assets: [PHAsset]) {
-        self.init()
-        self.assets = assets
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        view.backgroundColor = .white
-        
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.delegate = self
-        view.addSubview(scrollView)
-        
+        button.addTarget(self, action: #selector(onButtonClick(sender:)), for: .touchUpInside)
+
         NSLayoutConstraint.activate([
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            button.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            button.widthAnchor.constraint(equalToConstant: 44),
+            button.heightAnchor.constraint(equalToConstant: 44)
         ])
-        
-        stackView.axis = .horizontal
-        stackView.spacing = 10
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(stackView)
-        
+    }
+
+    func setupPlayerView() {
+        self.addChild(playerViewController)
+        self.view.addSubview(playerViewController.view)
+
+        playerViewController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            stackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            stackView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            stackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            stackView.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
+            playerViewController.view.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            playerViewController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            playerViewController.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            playerViewController.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
         ])
-        
-        let options = PHFetchOptions()
-        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        options.fetchLimit = 50 // Limit the number of assets loaded to 50
-        let fetchResult = PHAsset.fetchAssets(with: options)
-        
-        DispatchQueue.global(qos: .background).async { [weak self] in
-            fetchResult.enumerateObjects { (asset, index, stop) in
-                guard let self = self else { return }
-                self.assets.append(asset)
-                
-                DispatchQueue.main.async {
-                    let assetView = AssetViewerViewController(asset: asset)
-                    self.addChild(assetView)
-                    self.stackView.addArrangedSubview(assetView.view)
-                    assetView.didMove(toParent: self)
+    }
+
+    @objc func onButtonClick(sender: UIButton){
+        let imagePicker = UIImagePickerController()
+        imagePicker.sourceType = .photoLibrary
+        imagePicker.mediaTypes = ["public.image", "public.movie"] // Set supported media types
+        imagePicker.delegate = self
+        present(imagePicker, animated: true, completion: nil)
+    }
+
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        dismiss(animated: true) {
+            if let mediaType = info[UIImagePickerController.InfoKey.mediaType] as? String {
+                if mediaType == "public.movie", let videoURL = info[UIImagePickerController.InfoKey.mediaURL] as? URL {
+                    let player = AVPlayer(url: videoURL)
+                    self.playerViewController.player = player
+                    player.play()
+                } else if mediaType == "public.image", let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+                    self.imageView.image = image
                 }
             }
         }
     }
 
-        func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-            let pageIndex = round(scrollView.contentOffset.x / scrollView.frame.size.width)
-            guard let subview = stackView.arrangedSubviews[Int(pageIndex)] as? AssetViewerViewController else {
-                return
-            }
-            if let assetIndex = stackView.arrangedSubviews.firstIndex(of: subview.view) {
-                subview.configure(with: assets[assetIndex])
-            }
-        }
-    }
-    
-    //
-    //
-    //
-    //class AssetViewerViewController: UIViewController, UIScrollViewDelegate {
-    //
-    //    var asset: PHAsset?
-    //    var imageView: UIImageView!
-    //
-    //
-    //    init(asset: PHAsset) {
-    //        self.asset = asset
-    //        super.init(nibName: nil, bundle: nil)
-    //    }
-    //
-    //    required init?(coder: NSCoder) {
-    //        fatalError("init(coder:) has not been implemented")
-    //    }
-    //
-    //    override func viewDidLoad() {
-    //        super.viewDidLoad()
-    //
-    //        imageView = UIImageView(frame: view.bounds)
-    //        imageView.contentMode = .scaleAspectFit
-    //        view.addSubview(imageView)
-    //
-    //        if let asset = asset {
-    //            let options = PHImageRequestOptions()
-    //
-    //            options.isSynchronous = true
-    //
-    //            PHImageManager.default().requestImage(for: asset, targetSize: view.bounds.size, contentMode: .aspectFit, options: options) { (image, info) in
-    //                self.imageView.image = image
-    //
-    //            }
-    //        }
-    //    }
-    //}
-
+}
