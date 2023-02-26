@@ -18,6 +18,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     static var isRecording = false
     private weak var timerLabel: UILabel?
     private var isTimerRunning = false
+    var currentCameraPosition: AVCaptureDevice.Position = .front
 
     
     // Declare a timer and a counter variable to track elapsed time
@@ -40,6 +41,14 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         button.translatesAutoresizingMaskIntoConstraints = false
         let config = UIImage.SymbolConfiguration(pointSize: 50)
         button.setImage(UIImage(systemName: "camera.rotate", withConfiguration: config), for: .normal)
+        return button
+    }()
+    
+    let flashButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        let config = UIImage.SymbolConfiguration(pointSize: 50)
+        button.setImage(UIImage(systemName:"flashlight.on.fill", withConfiguration: config), for: .normal)
         return button
     }()
 
@@ -67,6 +76,26 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         assetViewer.present(imagePicker, animated: true, completion: nil)
         
     }
+    @objc private func toggleFlash() {
+        guard let device = AVCaptureDevice.default(for: .video) else { return }
+        guard device.hasTorch else { return }
+        if currentCameraPosition == .back {
+            do {
+                try device.lockForConfiguration()
+                
+                if device.torchMode == .off {
+                    device.torchMode = .on
+                } else {
+                    device.torchMode = .off
+                }
+                
+                device.unlockForConfiguration()
+            } catch {
+                print("Error toggling flash: \(error.localizedDescription)")
+            }
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         UIApplication.shared.isIdleTimerDisabled = true
@@ -119,6 +148,11 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             switchCameraButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             switchCameraButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
+        
+        
+        switchCameraButton.addTarget(self, action: #selector(toggleCamera), for: .touchUpInside)
+
+        
         view.addSubview(galleryButton)
 
         NSLayoutConstraint.activate([
@@ -129,6 +163,17 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         ])
 
         galleryButton.addTarget(self, action: #selector(onGalleryButtonClick), for: .touchUpInside)
+        
+        flashButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(flashButton)
+
+        // Add constraints to position the flash button in the top right corner
+        NSLayoutConstraint.activate([
+            flashButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            flashButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
+        ])
+        flashButton.addTarget(self, action: #selector(toggleFlash), for: .touchUpInside)
+
 
     }
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -194,7 +239,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         
         // Select a front facing camera, make an input.
         
-        guard let captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else { return }
+        guard let captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: currentCameraPosition) else { return }
         guard let input = try? AVCaptureDeviceInput(device: captureDevice) else { return }
         
         captureSession.addInput(input)
@@ -209,12 +254,12 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         
         // Add video input
         
-        guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
-            fatalError("Could not get video device")
-        }
+//        guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: currentCameraPosition) else {
+//            fatalError("Could not get video device")
+//        }
         
         do {
-            let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
+            let videoDeviceInput = try AVCaptureDeviceInput(device: captureDevice)
             if captureSession.canAddInput(videoDeviceInput) {
                 captureSession.addInput(videoDeviceInput)
             }
@@ -252,6 +297,30 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         captureSession.commitConfiguration()
 
     }
+    
+    @objc private func toggleCamera() {
+        // Toggle the camera position
+        currentCameraPosition = (currentCameraPosition == .front) ? .back : .front
+        
+        // Stop the capture session and remove the inputs
+        captureSession?.stopRunning()
+        for input in captureSession!.inputs {
+            captureSession?.removeInput(input)
+        }
+        
+        // Re-add the inputs for the new camera position
+        guard let captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: currentCameraPosition) else { return }
+        guard let input = try? AVCaptureDeviceInput(device: captureDevice) else { return }
+        captureSession?.addInput(input)
+        
+        // Restart the capture session
+        
+        DispatchQueue.global(qos: .background).async { [self] in
+            captureSession?.startRunning()
+        }
+
+    }
+
     
     private func prepareCaptureUI() {
         guard let session = captureSession else { return }
@@ -421,7 +490,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.87 && indexTipPoint.confidence > 0.85 && littleDIPPoint.confidence > 0.81 && ringDIPPoint.confidence > 0.81 && middleDIPPoint.confidence > 0.83
+        guard thumbTipPoint.confidence > 0.83 && indexTipPoint.confidence > 0.83 && littleDIPPoint.confidence > 0.79 && ringDIPPoint.confidence > 0.79 && middleDIPPoint.confidence > 0.81
         else {
             return
         }
