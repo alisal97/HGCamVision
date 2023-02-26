@@ -8,9 +8,6 @@ import PhotosUI
 
 class CameraViewController: UIViewController {
 
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return .landscape
-    }
     private var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     let redBorder = CALayer()
@@ -95,8 +92,6 @@ class CameraViewController: UIViewController {
             recordLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
-        // Start the timer when recording begins
-
 
         
         
@@ -114,24 +109,30 @@ class CameraViewController: UIViewController {
 //        ])
 
     }
-//    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-//        super.viewWillTransition(to: size, with: coordinator)
-//
-//        let deviceOrientation = UIDevice.current.orientation
-//
-//        if let previewLayerConnection = self.previewLayer.connection as? AVCaptureConnection, previewLayerConnection.isVideoOrientationSupported {
-//            switch deviceOrientation {
-//            case .portrait:
-//                previewLayerConnection.videoOrientation = .portrait
-//            case .landscapeLeft:
-//                previewLayerConnection.videoOrientation = .landscapeRight
-//            case .landscapeRight:
-//                previewLayerConnection.videoOrientation = .landscapeLeft
-//            default:
-//                previewLayerConnection.videoOrientation = .portrait
-//            }
-//        }
-//    }
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return [.portrait, .landscapeLeft, .landscapeRight]
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: { [weak self] _ in
+            guard let self = self else { return }
+            let isLandscape = UIDevice.current.orientation.isLandscape
+            self.updateConstraintsForOrientation(isLandscape)
+        }, completion: nil)
+    }
+
+    private func updateConstraintsForOrientation(_ isLandscape: Bool) {
+        // Update your constraints here based on the current orientation
+        // For example:
+        if isLandscape {
+            recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 23).isActive = true
+        } else {
+            recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 13).isActive = true
+        }
+    }
+
 
     func startTimer() {
         recordLabel.isHidden = false
@@ -162,32 +163,32 @@ class CameraViewController: UIViewController {
         UIApplication.shared.isIdleTimerDisabled = false
     }
 
-//                        @objc func openGallery() {
-//                            PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
-//                                guard status == .authorized else {
-//                                    // Handle access denied or restricted
-//                                    print("Access to photo library denied or restricted")
-//                                    return
-//                                }
+//    @objc func openGallery() {
+//        PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+//            guard status == .authorized else {
+//                // Handle access denied or restricted
+//                print("Access to photo library denied or restricted")
+//                return
+//            }
 //
-//                                let fetchOptions = PHFetchOptions()
-//                                fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-//                                let allPhotos = PHAsset.fetchAssets(with: fetchOptions)
-//                                guard allPhotos.count > 0 else { return }
+//            let fetchOptions = PHFetchOptions()
+//            fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+//            let allPhotos = PHAsset.fetchAssets(with: fetchOptions)
+//            guard allPhotos.count > 0 else { return }
 //
-//                                // Create an array of assets to display
-//                                var assets = [PHAsset]()
-//                                allPhotos.enumerateObjects { (asset, _, _) in
-//                                    assets.append(asset)
-//                                }
+//            // Create an array of assets to display
+//            var assets = [PHAsset]()
+//            allPhotos.enumerateObjects { (asset, _, _) in
+//                assets.append(asset)
+//            }
 //
-//                                DispatchQueue.main.async {
-//                                    // Create a scrolling view controller with the assets
-//                                    let viewer = AssetScrollViewController(assets: assets)
-//                                    self.navigationController?.pushViewController(viewer, animated: true)
-//                                }
-//                            }
-//                        }
+//            DispatchQueue.main.async {
+//                // Create a scrolling view controller with the assets
+//                let viewer = AssetScrollViewController(assets: assets)
+//                self.navigationController?.pushViewController(viewer, animated: true)
+//            }
+//        }
+//    }
     private func prepareCaptureSession() {
         captureSession?.beginConfiguration()
         let captureSession = AVCaptureSession()
@@ -262,6 +263,24 @@ class CameraViewController: UIViewController {
         videoPreviewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
         videoPreviewLayer.frame = view.layer.bounds
         view.layer.addSublayer(videoPreviewLayer)
+        
+        if let previewLayerConnection = videoPreviewLayer.connection {
+            let currentDeviceOrientation = UIDevice.current.orientation
+            let videoOrientation: AVCaptureVideoOrientation
+            
+            switch currentDeviceOrientation {
+            case .portrait:
+                videoOrientation = .portrait
+            case .landscapeLeft:
+                videoOrientation = .landscapeRight
+            case .landscapeRight:
+                videoOrientation = .landscapeLeft
+            default:
+                videoOrientation = .portrait
+            }
+            
+            previewLayerConnection.videoOrientation = videoOrientation
+        }
         
         self.videoPreviewLayer = videoPreviewLayer
     }
