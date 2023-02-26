@@ -155,6 +155,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 13).isActive = true
         }
     }
+    
     func startTimer() {
         recordLabel.isHidden = false
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
