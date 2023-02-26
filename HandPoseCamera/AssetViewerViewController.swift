@@ -15,7 +15,7 @@ class AssetViewerViewController: UIViewController, UIImagePickerControllerDelega
     @IBOutlet weak var imageView: UIImageView! // add this line
 
 
-    let button:UIButton = {
+    let button: UIButton = {
         let view = UIButton()
         view.translatesAutoresizingMaskIntoConstraints = false
         let config = UIImage.SymbolConfiguration(pointSize: 50)
@@ -73,7 +73,7 @@ class AssetViewerViewController: UIViewController, UIImagePickerControllerDelega
                     self.playerViewController.player = player
                     player.play()
                 } else if mediaType == "public.image", let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                    self.imageView.image = image
+                    self.imageView?.image = image
                 }
             }
         }

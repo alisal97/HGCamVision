@@ -17,7 +17,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     private let handGestureProcessor = HandGestureProcessor()
     static var isRecording = false
     private weak var timerLabel: UILabel?
-    
     private var isTimerRunning = false
 
     
@@ -94,13 +93,11 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             } catch {
                 print("Error loading sound file: \(error.localizedDescription)")
             }
-        } else {
-            print("Error: Sound file not found.")
+            
         }
         prepareTimerView()
         
         handPoseRequest.maximumHandCount = 1
-        
         
         // Add the timerLabel to the view and position it at the top
         view.addSubview(recordLabel)
@@ -122,7 +119,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             switchCameraButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             switchCameraButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
-
         view.addSubview(galleryButton)
 
         NSLayoutConstraint.activate([
@@ -157,6 +153,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             }
         }
     }
+
 
 
 	
