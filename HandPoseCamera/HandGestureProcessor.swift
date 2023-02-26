@@ -1,3 +1,11 @@
+//
+//  HandGestureProcessor.swift
+//  HGCam
+//
+//  Created by Aly Salman on 20/02/23.
+//  Copyright © 2023 CB Gang. All rights reserved.
+//
+
 import UIKit
 
 class HandGestureProcessor {
