@@ -19,8 +19,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     private weak var timerLabel: UILabel?
     
     private var isTimerRunning = false
-    
-    let switchCameraButton = UIButton()
 
     
     // Declare a timer and a counter variable to track elapsed time
@@ -36,6 +34,14 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         label.textAlignment = .center
         label.isHidden = true
         return label
+    }()
+//      camera switch button
+    let switchCameraButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        let config = UIImage.SymbolConfiguration(pointSize: 50)
+        button.setImage(UIImage(systemName: "camera.rotate", withConfiguration: config), for: .normal)
+        return button
     }()
 
     
@@ -104,58 +110,57 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             recordLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
-
-
         
-        // Configure the switch camera button
-        switchCameraButton.setImage(UIImage(systemName: "camera.rotate"), for: .normal)
-//        switchCameraButton.addTarget(self, action: #selector(switchCamera), for: .touchUpInside)
-        switchCameraButton.translatesAutoresizingMaskIntoConstraints = false
+
         view.addSubview(switchCameraButton)
 
-        // Position the button in the bottom right corner
+        switchCameraButton.translatesAutoresizingMaskIntoConstraints = false
+
         NSLayoutConstraint.activate([
-            switchCameraButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            switchCameraButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
             switchCameraButton.widthAnchor.constraint(equalToConstant: 44),
-            switchCameraButton.heightAnchor.constraint(equalToConstant: 44)
+            switchCameraButton.heightAnchor.constraint(equalToConstant: 44),
+            switchCameraButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            switchCameraButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
-        
 
         view.addSubview(galleryButton)
 
         NSLayoutConstraint.activate([
-            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            galleryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             galleryButton.widthAnchor.constraint(equalToConstant: 44),
-            galleryButton.heightAnchor.constraint(equalToConstant: 44)
+            galleryButton.heightAnchor.constraint(equalToConstant: 44),
+            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            galleryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
+
         galleryButton.addTarget(self, action: #selector(onGalleryButtonClick), for: .touchUpInside)
 
-    }
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return [.portrait, .landscapeLeft, .landscapeRight]
     }
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
-        coordinator.animate(alongsideTransition: { [weak self] _ in
-            guard let self = self else { return }
-            let isLandscape = UIDevice.current.orientation.isLandscape
-            self.updateConstraintsForOrientation(isLandscape)
-        }, completion: nil)
-    }
-
-    private func updateConstraintsForOrientation(_ isLandscape: Bool) {
-        // Update your constraints here based on the current orientation
-        // For example:
-        if isLandscape {
-            recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 23).isActive = true
-        } else {
-            recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 13).isActive = true
+        // Get the new device orientation
+        let newOrientation = UIDevice.current.orientation
+        
+        // Update the video orientation of the preview layer based on the new device orientation
+        if let connection = self.videoPreviewLayer?.connection {
+            switch newOrientation {
+            case .portrait:
+                connection.videoOrientation = .portrait
+            case .landscapeRight:
+                connection.videoOrientation = .landscapeLeft
+            case .landscapeLeft:
+                connection.videoOrientation = .landscapeRight
+            case .portraitUpsideDown:
+                connection.videoOrientation = .portraitUpsideDown
+            default:
+                connection.videoOrientation = .portrait
+            }
         }
     }
-    
+
+
+	
+
     func startTimer() {
         recordLabel.isHidden = false
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -239,10 +244,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             captureSession.addOutput(movieOutput)
         }
         
-        
-
-
-
         self.captureSession?.sessionPreset = .high
         self.captureSession = captureSession
         
@@ -262,28 +263,34 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         videoPreviewLayer.frame = view.layer.bounds
         view.layer.addSublayer(videoPreviewLayer)
         
-        if let previewLayerConnection = videoPreviewLayer.connection {
-            let currentDeviceOrientation = UIDevice.current.orientation
-            let videoOrientation: AVCaptureVideoOrientation
-            
-            switch currentDeviceOrientation {
-            case .portrait:
-                videoOrientation = .portrait
-            case .landscapeLeft:
-                videoOrientation = .landscapeRight
-            case .landscapeRight:
-                videoOrientation = .landscapeLeft
-            default:
-                videoOrientation = .portrait
-            }
-            
-            previewLayerConnection.videoOrientation = videoOrientation
-        }
-        
         self.videoPreviewLayer = videoPreviewLayer
     }
     
-    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if let connection =  self.videoPreviewLayer?.connection {
+            let currentDevice: UIDevice = UIDevice.current
+            let orientation: UIDeviceOrientation = currentDevice.orientation
+            let previewLayerConnection : AVCaptureConnection = connection
+
+            if previewLayerConnection.isVideoOrientationSupported {
+                switch (orientation) {
+                case .portrait:
+                    previewLayerConnection.videoOrientation = .portrait
+                case .landscapeRight:
+                    previewLayerConnection.videoOrientation = .landscapeLeft
+                case .landscapeLeft:
+                    previewLayerConnection.videoOrientation = .landscapeRight
+                case .portraitUpsideDown:
+                    previewLayerConnection.videoOrientation = .portraitUpsideDown
+                default:
+                    previewLayerConnection.videoOrientation = .portrait
+                }
+                self.videoPreviewLayer?.frame = self.view.bounds
+            }
+        }
+    }
+
 
 
     func startRecording() {
@@ -374,10 +381,6 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         
         do {
             try handler.perform([handPoseRequest])
-            
-//            guard let observation = handPoseRequest.results?.first as? VNRecognizedPointsObservation else {
-//                return
-//            }
             guard let observation = handPoseRequest.results?.first else {
                 return
             }
