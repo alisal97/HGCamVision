@@ -180,7 +180,8 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         UIApplication.shared.isIdleTimerDisabled = true
         prepareCaptureSession()
         prepareCaptureUI()
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleBackgroundTask(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
+
         if let sound = Bundle.main.path(forResource: "shutter", ofType: "mp3") {
             do {
                 audioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: sound))
@@ -241,6 +242,10 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
 
 
     }
+    @objc func handleBackgroundTask(_ notification: Notification) {
+       UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
+    }
+
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
@@ -649,6 +654,8 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
 
 extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        let backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "SaveVideoToPhotos") // Start the background task
+
         videoQueue.async {
             if let error = error {
                 print("Error recording video: \(error.localizedDescription)")
@@ -696,7 +703,8 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                             }) { success, error in
                                 if success {
                                     print("Video saved to photos")
-                                } else {
+                                    UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+§                                } else {
                                     print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
                                 }
                             }

@@ -22,13 +22,13 @@ class HandGestureProcessor {
         if distanceY <= 23 && distanceIM >= 9 && isRec == false{
             return .pinchedPhoto
             
-        } else if distanceX <= 25 && distanceRM <= 25 && distanceRL > 3 && isRec == false {
+        } else if distanceX <= 17 && distanceRM <= 21 && isRec == false {
             return .pinchedVidRec
             
-        } else if distanceZ <= 25 && distanceRL <= 27 && distanceRM > 3 && isRec == true {
+        } else if distanceZ <= 17 && distanceRL <= 23 && isRec == true {
             return .pinchedVidStop
             
-        } else if distanceY >= 25.5 || distanceX + distanceRM >= 51 || distanceZ + distanceRL >= 53
+        } else if distanceY >= 25.5 || distanceX + distanceRM >= 39 || distanceZ + distanceRL >= 41
                     {
             //                if indexTip.y > middleTipDIP.y && indexTip.y > ringTip.y && indexTip.y > littleDIP.y {
             //                return .pinched

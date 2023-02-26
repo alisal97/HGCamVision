@@ -24,6 +24,10 @@
 	<string>you need to give app permission in order to view gallery</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We need Camera access in order to launch the app!</string>
+	<key>NSCocoaErrorDomain</key>
+	<string></string>
+	<key>NSFileProviderDomainUsageDescription</key>
+	<string>WE WOOO</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>we need mic access in order to recrod videos!</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
@@ -49,6 +53,12 @@
 			</array>
 		</dict>
 	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -70,9 +80,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSCocoaErrorDomain</key>
-	<string></string>
-	<key>NSFileProviderDomainUsageDescription</key>
-	<string>WE WOOO</string>
 </dict>
 </plist>
