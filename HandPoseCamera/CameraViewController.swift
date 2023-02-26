@@ -21,10 +21,11 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     private var isTimerRunning = false
     var currentCameraPosition: AVCaptureDevice.Position = .front
 
-    
+
     // Declare a timer and a counter variable to track elapsed time
     var timer: Timer?
     var counter = 0
+    
     
     // Declare a UILabel to display the time elapsed
     let recordLabel: UILabel = {
@@ -153,7 +154,19 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     }
 
 
-    
+    private var activityIndicator: UIActivityIndicatorView!
+
+    private func setupActivityIndicator() {
+        activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.transform = CGAffineTransform(scaleX: 3.5, y: 3.5)
+        activityIndicator.color = UIColor.green
+        activityIndicator.center = view.center
+        activityIndicator.hidesWhenStopped = true
+        DispatchQueue.main.async { [self] in
+            view.addSubview(activityIndicator)
+        }
+    }
+
 
     @objc private func toggleFlash() {
         guard let device = AVCaptureDevice.default(for: .video) else { return }
@@ -190,6 +203,9 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             }
             
         }
+        setupActivityIndicator()
+
+
         prepareTimerView()
         setupGalleryButton()
         handPoseRequest.maximumHandCount = 1
@@ -653,13 +669,19 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
 
 
 extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
+    
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         let backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "SaveVideoToPhotos") // Start the background task
 
         videoQueue.async {
+            DispatchQueue.main.async {
+                self.activityIndicator.startAnimating()
+            }
+
             if let error = error {
                 print("Error recording video: \(error.localizedDescription)")
                 return
+                
             }
             
             let asset = AVAsset(url: outputFileURL)
@@ -704,19 +726,43 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                                 if success {
                                     print("Video saved to photos")
                                     UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
-§                                } else {
+                                    DispatchQueue.main.async {
+                                        self.activityIndicator.stopAnimating()
+                                    }
+
+                                } else {
                                     print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
+                                    DispatchQueue.main.async {
+                                        self.activityIndicator.stopAnimating()
+                                    }
+
                                 }
                             }
                         } else {
                             print("Access to photo library denied")
+                            DispatchQueue.main.async {
+                                self.activityIndicator.stopAnimating()
+                            }
+
                         }
                     }
                 case .failed:
                     print("Export failed: \(exportSession.error?.localizedDescription ?? "unknown error")")
+                    DispatchQueue.main.async {
+                        self.activityIndicator.stopAnimating()
+                    }
+
                     print("Export error: \(String(describing: exportSession.error))")
+                    DispatchQueue.main.async {
+                        self.activityIndicator.stopAnimating()
+                    }
+
                 case .cancelled:
                     print("Export cancelled")
+                    DispatchQueue.main.async {
+                        self.activityIndicator.stopAnimating()
+                    }
+
                 case .exporting:
                     print("Exporting...")
                 case .waiting:
@@ -725,6 +771,10 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                     print("Unknown status...")
                 @unknown default:
                     print("Fatal Error")
+                    DispatchQueue.main.async {
+                        self.activityIndicator.stopAnimating()
+                    }
+
                 }
             }
         }
