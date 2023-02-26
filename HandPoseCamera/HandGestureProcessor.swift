@@ -14,6 +14,8 @@ class HandGestureProcessor {
         case pinchedPhoto
         case pinchedVidRec
         case pinchedVidStop
+//        case pinchedPause
+//        case pinchedUnPause
         case unknown
     }
 
@@ -24,6 +26,7 @@ class HandGestureProcessor {
         let distanceZ = abs(thumbTip.y - ringDIP.y)
         let distanceRL = abs(ringDIP.y - littleDIP.y)
         let distanceIM = abs(indexTip.y - middleDIP.y)
+
         
         let isRec = CameraViewController.isRecording
         

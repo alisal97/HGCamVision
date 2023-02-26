@@ -679,7 +679,7 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
 extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-        let backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "SaveVideoToPhotos") // Start the background task
+        let recordingTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "SaveVideoToPhotos") // Start the background task
 
         videoQueue.async {
             DispatchQueue.main.async {
@@ -733,7 +733,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                             }) { success, error in
                                 if success {
                                     print("Video saved to photos")
-                                    UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+                                    UIApplication.shared.endBackgroundTask(recordingTaskIdentifier)
                                     DispatchQueue.main.async {
                                         self.activityIndicator.stopAnimating()
                                     }
