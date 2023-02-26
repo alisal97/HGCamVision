@@ -1,4 +1,5 @@
 import UIKit
+import AVKit
 import Foundation
 import AVFoundation
 import Vision
@@ -61,21 +62,101 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         button.setImage(UIImage(systemName: "photo.fill", withConfiguration: config), for: .normal)
         return button
     }()
+    
+
+    @objc private func openPhotosApp() {
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        let fetchResult = PHAsset.fetchAssets(with: fetchOptions)
+        
+        guard let latestAsset = fetchResult.firstObject else {
+            // There are no assets in the user's library
+            return
+        }
+        
+        let assetID = latestAsset.localIdentifier.replacingOccurrences(of: "/", with: "-")
+        let photosURL = URL(string: "photos-redirect://asset/\(assetID)")!
+        
+        UIApplication.shared.open(photosURL, options: [:], completionHandler: nil)
+    }
 
     
-    @objc func onGalleryButtonClick(sender: UIButton){
-        let assetViewer = AssetViewerViewController() // or get a reference to an existing instance
+    private func setupGalleryButton() {
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        let fetchResult = PHAsset.fetchAssets(with: fetchOptions)
         
-        self.addChild(assetViewer)
-        view.addSubview(assetViewer.view)
-        assetViewer.didMove(toParent: self)
-        let imagePicker = UIImagePickerController()
-        imagePicker.sourceType = .photoLibrary
-        imagePicker.mediaTypes = ["public.image", "public.movie"] // Set supported media types
-        imagePicker.delegate = assetViewer.self
-        assetViewer.present(imagePicker, animated: true, completion: nil)
+        guard let latestAsset = fetchResult.firstObject else {
+            // There are no assets in the user's library
+            return
+        }
         
+        let imageManager = PHImageManager.default()
+        let requestOptions = PHImageRequestOptions()
+        requestOptions.deliveryMode = .fastFormat
+        requestOptions.isSynchronous = true
+        
+        imageManager.requestImage(for: latestAsset, targetSize: CGSize(width: 75, height: 75), contentMode: .aspectFill, options: requestOptions) { (image, info) in
+            if let image = image {
+                DispatchQueue.main.async {
+                    self.galleryButton.setImage(image, for: .normal)
+                }
+            }
+        }
     }
+        
+
+    
+//    @objc private func openPhotosApp() {
+//        PHPhotoLibrary.requestAuthorization { status in
+//            switch status {
+//            case .authorized:
+//                let fetchOptions = PHFetchOptions()
+//                fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+//                let allAssets = PHAsset.fetchAssets(with: fetchOptions)
+//                guard let mostRecentAsset = allAssets.firstObject else { return }
+//
+//                if mostRecentAsset.mediaType == .image {
+//                    PHImageManager.default().requestImage(for: mostRecentAsset, targetSize: CGSize(width: 1024, height: 1024), contentMode: .aspectFill, options: nil) { (image, info) in
+//                        if let imageURL = (info?["PHImageFileURLKey"] as? NSURL) {
+//                            let urlString = imageURL.absoluteString ?? ""
+//                            if let url = URL(string: urlString) {
+//                                DispatchQueue.main.async {
+//                                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+//                                }
+//                            }
+//                        }
+//                    }
+//                } else if mostRecentAsset.mediaType == .video {
+//                    let requestOptions = PHVideoRequestOptions()
+//                    requestOptions.version = .original
+//
+//                    PHImageManager.default().requestAVAsset(forVideo: mostRecentAsset, options: requestOptions) { (asset, audioMix, info) in
+//                        if let urlAsset = asset as? AVURLAsset {
+//                            let videoURL = urlAsset.url
+//                            DispatchQueue.main.async {
+//                                let player = AVPlayer(url: videoURL)
+//                                let playerViewController = AVPlayerViewController()
+//                                playerViewController.player = player
+//                                self.present(playerViewController, animated: true) {
+//                                    playerViewController.player?.play()
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            case .denied, .restricted:
+//                print("Access to photo library is denied or restricted")
+//            case .notDetermined:
+//                print("Access to photo library has not been determined")
+//            case .limited:
+//                print("Allow access to all photos")
+//            @unknown default:
+//                fatalError("Unexpected case occurred while requesting photo library authorization")
+//            }
+//        }
+//    }
+
     @objc private func toggleFlash() {
         guard let device = AVCaptureDevice.default(for: .video) else { return }
         guard device.hasTorch else { return }
@@ -125,7 +206,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             
         }
         prepareTimerView()
-        
+        setupGalleryButton()
         handPoseRequest.maximumHandCount = 1
         
         // Add the timerLabel to the view and position it at the top
@@ -162,7 +243,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             galleryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
 
-        galleryButton.addTarget(self, action: #selector(onGalleryButtonClick), for: .touchUpInside)
+        galleryButton.addTarget(self, action: #selector(openPhotosApp), for: .touchUpInside)
         
         flashButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(flashButton)
@@ -198,10 +279,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             }
         }
     }
-
-
-
-	
 
     func startTimer() {
         recordLabel.isHidden = false
@@ -253,11 +330,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         captureSession.addOutput(photoOutput)
         
         // Add video input
-        
-//        guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: currentCameraPosition) else {
-//            fatalError("Could not get video device")
-//        }
-        
+
         do {
             let videoDeviceInput = try AVCaptureDeviceInput(device: captureDevice)
             if captureSession.canAddInput(videoDeviceInput) {

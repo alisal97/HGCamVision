@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		10874CD829A7ABBA004B68FC /* AssetViewerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10874CD729A7ABBA004B68FC /* AssetViewerViewController.swift */; };
 		AC5F900B24C3526700C85582 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = AC5F900A24C3526700C85582 /* SnapKit */; };
 		AC5F901124C36D2300C85582 /* VNRecognizedPoint+.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5F901024C36D2300C85582 /* VNRecognizedPoint+.swift */; };
 		AC99CF3324B0A15500C54CE2 /* HandGestureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC99CF3224B0A15500C54CE2 /* HandGestureProcessor.swift */; };
@@ -37,7 +36,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		10874CD729A7ABBA004B68FC /* AssetViewerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetViewerViewController.swift; sourceTree = "<group>"; };
 		10874CD929A7C837004B68FC /* HGCamRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCamRelease.entitlements; sourceTree = "<group>"; };
 		AC5F901024C36D2300C85582 /* VNRecognizedPoint+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VNRecognizedPoint+.swift"; sourceTree = "<group>"; };
 		AC99CF3224B0A15500C54CE2 /* HandGestureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandGestureProcessor.swift; sourceTree = "<group>"; };
@@ -112,7 +110,6 @@
 				AC5F900F24C36CD000C85582 /* Extensions */,
 				ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */,
 				ACBD85EF24A4E3A7002F7C9C /* CameraViewController.swift */,
-				10874CD729A7ABBA004B68FC /* AssetViewerViewController.swift */,
 				ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */,
 				AC99CF3224B0A15500C54CE2 /* HandGestureProcessor.swift */,
 				ACBD85F124A4E3A7002F7C9C /* Main.storyboard */,
@@ -261,7 +258,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACBD85F024A4E3A7002F7C9C /* CameraViewController.swift in Sources */,
-				10874CD829A7ABBA004B68FC /* AssetViewerViewController.swift in Sources */,
 				ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */,
 				ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */,
 				AC99CF3324B0A15500C54CE2 /* HandGestureProcessor.swift in Sources */,
