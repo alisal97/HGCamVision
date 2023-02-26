@@ -8,6 +8,9 @@ import PhotosUI
 
 class CameraViewController: UIViewController {
 
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return .landscape
+    }
     private var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     let redBorder = CALayer()
@@ -16,7 +19,6 @@ class CameraViewController: UIViewController {
     private var videoDeviceInput: AVCaptureDeviceInput!
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
     private let handGestureProcessor = HandGestureProcessor()
-//    private let recordButton = UIButton()
     static var isRecording = false
 
     private weak var timerLabel: UILabel?
@@ -24,21 +26,52 @@ class CameraViewController: UIViewController {
     private var isTimerRunning = false
     
     
-    // gallery button
-    private lazy var galleryButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.setImage(UIImage(systemName: "square.grid.2x2.fill"), for: .normal)
-        button.tintColor = .blue
-        button.addTarget(self, action: #selector(openGallery), for: .touchUpInside)
-        return button
+    // Declare a timer and a counter variable to track elapsed time
+    var timer: Timer?
+    var counter = 0
+    
+    // Declare a UILabel to display the time elapsed
+    let recordLabel: UILabel = {
+        let label = UILabel()
+        label.text = "00:00"
+        label.font = UIFont.systemFont(ofSize: 37, weight: .heavy)
+        label.textColor = UIColor.red
+        label.textAlignment = .center
+        label.isHidden = true
+        return label
     }()
+
+    
+    // gallery button
+//    private lazy var galleryButton: UIButton = {
+//        let button = UIButton(type: .custom)
+//        button.setImage(UIImage(systemName: "square.grid.2x2.fill"), for: .normal)
+//        button.tintColor = .blue
+//        button.addTarget(self, action: #selector(openGallery), for: .touchUpInside)
+//        return button
+//    }()
     
     
+
     override func viewDidLoad() {
         super.viewDidLoad()
         UIApplication.shared.isIdleTimerDisabled = true
         prepareCaptureSession()
         prepareCaptureUI()
+        let status = PHPhotoLibrary.authorizationStatus()
+        if status == .notDetermined {
+            PHPhotoLibrary.requestAuthorization { status in
+                if status == .authorized {
+                    print("Access to photo library granted")
+                } else {
+                    print("Access to photo library denied")
+                }
+            }
+        } else if status == .authorized {
+            print("Access to photo library granted")
+        } else {
+            print("Access to photo library denied")
+        }
         
         if let sound = Bundle.main.path(forResource: "shutter", ofType: "mp3") {
             do {
@@ -53,20 +86,75 @@ class CameraViewController: UIViewController {
         
         handPoseRequest.maximumHandCount = 1
         
+        
+        // Add the timerLabel to the view and position it at the top
+        view.addSubview(recordLabel)
+        recordLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            recordLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+        
+        // Start the timer when recording begins
+
+
+        
+        
         // Add the gallery thumbnail button to the view
         
-        view.addSubview(galleryButton)
-        
-        // Position the gallery thumbnail button in the bottom left corner
-        galleryButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            galleryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            galleryButton.widthAnchor.constraint(equalToConstant: 44),
-            galleryButton.heightAnchor.constraint(equalToConstant: 44)
-        ])
+//        view.addSubview(galleryButton)
+//
+//        // Position the gallery thumbnail button in the bottom left corner
+//        galleryButton.translatesAutoresizingMaskIntoConstraints = false
+//        NSLayoutConstraint.activate([
+//            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+//            galleryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+//            galleryButton.widthAnchor.constraint(equalToConstant: 44),
+//            galleryButton.heightAnchor.constraint(equalToConstant: 44)
+//        ])
 
     }
+//    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+//        super.viewWillTransition(to: size, with: coordinator)
+//
+//        let deviceOrientation = UIDevice.current.orientation
+//
+//        if let previewLayerConnection = self.previewLayer.connection as? AVCaptureConnection, previewLayerConnection.isVideoOrientationSupported {
+//            switch deviceOrientation {
+//            case .portrait:
+//                previewLayerConnection.videoOrientation = .portrait
+//            case .landscapeLeft:
+//                previewLayerConnection.videoOrientation = .landscapeRight
+//            case .landscapeRight:
+//                previewLayerConnection.videoOrientation = .landscapeLeft
+//            default:
+//                previewLayerConnection.videoOrientation = .portrait
+//            }
+//        }
+//    }
+
+    func startTimer() {
+        recordLabel.isHidden = false
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            self?.counter += 1
+            self?.recordLabel.text = self?.formattedTime()
+        }
+    }
+
+    // Stop the timer when recording ends
+    func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+        counter = 0
+        recordLabel.isHidden = true
+        recordLabel.text = "00:00"
+    }
+    func formattedTime() -> String {
+        let minutes = counter / 60
+        let seconds = counter % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
@@ -74,32 +162,32 @@ class CameraViewController: UIViewController {
         UIApplication.shared.isIdleTimerDisabled = false
     }
 
-                        @objc func openGallery() {
-                            PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
-                                guard status == .authorized else {
-                                    // Handle access denied or restricted
-                                    print("Access to photo library denied or restricted")
-                                    return
-                                }
-
-                                let fetchOptions = PHFetchOptions()
-                                fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-                                let allPhotos = PHAsset.fetchAssets(with: fetchOptions)
-                                guard allPhotos.count > 0 else { return }
-
-                                // Create an array of assets to display
-                                var assets = [PHAsset]()
-                                allPhotos.enumerateObjects { (asset, _, _) in
-                                    assets.append(asset)
-                                }
-
-                                DispatchQueue.main.async {
-                                    // Create a scrolling view controller with the assets
-                                    let viewer = AssetScrollViewController(assets: assets)
-                                    self.navigationController?.pushViewController(viewer, animated: true)
-                                }
-                            }
-                        }
+//                        @objc func openGallery() {
+//                            PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+//                                guard status == .authorized else {
+//                                    // Handle access denied or restricted
+//                                    print("Access to photo library denied or restricted")
+//                                    return
+//                                }
+//
+//                                let fetchOptions = PHFetchOptions()
+//                                fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+//                                let allPhotos = PHAsset.fetchAssets(with: fetchOptions)
+//                                guard allPhotos.count > 0 else { return }
+//
+//                                // Create an array of assets to display
+//                                var assets = [PHAsset]()
+//                                allPhotos.enumerateObjects { (asset, _, _) in
+//                                    assets.append(asset)
+//                                }
+//
+//                                DispatchQueue.main.async {
+//                                    // Create a scrolling view controller with the assets
+//                                    let viewer = AssetScrollViewController(assets: assets)
+//                                    self.navigationController?.pushViewController(viewer, animated: true)
+//                                }
+//                            }
+//                        }
     private func prepareCaptureSession() {
         captureSession?.beginConfiguration()
         let captureSession = AVCaptureSession()
@@ -180,42 +268,15 @@ class CameraViewController: UIViewController {
     
     
 
-//
-//    private func setupRecordButton() {
-//        recordButton.backgroundColor = .red
-//        recordButton.addTarget(self, action: #selector(recordButtonTapped), for: .touchUpInside)
-//
-//        view.addSubview(recordButton)
-//
-//        recordButton.snp.makeConstraints { make in
-//            make.centerX.equalToSuperview()
-//            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottomMargin).offset(-16)
-//            make.width.height.equalTo(80)
-//        }
-//    }
-//    @objc private func recordButtonTapped() {
-//        if !CameraViewController.isRecording {
-//            startRecording()
-//            CameraViewController.isRecording = true
-//            recordButton.backgroundColor = .green
-//        } else {
-//            stopRecording()
-//            CameraViewController.isRecording = false
-//            recordButton.backgroundColor = .red
-//        }
-//    }
 
     func startRecording() {
        if !movieOutput.isRecording {
            CameraViewController.isRecording = true
            let outputPath = NSTemporaryDirectory() + "output.mov"
            let outputFileURL = URL(fileURLWithPath: outputPath)
+           
+           startTimer()
            movieOutput.startRecording(to: outputFileURL, recordingDelegate: self)
-           redBorder.borderColor = UIColor.red.cgColor
-           redBorder.borderWidth = 13
-           redBorder.frame = CGRect(x: 0, y: 0, width: view.frame.width - view.frame.width * 0.03, height: view.frame.height - view.frame.height * 0.03)
-           redBorder.position = CGPoint(x: view.frame.width / 2, y: view.frame.height / 2)
-           view.layer.addSublayer(redBorder)
 
            
        }
@@ -224,8 +285,7 @@ class CameraViewController: UIViewController {
        if movieOutput.isRecording {
            movieOutput.stopRecording()
            CameraViewController.isRecording = false
-           redBorder.removeFromSuperlayer()
-
+           stopTimer()
        }
    }
     
@@ -344,7 +404,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.93 && indexTipPoint.confidence > 0.91 && littleDIPPoint.confidence > 0.91 && ringDIPPoint.confidence > 0.93 && middleDIPPoint.confidence > 0.87
+        guard thumbTipPoint.confidence > 0.93 && indexTipPoint.confidence > 0.91 && littleDIPPoint.confidence > 0.89 && ringDIPPoint.confidence > 0.91 && middleDIPPoint.confidence > 0.89
         else {
             return
         }
@@ -409,11 +469,8 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         switch stopVid {
         case .pinchedVidStop:
             if isTimerRunning == false {
-                runTimer(seconds: 3, completion: {
-                    print("pinched to stop vid")
-                    self.stopRecording()
-                    
-                })
+                print("pinched to stop vid")
+                self.stopRecording()
             }
         case .unknown:
             break
@@ -471,14 +528,14 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
         
         let duration = asset.duration
         let startTime = CMTime.zero
-        let endTime = CMTimeSubtract(duration, CMTimeMake(value: 3, timescale: 1))
+        let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds(3, preferredTimescale: 1))
         let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
         exportSession.timeRange = timeRange
-        
+
         exportSession.exportAsynchronously {
             switch exportSession.status {
             case .completed:
-                PHPhotoLibrary.requestAuthorization(for: .readWrite ) { status in
+                PHPhotoLibrary.requestAuthorization { status in
                     if status == .authorized {
                         PHPhotoLibrary.shared().performChanges({
                             PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)
@@ -495,15 +552,23 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                 }
             case .failed:
                 print("Export failed: \(exportSession.error?.localizedDescription ?? "unknown error")")
+                print("Export error: \(String(describing: exportSession.error))")
             case .cancelled:
                 print("Export cancelled")
-            default:
-                break
+            case .exporting:
+                print("Exporting...")
+            case .waiting:
+                print("Waiting...")
+            case .unknown:
+                print("Unknown status...")
+            @unknown default:
+                print("Fatal Error")
             }
         }
     }
-    
 }
+
+
     
 
 
