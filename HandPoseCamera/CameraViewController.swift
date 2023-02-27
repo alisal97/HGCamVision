@@ -50,7 +50,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         let config = UIImage.SymbolConfiguration(pointSize: 50)
-        button.setImage(UIImage(systemName: "camera.rotate", withConfiguration: config), for: .normal)
+        button.setImage(UIImage(systemName: "arrow.triangle.2.circlepath", withConfiguration: config), for: .normal)
         return button
     }()
     
@@ -58,7 +58,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         let config = UIImage.SymbolConfiguration(pointSize: 50)
-        button.setImage(UIImage(systemName:"flashlight.on.fill", withConfiguration: config), for: .normal)
+        button.setImage(UIImage(systemName:"bolt.slash.circle", withConfiguration: config), for: .normal)
         return button
     }()
 
@@ -185,8 +185,12 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
                 
                 if device.torchMode == .off {
                     device.torchMode = .on
+                    let config = UIImage.SymbolConfiguration(pointSize: 50)
+                    flashButton.setImage(UIImage(systemName:"bolt.circle.fill", withConfiguration: config), for: .normal)
                 } else {
                     device.torchMode = .off
+                    let config = UIImage.SymbolConfiguration(pointSize: 50)
+                    flashButton.setImage(UIImage(systemName:"bolt.slash.circle", withConfiguration: config), for: .normal)
                 }
                 
                 device.unlockForConfiguration()
@@ -195,7 +199,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             }
         }
     }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         UIApplication.shared.isIdleTimerDisabled = true
@@ -212,8 +215,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             
         }
         setupActivityIndicator()
-
-
         prepareTimerView()
         setupGalleryButton()
         handPoseRequest.maximumHandCount = 1
@@ -259,8 +260,8 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
 
         // Add constraints to position the flash button in the top right corner
         NSLayoutConstraint.activate([
-            flashButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            flashButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
+            flashButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -16),
+            flashButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
         ])
         flashButton.addTarget(self, action: #selector(toggleFlash), for: .touchUpInside)
 
