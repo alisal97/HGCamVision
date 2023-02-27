@@ -39,8 +39,8 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     let recordLabel: UILabel = {
         let label = UILabel()
         label.text = "00:00"
-        label.font = UIFont.systemFont(ofSize: 37, weight: .heavy)
-        label.textColor = UIColor.red
+        label.font = UIFont.systemFont(ofSize: 39, weight: .semibold)
+        label.textColor = UIColor.white
         label.textAlignment = .center
         label.isHidden = true
         return label
@@ -49,16 +49,18 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     let switchCameraButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        let config = UIImage.SymbolConfiguration(pointSize: 50)
+        let config = UIImage.SymbolConfiguration(pointSize: 35)
         button.setImage(UIImage(systemName: "arrow.triangle.2.circlepath", withConfiguration: config), for: .normal)
+        button.tintColor = .white
         return button
     }()
     
     let flashButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        let config = UIImage.SymbolConfiguration(pointSize: 50)
+        let config = UIImage.SymbolConfiguration(pointSize: 35)
         button.setImage(UIImage(systemName:"bolt.slash.circle", withConfiguration: config), for: .normal)
+        button.tintColor = .white
         return button
     }()
 
@@ -69,6 +71,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         button.translatesAutoresizingMaskIntoConstraints = false
         let config = UIImage.SymbolConfiguration(pointSize: 50)
         button.setImage(UIImage(systemName: "photo.fill", withConfiguration: config), for: .normal)
+        button.tintColor = .white
         return button
     }()
 
@@ -167,7 +170,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     private func setupActivityIndicator() {
         activityIndicator = UIActivityIndicatorView(style: .large)
         activityIndicator.transform = CGAffineTransform(scaleX: 3.5, y: 3.5)
-        activityIndicator.color = UIColor.green
+        activityIndicator.color = UIColor.darkGray
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
         DispatchQueue.main.async { [self] in
@@ -185,11 +188,11 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
                 
                 if device.torchMode == .off {
                     device.torchMode = .on
-                    let config = UIImage.SymbolConfiguration(pointSize: 50)
+                    let config = UIImage.SymbolConfiguration(pointSize: 35)
                     flashButton.setImage(UIImage(systemName:"bolt.circle.fill", withConfiguration: config), for: .normal)
                 } else {
                     device.torchMode = .off
-                    let config = UIImage.SymbolConfiguration(pointSize: 50)
+                    let config = UIImage.SymbolConfiguration(pointSize: 35)
                     flashButton.setImage(UIImage(systemName:"bolt.slash.circle", withConfiguration: config), for: .normal)
                 }
                 
@@ -217,13 +220,14 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         setupActivityIndicator()
         prepareTimerView()
         setupGalleryButton()
+        cameraUI()
         handPoseRequest.maximumHandCount = 1
         
         // Add the timerLabel to the view and position it at the top
         view.addSubview(recordLabel)
         recordLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -16),
             recordLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
@@ -422,7 +426,32 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         }
 
     }
+    private func cameraUI() {
+        // Create a new view for the grey rectangle
+        let topView = UIView()
+        topView.translatesAutoresizingMaskIntoConstraints = false
+        topView.backgroundColor = UIColor.black.withAlphaComponent(0.79) // set the background color to transparent grey
+        view.addSubview(topView)
 
+        // Add constraints to position the top view at the top of the screen, taking up 9% of the screen height
+        topView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        topView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        topView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        topView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.15).isActive = true
+
+        // Create a new view for the grey rectangle
+        let bottomView = UIView()
+        bottomView.translatesAutoresizingMaskIntoConstraints = false
+        bottomView.backgroundColor = UIColor.black.withAlphaComponent(0.79) // set the background color to transparent grey
+        view.addSubview(bottomView)
+
+        // Add constraints to position the bottom view at the bottom of the screen, taking up 17% of the screen height
+        bottomView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        bottomView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        bottomView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        bottomView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.17).isActive = true
+            
+    }
     
     private func prepareCaptureUI() {
         guard let session = captureSession else { return }
