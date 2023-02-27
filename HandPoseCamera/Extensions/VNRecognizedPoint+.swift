@@ -14,6 +14,8 @@ extension VNRecognizedPoint {
         return CGPoint(x: self.location.x, y: 1 - self.location.y)
     }
 }
+
+
 //future implementation to pause recording
 
 //// Declare a variable to keep track of whether recording is currently paused

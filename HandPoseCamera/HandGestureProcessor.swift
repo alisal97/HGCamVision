@@ -41,10 +41,7 @@ class HandGestureProcessor {
             
         } else if distanceIT >= 17 || distanceTM + distanceRM >= 27 || distanceTR + distanceRL >= 29
                     {
-            //                if indexTip.y > middleTipDIP.y && indexTip.y > ringTip.y && indexTip.y > littleDIP.y {
-            //                return .pinched
-            //            } else {
-                            return .unknown
+            return .unknown
                         } else {
             return .unknown
         }
