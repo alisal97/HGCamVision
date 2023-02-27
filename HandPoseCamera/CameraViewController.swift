@@ -16,10 +16,10 @@ import SnapKit
 
 class CameraViewController: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
     
-    let videoQueue = DispatchQueue(label: "com.example.videoQueue")
+    let videoQueue = DispatchQueue(label: "com.example.videoQueue") // queue for saving video, so we can pioritize video saving and keep it from interruptions
     private var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
-    var audioPlayer: AVAudioPlayer?
+    var audioPlayer: AVAudioPlayer? //for playing shutter sound
     private let movieOutput = AVCaptureMovieFileOutput()
     private var videoDeviceInput: AVCaptureDeviceInput!
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
@@ -75,7 +75,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         return button
     }()
 
-    
+    //function to get the most recent media from the photos app
     @objc private func openPhotosApp() {
         PHPhotoLibrary.requestAuthorization { status in
             switch status {
@@ -129,7 +129,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             }
         }
     }
-
+//  function to exit the gallery view defined in the function above, you can use by clicking on the black borders
     @objc private func dismissImageView() {
         for subview in self.view.subviews {
             if let imageView = subview as? UIImageView {
@@ -139,7 +139,8 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         self.setNeedsStatusBarAppearanceUpdate()
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
-
+    
+//  function to get a thumbnail of the most recent media for the gallery button.
     private func setupGalleryButton() {
         let fetchOptions = PHFetchOptions()
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
@@ -165,6 +166,8 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     }
 
 
+// activity indicator / loading icon for when the video is saving.
+// since we are cutting the last 3 seconds of the recorded videos it takes a while to save.
     private var activityIndicator: UIActivityIndicatorView!
 
     private func setupActivityIndicator() {
@@ -178,11 +181,11 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         }
     }
 
-
+//  toggle the camera flash light
     @objc private func toggleFlash() {
         guard let device = AVCaptureDevice.default(for: .video) else { return }
         guard device.hasTorch else { return }
-        if currentCameraPosition == .back {
+        if currentCameraPosition == .back { // if statement to check if the back camera is in use before toggling on the flash
             do {
                 try device.lockForConfiguration()
                 
@@ -202,6 +205,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             }
         }
     }
+    // in viewDidLoad you should add all the UI elements and "constant" tasks like calling the cameraView, because viewDidLoad job's is to keep calling the functions constantly.
     override func viewDidLoad() {
         super.viewDidLoad()
         UIApplication.shared.isIdleTimerDisabled = true
@@ -271,11 +275,12 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
 
 
     }
+    // enabling backgroundTask, this way video saving will keep on working even if the user switches to another app or to home screen
     @objc func handleBackgroundTask(_ notification: Notification) {
        UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
         
     }
-
+//  adding support for landscape views.
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
@@ -298,7 +303,8 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             }
         }
     }
-
+    
+//  timer to start counting seconds and minutes when recording starts
     func startTimer() {
         recordLabel.isHidden = false
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -315,18 +321,21 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         recordLabel.isHidden = true
         recordLabel.text = "00:00"
     }
+// for every 60 seconds it will add a minute
     func formattedTime() -> String {
         let minutes = counter / 60
         let seconds = counter % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
-
+// to keep screen on when recording.
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
         // Re-enable idle timer when the app goes into the background or is closed
         UIApplication.shared.isIdleTimerDisabled = false
     }
+    
+    //instead of putting all these methods in viewDidLoad we wrap them in this function and call it in viewDidLoad
 
     private func prepareCaptureSession() {
             captureSession?.beginConfiguration()
@@ -389,7 +398,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
 
         }
 
-    
+//  function in objectiveC to switch the camera between back and front. we have to add audio input again after switching camera, otherwise it will not work.
     @objc private func toggleCamera() {
         
         // Toggle the camera position
@@ -462,6 +471,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         
         self.videoPreviewLayer = videoPreviewLayer
     }
+    // also to add support to landscape mode.
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -489,7 +499,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     }
 
 
-
+//  to record video
     func startRecording() {
        if !movieOutput.isRecording {
            CameraViewController.isRecording = true
@@ -501,6 +511,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
            
        }
    }
+// to stop recording video
     func stopRecording() {
        if movieOutput.isRecording {
            movieOutput.stopRecording()
@@ -508,7 +519,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
            stopTimer()
        }
    }
-    
+// view for countdown timer for when taking a photo or a video
     private func prepareTimerView() {
         let timerLabel = UILabel()
         timerLabel.textAlignment = .center
@@ -521,7 +532,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         
         self.timerLabel = timerLabel
     }
-    
+    // capturing images
     private func captureImage() {
         guard let photoOutput = captureSession?.outputs.first(where: { $0 is AVCapturePhotoOutput }) as? AVCapturePhotoOutput else { return }
         let settings = AVCapturePhotoSettings()
@@ -544,7 +555,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         audioPlayer?.play()
 
     }
-
+// function that actually defines the timer
     private func runTimer(seconds: Int, completion: @escaping () -> Void) {
         isTimerRunning = true
 
@@ -567,6 +578,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     }
 }
 
+// function to take photos for the vision framework to recognize the hand gesture.
 extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
@@ -615,6 +627,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
     }
     
+    // after points are recognized, this function checks for the confidence of the points before processing them
     private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
@@ -642,7 +655,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         guard let middleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: middleDIPPoint.toAVFoundationPoint) else {
             return
         }
-
+// checking for hand gestures, it doesn't work well if I put them all in the same switch statement, I don't know why but I assume we have to call handGestureProcesor for each gesture using a different constant, because the processor might have a one time use limit.
         let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint)
         
         switch state {
@@ -696,7 +709,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
 }
 
-
+// output for captured photos
 extension CameraViewController: AVCapturePhotoCaptureDelegate {
     
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
@@ -706,15 +719,15 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
     }
 }
 
-
+// output for recorded videos, it's added to video queue for pioritizing with activity indicator to show that a video is being saved, and it's added to background tasks so it doesn't get interrupted when users switch to another app or homescreen.
 extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         let recordingTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "SaveVideoToPhotos") // Start the background task
 
-        videoQueue.async {
-            DispatchQueue.main.async {
-                self.activityIndicator.startAnimating()
+        videoQueue.async { // adding to queue for piortizing and to proof from interruptions
+            DispatchQueue.main.async { // animating on the main thread.
+                self.activityIndicator.startAnimating() //starting the activity loading indicator for when a video is taken.
             }
 
             if let error = error {
@@ -743,14 +756,14 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                     print("Error removing file at path: \(outputURL.path)")
                 }
             }
-            
+            // method to cut the last 3 seconds of the video.
             exportSession.outputURL = outputURL
             exportSession.outputFileType = .mp4
             exportSession.shouldOptimizeForNetworkUse = true
             
             let duration = asset.duration
             let startTime = CMTime.zero
-            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds(3, preferredTimescale: 1))
+            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds(3, preferredTimescale: 1)) // to make it cut 5 seconds for example, we just put 5 instead of 3.
             let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
             exportSession.timeRange = timeRange
             
@@ -764,12 +777,12 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                             }) { success, error in
                                 if success {
                                     print("Video saved to photos")
-                                    UIApplication.shared.endBackgroundTask(recordingTaskIdentifier)
+                                    UIApplication.shared.endBackgroundTask(recordingTaskIdentifier) // when video saving is complete it will remove the app from background tasks
                                     DispatchQueue.main.async {
-                                        self.activityIndicator.stopAnimating()
+                                        self.activityIndicator.stopAnimating() // when saving video is complete it will stop the animation of the indicator and remove it from the view.
                                     }
 
-                                } else {
+                                } else { // starting here are just debugging for error checking.
                                     print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
                                     DispatchQueue.main.async {
                                         self.activityIndicator.stopAnimating()
