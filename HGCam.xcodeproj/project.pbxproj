@@ -19,23 +19,6 @@
 		ACBD85F824A4E3AC002F7C9C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ACBD85F624A4E3AC002F7C9C /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		ACBD85FF24A4E3AD002F7C9C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = ACBD85E024A4E3A7002F7C9C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = ACBD85E724A4E3A7002F7C9C;
-			remoteInfo = HandPoseCamera;
-		};
-		ACBD860A24A4E3AD002F7C9C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = ACBD85E024A4E3A7002F7C9C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = ACBD85E724A4E3A7002F7C9C;
-			remoteInfo = HandPoseCamera;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		10874CD929A7C837004B68FC /* HGCamRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCamRelease.entitlements; sourceTree = "<group>"; };
 		10E9A63129AC122100311FC3 /* GuideScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideScreen.swift; sourceTree = "<group>"; };
@@ -49,8 +32,6 @@
 		ACBD85F424A4E3AC002F7C9C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		ACBD85F724A4E3AC002F7C9C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ACBD85F924A4E3AC002F7C9C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		ACBD85FE24A4E3AD002F7C9C /* HGCamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HGCamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		ACBD860924A4E3AD002F7C9C /* HGCamUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HGCamUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,20 +40,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC5F900B24C3526700C85582 /* SnapKit in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		ACBD85FB24A4E3AD002F7C9C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		ACBD860624A4E3AD002F7C9C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,8 +67,6 @@
 			isa = PBXGroup;
 			children = (
 				ACBD85E824A4E3A7002F7C9C /* HGCam.app */,
-				ACBD85FE24A4E3AD002F7C9C /* HGCamTests.xctest */,
-				ACBD860924A4E3AD002F7C9C /* HGCamUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -146,42 +111,6 @@
 			productReference = ACBD85E824A4E3A7002F7C9C /* HGCam.app */;
 			productType = "com.apple.product-type.application";
 		};
-		ACBD85FD24A4E3AD002F7C9C /* HGCamTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = ACBD861524A4E3AD002F7C9C /* Build configuration list for PBXNativeTarget "HGCamTests" */;
-			buildPhases = (
-				ACBD85FA24A4E3AD002F7C9C /* Sources */,
-				ACBD85FB24A4E3AD002F7C9C /* Frameworks */,
-				ACBD85FC24A4E3AD002F7C9C /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				ACBD860024A4E3AD002F7C9C /* PBXTargetDependency */,
-			);
-			name = HGCamTests;
-			productName = HandPoseCameraTests;
-			productReference = ACBD85FE24A4E3AD002F7C9C /* HGCamTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		ACBD860824A4E3AD002F7C9C /* HGCamUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = ACBD861824A4E3AD002F7C9C /* Build configuration list for PBXNativeTarget "HGCamUITests" */;
-			buildPhases = (
-				ACBD860524A4E3AD002F7C9C /* Sources */,
-				ACBD860624A4E3AD002F7C9C /* Frameworks */,
-				ACBD860724A4E3AD002F7C9C /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				ACBD860B24A4E3AD002F7C9C /* PBXTargetDependency */,
-			);
-			name = HGCamUITests;
-			productName = HandPoseCameraUITests;
-			productReference = ACBD860924A4E3AD002F7C9C /* HGCamUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -194,14 +123,6 @@
 				TargetAttributes = {
 					ACBD85E724A4E3A7002F7C9C = {
 						CreatedOnToolsVersion = 11.5;
-					};
-					ACBD85FD24A4E3AD002F7C9C = {
-						CreatedOnToolsVersion = 11.5;
-						TestTargetID = ACBD85E724A4E3A7002F7C9C;
-					};
-					ACBD860824A4E3AD002F7C9C = {
-						CreatedOnToolsVersion = 11.5;
-						TestTargetID = ACBD85E724A4E3A7002F7C9C;
 					};
 				};
 			};
@@ -222,8 +143,6 @@
 			projectRoot = "";
 			targets = (
 				ACBD85E724A4E3A7002F7C9C /* HGCam */,
-				ACBD85FD24A4E3AD002F7C9C /* HGCamTests */,
-				ACBD860824A4E3AD002F7C9C /* HGCamUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -236,20 +155,6 @@
 				ACBD85F824A4E3AC002F7C9C /* LaunchScreen.storyboard in Resources */,
 				ACBD85F524A4E3AC002F7C9C /* Assets.xcassets in Resources */,
 				ACBD85F324A4E3A7002F7C9C /* Main.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		ACBD85FC24A4E3AD002F7C9C /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		ACBD860724A4E3AD002F7C9C /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,34 +174,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ACBD85FA24A4E3AD002F7C9C /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		ACBD860524A4E3AD002F7C9C /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		ACBD860024A4E3AD002F7C9C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = ACBD85E724A4E3A7002F7C9C /* HGCam */;
-			targetProxy = ACBD85FF24A4E3AD002F7C9C /* PBXContainerItemProxy */;
-		};
-		ACBD860B24A4E3AD002F7C9C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = ACBD85E724A4E3A7002F7C9C /* HGCam */;
-			targetProxy = ACBD860A24A4E3AD002F7C9C /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		ACBD85F124A4E3A7002F7C9C /* Main.storyboard */ = {
@@ -470,94 +348,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = aly.CB.Gang.HGCam;
+				PRODUCT_BUNDLE_IDENTIFIER = CBGang.HGCam.Aly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		ACBD861624A4E3AD002F7C9C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 43KKKRBAP2;
-				INFOPLIST_FILE = HandPoseCameraTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = aly.CB.Gang.HGCam;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HGCam.app/HGCam";
-			};
-			name = Debug;
-		};
-		ACBD861724A4E3AD002F7C9C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 43KKKRBAP2;
-				INFOPLIST_FILE = HandPoseCameraTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = aly.CB.Gang.HGCam;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HGCam.app/HGCam";
-			};
-			name = Release;
-		};
-		ACBD861924A4E3AD002F7C9C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 43KKKRBAP2;
-				INFOPLIST_FILE = HandPoseCameraUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = aly.CB.Gang.HGCam;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = HandPoseCamera;
-			};
-			name = Debug;
-		};
-		ACBD861A24A4E3AD002F7C9C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 43KKKRBAP2;
-				INFOPLIST_FILE = HandPoseCameraUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = aly.CB.Gang.HGCam;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = HandPoseCamera;
 			};
 			name = Release;
 		};
@@ -578,24 +372,6 @@
 			buildConfigurations = (
 				ACBD861324A4E3AD002F7C9C /* Debug */,
 				ACBD861424A4E3AD002F7C9C /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		ACBD861524A4E3AD002F7C9C /* Build configuration list for PBXNativeTarget "HGCamTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				ACBD861624A4E3AD002F7C9C /* Debug */,
-				ACBD861724A4E3AD002F7C9C /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		ACBD861824A4E3AD002F7C9C /* Build configuration list for PBXNativeTarget "HGCamUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				ACBD861924A4E3AD002F7C9C /* Debug */,
-				ACBD861A24A4E3AD002F7C9C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

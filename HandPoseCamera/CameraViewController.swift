@@ -725,7 +725,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         let recordingTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "SaveVideoToPhotos") // Start the background task
 
-        videoQueue.async { // adding to queue for piortizing and to proof from interruptions
+        videoQueue.async { // adding to queue for piortizing and to proof from interruptions 
             DispatchQueue.main.async { // animating on the main thread.
                 self.activityIndicator.startAnimating() //starting the activity loading indicator for when a video is taken.
             }
