@@ -33,13 +33,13 @@ class HandGestureProcessor {
         if distanceIT <= 9 && distanceIM >= 11 && distanceRM >= 11 && distanceRL >= 11 && isRec == false {
             return .pinchedPhoto
             
-        } else if distanceTM <= 11 && distanceRM <= 9 && distanceRL >= 11 && distanceIM >= 11 && isRec == false {
+        } else if distanceTM <= 7 && distanceRM <= 7 && distanceRL >= 11 && distanceIM >= 11 && isRec == false {
             return .pinchedVidRec
             
-        } else if distanceTR <= 11 && distanceRL <= 9 && distanceRM >= 11 && distanceIT >= 11 && isRec == true {
+        } else if distanceTR <= 7 && distanceRL <= 7 && distanceRM >= 11 && distanceIT >= 11 && isRec == true {
             return .pinchedVidStop
             
-        } else if distanceIT >= 11 || distanceTM + distanceRM >= 21 || distanceTR + distanceRL >= 21
+        } else if distanceIT >= 11 || distanceTM + distanceRM >= 19 || distanceTR + distanceRL >= 19
                     {
             return .unknown
                         } else {
