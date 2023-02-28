@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		10A9CE3129AE988D00EEA4CA /* helperFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A9CE3029AE988D00EEA4CA /* helperFunc.swift */; };
 		10E9A63229AC122100311FC3 /* GuideScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E9A63129AC122100311FC3 /* GuideScreen.swift */; };
 		AC5F900B24C3526700C85582 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = AC5F900A24C3526700C85582 /* SnapKit */; };
 		AC5F901124C36D2300C85582 /* VNRecognizedPoint+.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5F901024C36D2300C85582 /* VNRecognizedPoint+.swift */; };
@@ -21,6 +22,7 @@
 
 /* Begin PBXFileReference section */
 		10874CD929A7C837004B68FC /* HGCamRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCamRelease.entitlements; sourceTree = "<group>"; };
+		10A9CE3029AE988D00EEA4CA /* helperFunc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = helperFunc.swift; sourceTree = "<group>"; };
 		10E9A63129AC122100311FC3 /* GuideScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideScreen.swift; sourceTree = "<group>"; };
 		AC5F901024C36D2300C85582 /* VNRecognizedPoint+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VNRecognizedPoint+.swift"; sourceTree = "<group>"; };
 		AC99CF3224B0A15500C54CE2 /* HandGestureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandGestureProcessor.swift; sourceTree = "<group>"; };
@@ -50,6 +52,7 @@
 			isa = PBXGroup;
 			children = (
 				AC5F901024C36D2300C85582 /* VNRecognizedPoint+.swift */,
+				10A9CE3029AE988D00EEA4CA /* helperFunc.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -167,6 +170,7 @@
 			files = (
 				10E9A63229AC122100311FC3 /* GuideScreen.swift in Sources */,
 				ACBD85F024A4E3A7002F7C9C /* CameraViewController.swift in Sources */,
+				10A9CE3129AE988D00EEA4CA /* helperFunc.swift in Sources */,
 				ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */,
 				ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */,
 				AC99CF3324B0A15500C54CE2 /* HandGestureProcessor.swift in Sources */,
