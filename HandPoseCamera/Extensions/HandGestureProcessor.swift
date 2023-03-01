@@ -29,17 +29,19 @@ class HandGestureProcessor: UIViewController {
         let distanceIM = abs(indexTip.y - middleDIP.y) // index and middle finger
         
         let isRec = CameraViewController.isRecording
-        
+        for _ in 1...3 {
+            print(distanceIT)
+        }
         if distanceIT <= 9 && distanceIM >= 7 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
             return .pinchedPhoto
 
         } else if distanceTM <= 11 && distanceRM <= 9 && distanceRL >= 5 && distanceIM >= 5 && isRec == false {
             return .pinchedVidRec
 
-        } else if distanceTR <= 15 && distanceRL <= 9 && distanceRM >= 5 && distanceIT >= 5 && isRec == true {
+        } else if distanceTR <= 15 && distanceRL <= 11 && distanceRM >= 5 && distanceIT >= 5 && isRec == true {
             return .pinchedVidStop
 
-        } else if distanceIT >= 11 || distanceTM + distanceRM >= 21 || distanceTR + distanceRL >= 25
+        } else if distanceIT >= 11 || distanceTM + distanceRM >= 21 || distanceTR + distanceRL >= 27
                     {
             return .unknown
                         } else {

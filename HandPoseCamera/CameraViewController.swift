@@ -227,6 +227,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             }
             
         }
+        addAudioInput()
         setupActivityIndicator()
         prepareTimerView()
         setupGalleryButton()
@@ -362,7 +363,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             let photoOutput = AVCapturePhotoOutput()
             captureSession.addOutput(photoOutput)
         
-            addAudioInput()
             // Add video input
 
             do {
@@ -390,23 +390,22 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             captureSession.commitConfiguration()
 
         }
+    
     func addAudioInput() {
-        // Add audio input
-        guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
-            fatalError("Could not get audio device")
-        }
-        
+        let audioSession = AVAudioSession.sharedInstance()
         do {
-            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
-            
-            if captureSession.canAddInput(audioDeviceInput) {
-                captureSession.addInput(audioDeviceInput)
+            try audioSession.setCategory(.playAndRecord, mode: .default)
+            try audioSession.setActive(true, options: .init())
+            let audioDevice = AVCaptureDevice.default(for: AVMediaType.audio)!
+            let audioInput = try AVCaptureDeviceInput(device: audioDevice)
+            if ((captureSession?.canAddInput(audioInput)) != nil) {
+                captureSession!.addInput(audioInput)
             }
         } catch {
-            fatalError("Could not create audio device input: \(error.localizedDescription)")
+            print("Error setting up audio input: \(error.localizedDescription)")
         }
-
     }
+
 //  function in objectiveC to switch the camera between back and front. we have to add audio input again after switching camera, otherwise it will not work.
     @objc private func toggleCamera() {
         
@@ -425,7 +424,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         captureSession?.addInput(input)
         
         // Add audio input
-        addAudioInput() 
+        addAudioInput()
         // Restart the capture session
         
         DispatchQueue.global(qos: .background).async { [self] in
