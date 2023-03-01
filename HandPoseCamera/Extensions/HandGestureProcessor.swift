@@ -8,8 +8,7 @@
 
 import UIKit
 
-class HandGestureProcessor {
-    
+class HandGestureProcessor: UIViewController {
     enum State {
         case pinchedPhoto
         case pinchedVidRec
@@ -17,8 +16,10 @@ class HandGestureProcessor {
 //        case pinchedPause
 //        case pinchedUnPause
         case unknown
+    
     }
-
+    override func viewDidLoad() {
+    }
     func getHandState(thumbTip: CGPoint, indexTip: CGPoint, littleDIP: CGPoint, ringDIP: CGPoint, middleDIP: CGPoint) -> State {
         let distanceIT = abs(indexTip.y - thumbTip.y) // index and thumb
         let distanceTM = abs(thumbTip.y - middleDIP.y)// middle finger and thumb
@@ -27,19 +28,18 @@ class HandGestureProcessor {
         let distanceRL = abs(ringDIP.y - littleDIP.y) // ring finger and little finger
         let distanceIM = abs(indexTip.y - middleDIP.y) // index and middle finger
         
-        
         let isRec = CameraViewController.isRecording
         
-        if distanceIT <= 9 && distanceIM >= 11 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
+        if distanceIT <= 9 && distanceIM >= 7 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
             return .pinchedPhoto
-            
-        } else if distanceTM <= 9 && distanceRM <= 7 && distanceRL >= 5 && distanceIM >= 5 && isRec == false {
+
+        } else if distanceTM <= 11 && distanceRM <= 9 && distanceRL >= 5 && distanceIM >= 5 && isRec == false {
             return .pinchedVidRec
-            
-        } else if distanceTR <= 9 && distanceRL <= 7 && distanceRM >= 5 && distanceIT >= 5 && isRec == true {
+
+        } else if distanceTR <= 15 && distanceRL <= 9 && distanceRM >= 5 && distanceIT >= 5 && isRec == true {
             return .pinchedVidStop
-            
-        } else if distanceIT >= 11 || distanceTM + distanceRM >= 19 || distanceTR + distanceRL >= 19
+
+        } else if distanceIT >= 11 || distanceTM + distanceRM >= 21 || distanceTR + distanceRL >= 25
                     {
             return .unknown
                         } else {

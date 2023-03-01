@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		10A9CE3129AE988D00EEA4CA /* helperFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A9CE3029AE988D00EEA4CA /* helperFunc.swift */; };
 		10E9A63229AC122100311FC3 /* GuideScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E9A63129AC122100311FC3 /* GuideScreen.swift */; };
+		10F6C3EA29AF8F3F00A02651 /* CamMicInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F6C3E929AF8F3F00A02651 /* CamMicInputs.swift */; };
 		AC5F900B24C3526700C85582 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = AC5F900A24C3526700C85582 /* SnapKit */; };
 		AC5F901124C36D2300C85582 /* VNRecognizedPoint+.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5F901024C36D2300C85582 /* VNRecognizedPoint+.swift */; };
 		AC99CF3324B0A15500C54CE2 /* HandGestureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC99CF3224B0A15500C54CE2 /* HandGestureProcessor.swift */; };
@@ -23,7 +24,9 @@
 /* Begin PBXFileReference section */
 		10874CD929A7C837004B68FC /* HGCamRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCamRelease.entitlements; sourceTree = "<group>"; };
 		10A9CE3029AE988D00EEA4CA /* helperFunc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = helperFunc.swift; sourceTree = "<group>"; };
+		10A9CE3229AEB5C900EEA4CA /* HGCam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCam.entitlements; sourceTree = "<group>"; };
 		10E9A63129AC122100311FC3 /* GuideScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideScreen.swift; sourceTree = "<group>"; };
+		10F6C3E929AF8F3F00A02651 /* CamMicInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CamMicInputs.swift; sourceTree = "<group>"; };
 		AC5F901024C36D2300C85582 /* VNRecognizedPoint+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VNRecognizedPoint+.swift"; sourceTree = "<group>"; };
 		AC99CF3224B0A15500C54CE2 /* HandGestureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandGestureProcessor.swift; sourceTree = "<group>"; };
 		ACBD85E824A4E3A7002F7C9C /* HGCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HGCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -51,8 +54,10 @@
 		AC5F900F24C36CD000C85582 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				AC99CF3224B0A15500C54CE2 /* HandGestureProcessor.swift */,
 				AC5F901024C36D2300C85582 /* VNRecognizedPoint+.swift */,
 				10A9CE3029AE988D00EEA4CA /* helperFunc.swift */,
+				10F6C3E929AF8F3F00A02651 /* CamMicInputs.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -60,6 +65,7 @@
 		ACBD85DF24A4E3A7002F7C9C = {
 			isa = PBXGroup;
 			children = (
+				10A9CE3229AEB5C900EEA4CA /* HGCam.entitlements */,
 				10874CD929A7C837004B68FC /* HGCamRelease.entitlements */,
 				ACBD85EA24A4E3A7002F7C9C /* HandPoseCamera */,
 				ACBD85E924A4E3A7002F7C9C /* Products */,
@@ -81,7 +87,6 @@
 				ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */,
 				ACBD85EF24A4E3A7002F7C9C /* CameraViewController.swift */,
 				ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */,
-				AC99CF3224B0A15500C54CE2 /* HandGestureProcessor.swift */,
 				10E9A63129AC122100311FC3 /* GuideScreen.swift */,
 				ACBD85F124A4E3A7002F7C9C /* Main.storyboard */,
 				ACBD85F424A4E3AC002F7C9C /* Assets.xcassets */,
@@ -170,6 +175,7 @@
 			files = (
 				10E9A63229AC122100311FC3 /* GuideScreen.swift in Sources */,
 				ACBD85F024A4E3A7002F7C9C /* CameraViewController.swift in Sources */,
+				10F6C3EA29AF8F3F00A02651 /* CamMicInputs.swift in Sources */,
 				10A9CE3129AE988D00EEA4CA /* helperFunc.swift in Sources */,
 				ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */,
 				ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */,
@@ -320,6 +326,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HGCam.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 43KKKRBAP2;
 				INFOPLIST_FILE = HandPoseCamera/Info.plist;
