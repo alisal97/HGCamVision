@@ -4,6 +4,12 @@
 //
 //  Created by Aly Salman on 18/02/23.
 //  Copyright © 2023 CB Gang. All rights reserved.
+////
+//  CameraViewController.swift
+//  HGCam
+//
+//  Created by Aly Salman on 18/02/23.
+//  Copyright © 2023 CB Gang. All rights reserved.
 //
 
 import UIKit
@@ -28,6 +34,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     private weak var timerLabel: UILabel?
     private var isTimerRunning = false
     var currentCameraPosition: AVCaptureDevice.Position = .front
+    private var activityIndicator: UIActivityIndicatorView!
 
 
     // Declare a timer and a counter variable to track elapsed time
@@ -168,7 +175,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
 
 // activity indicator / loading icon for when the video is saving.
 // since we are cutting the last 3 seconds of the recorded videos it takes a while to save.
-    private var activityIndicator: UIActivityIndicatorView!
 
     private func setupActivityIndicator() {
         activityIndicator = UIActivityIndicatorView(style: .large)
@@ -355,7 +361,8 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             
             let photoOutput = AVCapturePhotoOutput()
             captureSession.addOutput(photoOutput)
-            
+        
+            addAudioInput()
             // Add video input
 
             do {
@@ -365,20 +372,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
                 }
             } catch {
                 fatalError("Could not create video device input: \(error.localizedDescription)")
-            }
-            // Add audio input
-            guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
-                fatalError("Could not get audio device")
-            }
-            
-            do {
-                let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
-                
-                if captureSession.canAddInput(audioDeviceInput) {
-                    captureSession.addInput(audioDeviceInput)
-                }
-            } catch {
-                fatalError("Could not create audio device input: \(error.localizedDescription)")
             }
             
             // Add video output
@@ -397,7 +390,23 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             captureSession.commitConfiguration()
 
         }
+    func addAudioInput() {
+        // Add audio input
+        guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
+            fatalError("Could not get audio device")
+        }
+        
+        do {
+            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
+            
+            if captureSession.canAddInput(audioDeviceInput) {
+                captureSession.addInput(audioDeviceInput)
+            }
+        } catch {
+            fatalError("Could not create audio device input: \(error.localizedDescription)")
+        }
 
+    }
 //  function in objectiveC to switch the camera between back and front. we have to add audio input again after switching camera, otherwise it will not work.
     @objc private func toggleCamera() {
         
@@ -416,18 +425,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         captureSession?.addInput(input)
         
         // Add audio input
-        guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
-            fatalError("Could not get audio device")
-        }
-        
-        do {
-            let audioDeviceInput = try? AVCaptureDeviceInput(device: audioDevice)
-            
-            if captureSession!.canAddInput(audioDeviceInput!) {
-                captureSession!.addInput(audioDeviceInput!)
-            }
-        }
-        
+        addAudioInput() 
         // Restart the capture session
         
         DispatchQueue.global(qos: .background).async { [self] in
@@ -725,7 +723,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         let recordingTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "SaveVideoToPhotos") // Start the background task
 
-        videoQueue.async { // adding to queue for piortizing and to proof from interruptions 
+        videoQueue.async { // adding to queue for piortizing and to proof from interruptions
             DispatchQueue.main.async { // animating on the main thread.
                 self.activityIndicator.startAnimating() //starting the activity loading indicator for when a video is taken.
             }
@@ -835,7 +833,6 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
 
 
     
-
 
 
 
