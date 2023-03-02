@@ -628,7 +628,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.8 && indexTipPoint.confidence > 0.8 && littleDIPPoint.confidence > 0.75 && ringDIPPoint.confidence > 0.75 && middleDIPPoint.confidence > 0.77
+        guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.89 && littleDIPPoint.confidence > 0.83   && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89
         else {
             return
         }
@@ -760,7 +760,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
             
             let duration = asset.duration
             let startTime = CMTime.zero
-            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds(3, preferredTimescale: 1)) // to make it cut 5 seconds for example, we just put 5 instead of 3.
+            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds(2.3, preferredTimescale: 1)) // to make it cut 5 seconds for example, we just put 5 instead of 3.
             let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
             exportSession.timeRange = timeRange
             
