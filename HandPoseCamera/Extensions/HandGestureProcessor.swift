@@ -58,7 +58,7 @@ class HandGestureProcessor: UIViewController {
                     }
                 }
             }
-        } else if distanceTM >= 11 && distanceRL >= 11 && distanceTL <= 11 && isRec == true {
+        } else if distanceTM >= 11 && distanceRL >= 11 && distanceTL <= 15 && isRec == true {
             if currentState != .pinchedVidStop {
                 currentState = .pinchedVidStop
                 timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
@@ -68,7 +68,7 @@ class HandGestureProcessor: UIViewController {
                     }
                 }
 //                | distanceTM + distanceRM >= 19 || distanceTR + distanceRL >= 21
-            } else if distanceIT >= 13 || distanceTM >= 9 || distanceTL >= 11 {
+            } else if distanceIT >= 13 || distanceTM >= 9 || distanceTL >= 17 {
                 currentState = .unknown
             }
         } else {

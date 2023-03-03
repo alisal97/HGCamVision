@@ -35,7 +35,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     private var isTimerRunning = false
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private var activityIndicator: UIActivityIndicatorView!
-
+    var savedTimer: Timer?
 
     // Declare a timer and a counter variable to track elapsed time
     var timer: Timer?
@@ -61,6 +61,20 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         button.tintColor = .white
         return button
     }()
+    
+    let savedLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Video saved!"
+        label.numberOfLines = 2
+        label.font = UIFont.systemFont(ofSize: 53, weight: .semibold)
+        label.textColor = UIColor.white
+        label.backgroundColor = UIColor.red
+        label.textAlignment = .center
+        label.alpha = 0.70
+        label.isHidden = true
+        return label
+    }()
+
     
     let flashButton: UIButton = {
         let button = UIButton()
@@ -242,7 +256,13 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
             recordLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
-        
+        view.addSubview(savedLabel)
+        savedLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            savedLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            savedLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+
 
         view.addSubview(switchCameraButton)
 
@@ -327,6 +347,16 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         counter = 0
         recordLabel.isHidden = true
         recordLabel.text = "00:00"
+    }
+    func videoSaved(){
+        savedLabel.isHidden = false
+        savedTimer = Timer.scheduledTimer(withTimeInterval: 1.5 , repeats: false) { _ in
+            DispatchQueue.main.async {
+                self.savedTimer = nil
+                self.savedLabel.isHidden = true
+            }
+            
+        }
     }
 // for every 60 seconds it will add a minute
     func formattedTime() -> String {
@@ -777,6 +807,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                                     UIApplication.shared.endBackgroundTask(recordingTaskIdentifier) // when video saving is complete it will remove the app from background tasks
                                     DispatchQueue.main.async {
                                         self.activityIndicator.stopAnimating() // when saving video is complete it will stop the animation of the indicator and remove it from the view.
+                                        self.videoSaved()
                                     }
 
                                 } else { // starting here are just debugging for error checking.
