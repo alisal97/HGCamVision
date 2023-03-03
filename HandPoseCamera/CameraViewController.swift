@@ -628,7 +628,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.89 && littleDIPPoint.confidence > 0.83   && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89
+        guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.89 && littleDIPPoint.confidence > 0.85 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89
         else {
             return
         }

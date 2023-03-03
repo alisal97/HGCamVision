@@ -30,7 +30,7 @@ class HandGestureProcessor: UIViewController {
         let distanceTR = abs(thumbTip.y - ringDIP.y) // thumb and ring finger
         let distanceRL = abs(ringDIP.y - littleDIP.y) // ring finger and little finger
         let distanceIM = abs(indexTip.y - middleDIP.y) // index and middle finger
-        
+        let distanceTL = abs(thumbTip.y - littleDIP.y) // thumb and little finger
         let isRec = CameraViewController.isRecording
         timer?.invalidate()
 
@@ -38,7 +38,7 @@ class HandGestureProcessor: UIViewController {
 //            print(distanceTR)
 //        }
     
-        if distanceIT <= 7 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
+        if distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
             if currentState != .pinchedPhoto {
                 currentState = .pinchedPhoto
                 timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
@@ -48,7 +48,7 @@ class HandGestureProcessor: UIViewController {
                     }
                 }
             }
-        } else if distanceTR <= 9 && distanceRL <= 11 && distanceRM >= 5 && distanceIT >= 5 && isRec == false {
+        } else if distanceIM >= 11 && distanceTM <= 9 && distanceRL <= 11 && distanceRM <= 9 && isRec == false {
             if currentState != .pinchedVidRec {
                 currentState = .pinchedVidRec
                 timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
@@ -58,16 +58,17 @@ class HandGestureProcessor: UIViewController {
                     }
                 }
             }
-        } else if distanceTM <= 9 && distanceRM <= 9 && distanceRL >= 5 && distanceIM >= 5 && isRec == true {
+        } else if distanceTM >= 11 && distanceRL >= 11 && distanceTL <= 11 && isRec == true {
             if currentState != .pinchedVidStop {
                 currentState = .pinchedVidStop
-                timer = Timer.scheduledTimer(withTimeInterval: 1 , repeats: false) { _ in
+                timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
                     DispatchQueue.main.async {
                         self.timer = nil
                         self.currentState = .pinchedVidStop
                     }
                 }
-            } else if distanceIT >= 9 || distanceTM + distanceRM >= 19 || distanceTR + distanceRL >= 21 {
+//                | distanceTM + distanceRM >= 19 || distanceTR + distanceRL >= 21
+            } else if distanceIT >= 13  {
                 currentState = .unknown
             }
         } else {
