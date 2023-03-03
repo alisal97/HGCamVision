@@ -41,17 +41,17 @@ class HandGestureProcessor: UIViewController {
         if distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
             if currentState != .pinchedPhoto {
                 currentState = .pinchedPhoto
-                timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+                timer = Timer.scheduledTimer(withTimeInterval: 0.3 , repeats: false) { _ in
                     DispatchQueue.main.async {
                         self.timer = nil
                         self.currentState = .pinchedPhoto
                     }
                 }
             }
-        } else if distanceIM >= 11 && distanceTM <= 9 && distanceRL <= 11 && distanceRM <= 9 && isRec == false {
+        } else if distanceIM >= 11 && distanceTM <= 7 && distanceRL <= 11 && distanceRM <= 9 && isRec == false {
             if currentState != .pinchedVidRec {
                 currentState = .pinchedVidRec
-                timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+                timer = Timer.scheduledTimer(withTimeInterval: 0.3 , repeats: false) { _ in
                     DispatchQueue.main.async {
                         self.timer = nil
                         self.currentState = .pinchedVidRec
@@ -61,14 +61,14 @@ class HandGestureProcessor: UIViewController {
         } else if distanceTM >= 11 && distanceRL >= 11 && distanceTL <= 11 && isRec == true {
             if currentState != .pinchedVidStop {
                 currentState = .pinchedVidStop
-                timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
                     DispatchQueue.main.async {
                         self.timer = nil
                         self.currentState = .pinchedVidStop
                     }
                 }
 //                | distanceTM + distanceRM >= 19 || distanceTR + distanceRL >= 21
-            } else if distanceIT >= 13  {
+            } else if distanceIT >= 13 || distanceTM >= 9 || distanceTL >= 11 {
                 currentState = .unknown
             }
         } else {
