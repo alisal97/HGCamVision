@@ -36,6 +36,10 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private var activityIndicator: UIActivityIndicatorView!
     var savedTimer: Timer?
+    static var isRecordingPaused = false
+    var currentRecordingFileURL: URL?
+    var currentRecordingStartTime: CMTime?
+
 
     // Declare a timer and a counter variable to track elapsed time
     var timer: Timer?
@@ -530,11 +534,13 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     func startRecording() {
        if !movieOutput.isRecording {
            CameraViewController.isRecording = true
-           let outputPath = NSTemporaryDirectory() + "output.mov"
-           let outputFileURL = URL(fileURLWithPath: outputPath)
+           let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+           let fileName = "\(UUID().uuidString).mp4"
+           let fileURL = documentsURL.appendingPathComponent(fileName)
            startTimer()
-           movieOutput.startRecording(to: outputFileURL, recordingDelegate: self)
-
+           movieOutput.startRecording(to: fileURL, recordingDelegate: self)
+           currentRecordingFileURL = fileURL
+           currentRecordingStartTime = CMClockGetTime(CMClockGetHostTimeClock())
            
        }
    }
@@ -546,6 +552,60 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
            stopTimer()
        }
    }
+    func pauseRecording() {
+        guard let currentRecordingStartTime = currentRecordingStartTime, let currentRecordingFileURL = currentRecordingFileURL else { return }
+
+        movieOutput.stopRecording()
+
+        let asset = AVAsset(url: currentRecordingFileURL)
+        let currentTime = CMClockGetTime(CMClockGetHostTimeClock())
+        let recordedDuration = CMTimeSubtract(currentTime, currentRecordingStartTime)
+
+        guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else { return }
+
+        let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("trimmedVideo.mp4")
+
+        if FileManager.default.fileExists(atPath: outputURL.path) {
+            do {
+                try FileManager.default.removeItem(at: outputURL)
+            } catch {
+                print("Error removing file at path: \(outputURL.path)")
+            }
+        }
+
+        let startTime = CMTime.zero
+        let endTime = CMTimeAdd(startTime, recordedDuration)
+        let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
+        exportSession.timeRange = timeRange
+        exportSession.outputURL = outputURL
+        exportSession.outputFileType = .mp4
+
+        exportSession.exportAsynchronously {
+            switch exportSession.status {
+            case .completed:
+                print("Export completed: \(outputURL)")
+            case .failed:
+                print("Export failed: \(exportSession.error?.localizedDescription ?? "unknown error")")
+            case .cancelled:
+                print("Export cancelled")
+            default:
+                print("Export in progress...")
+            }
+        }
+
+        CameraViewController.isRecordingPaused = true
+    }
+
+    // Resume recording
+    func resumeRecording() {
+        guard let currentRecordingFileURL = currentRecordingFileURL else { return }
+        addAudioInput()
+        movieOutput.startRecording(to: currentRecordingFileURL, recordingDelegate: self)
+        CameraViewController.isRecordingPaused = false
+    }
+    
+    
+    
 // view for countdown timer for when taking a photo or a video
     private func prepareTimerView() {
         let timerLabel = UILabel()
@@ -630,15 +690,17 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             }
             
             let littlePoints = try observation.recognizedPoints(.littleFinger)
-            guard let littleDIPPoint = littlePoints[.littleDIP] else {
+            guard let littleDIPPoint = littlePoints[.littleDIP],
+                  let littleTipPoint = littlePoints[.littleTip] else {
                 return
             }
             
             let ringPoints =  try observation.recognizedPoints(.ringFinger)
-            guard let ringDIPPoint = ringPoints[.ringDIP] else {
+            guard let ringDIPPoint = ringPoints[.ringDIP],
+                  let ringTipPoint = ringPoints[.ringTip] else {
                 return
             }
-            
+
             let middlePPoints =  try observation.recognizedPoints(.middleFinger)
             guard let middleDIPPoint = middlePPoints[.middleDIP] else {
                 return
@@ -648,17 +710,19 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                                indexTipPoint: indexTipPoint,
                                littleDIPPoint: littleDIPPoint,
                                ringDIPPoint: ringDIPPoint,
-                               middleDIPPoint: middleDIPPoint)
+                               middleDIPPoint: middleDIPPoint,
+                               littleTipPoint: littleTipPoint,
+                               ringTipPoint: ringTipPoint)
         } catch {
             print(error)
         }
     }
     
     // after points are recognized, this function checks for the confidence of the points before processing them
-    private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint) {
+    private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint, littleTipPoint:VNRecognizedPoint, ringTipPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.89 && littleDIPPoint.confidence > 0.85 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89
+        guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.89 && littleDIPPoint.confidence > 0.85 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89 && littleTipPoint.confidence > 0.83 && ringTipPoint.confidence > 0.85
         else {
             return
         }
@@ -671,11 +735,14 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
         
-        guard let littleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleDIPPoint.toAVFoundationPoint) else {
+        guard let littleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleDIPPoint.toAVFoundationPoint),
+              let littleTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleTipPoint.toAVFoundationPoint) else {
             return
         }
         
-        guard let ringDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringDIPPoint.toAVFoundationPoint) else {
+        guard let ringDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringDIPPoint.toAVFoundationPoint),
+              let ringTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringTipPoint.toAVFoundationPoint)
+        else {
             return
         }
         
@@ -683,54 +750,40 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
 // checking for hand gestures, it doesn't work well if I put them all in the same switch statement, I don't know why but I assume we have to call handGestureProcesor for each gesture using a different constant, because the processor might have a one time use limit.
-        let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint)
+        let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint, ringTip: ringTipUIKitPoint, littleTip: littleTipUIKitPoint)
         
         switch state {
-        case .pinchedPhoto:
+        case .capturePhoto:
             if isTimerRunning == false {
                 runTimer(seconds: 3, completion: {
                     self.captureImage()
                 })
             }
-        case .pinchedVidRec:
-            break
-        case .pinchedVidStop:
-            break
-        case .unknown:
-            break
-        }
-        
-        let startVid = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint)
-
-        switch startVid {
-        case .pinchedVidRec:
+        case .vidRec:
             if isTimerRunning == false {
                 runTimer(seconds: 3, completion: {
-                    print("pinched to start vid")
                     self.startRecording()
-                    
                 })
             }
-        case .unknown:
-            break
-        case .pinchedPhoto:
-            break
-        case .pinchedVidStop:
-            break
-        }
-        
-        let stopVid = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint)
-        switch stopVid {
-        case .pinchedVidStop:
+        case .vidStop:
             if isTimerRunning == false {
-                print("pinched to stop vid")
                 self.stopRecording()
             }
+        case .pauseVid:
+            break
+//            if isTimerRunning == false {
+//                    print("vid paused")
+//                    self.pauseRecording()
+//                }
+        case .unpauseVid:
+            break
+//            if isTimerRunning == false {
+//                print("vid unpaused")
+//                runTimer(seconds: 3, completion: {
+//                    self.resumeRecording()
+//                })
+//            }
         case .unknown:
-            break
-        case .pinchedPhoto:
-            break
-        case .pinchedVidRec:
             break
         }
     }

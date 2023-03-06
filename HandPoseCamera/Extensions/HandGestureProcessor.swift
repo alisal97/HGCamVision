@@ -7,78 +7,99 @@
 //
 
 import UIKit
-//        case pinchedPause
-//        case pinchedUnPause
 
 class HandGestureProcessor: UIViewController {
     var timer: Timer?
     var currentState: State = .unknown
-
-    enum State {
-        case pinchedPhoto
-        case pinchedVidRec
-        case pinchedVidStop
-        case unknown
     
+    enum State {
+        case capturePhoto
+        case vidRec
+        case vidStop
+        case pauseVid
+        case unpauseVid
+        
+        case unknown
+        
     }
     override func viewDidLoad() {
     }
-    func getHandState(thumbTip: CGPoint, indexTip: CGPoint, littleDIP: CGPoint, ringDIP: CGPoint, middleDIP: CGPoint) -> State {
+    func getHandState(thumbTip: CGPoint, indexTip: CGPoint, littleDIP: CGPoint, ringDIP: CGPoint, middleDIP: CGPoint, ringTip: CGPoint, littleTip: CGPoint) -> State {
         let distanceIT = abs(indexTip.y - thumbTip.y) // index and thumb
         let distanceTM = abs(thumbTip.y - middleDIP.y)// middle finger and thumb
         let distanceRM = abs(ringDIP.y - middleDIP.y) // ring finger and ring finger
-        let distanceTR = abs(thumbTip.y - ringDIP.y) // thumb and ring finger
+        let distanceTR = abs(thumbTip.y - ringTip.y) // thumb and ring finger
         let distanceRL = abs(ringDIP.y - littleDIP.y) // ring finger and little finger
         let distanceIM = abs(indexTip.y - middleDIP.y) // index and middle finger
-        let distanceTL = abs(thumbTip.y - littleDIP.y) // thumb and little finger
+        let distanceTL = abs(thumbTip.y - littleTip.y) // thumb and little finger
+        let distanceIR = abs(middleDIP.y - indexTip.y) // middle finger and index finger
         let isRec = CameraViewController.isRecording
+        let isPaused = CameraViewController.isRecordingPaused
         timer?.invalidate()
-
-//        for _ in 1...3 {
-//            print(distanceTR)
-//        }
-    
+        
+        //        for _ in 1...3 {
+        //            print(distanceTR)
+        //        }
+        
         if distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
-            if currentState != .pinchedPhoto {
-                currentState = .pinchedPhoto
+            if currentState != .capturePhoto {
+                currentState = .capturePhoto
                 timer = Timer.scheduledTimer(withTimeInterval: 0.3 , repeats: false) { _ in
                     DispatchQueue.main.async {
                         self.timer = nil
-                        self.currentState = .pinchedPhoto
+                        self.currentState = .capturePhoto
                     }
                 }
             }
         } else if distanceIM >= 11 && distanceTM <= 7 && distanceRL <= 11 && distanceRM <= 9 && isRec == false {
-            if currentState != .pinchedVidRec {
-                currentState = .pinchedVidRec
+            if currentState != .vidRec {
+                currentState = .vidRec
                 timer = Timer.scheduledTimer(withTimeInterval: 0.3 , repeats: false) { _ in
                     DispatchQueue.main.async {
                         self.timer = nil
-                        self.currentState = .pinchedVidRec
+                        self.currentState = .vidRec
                     }
                 }
             }
-        } else if distanceTM >= 11 && distanceRL >= 11 && distanceTL <= 15 && isRec == true {
-            if currentState != .pinchedVidStop {
-                currentState = .pinchedVidStop
+        } else if distanceTM >= 11 && distanceRM >= 11 && distanceIR >= 11 && distanceRL <= 11 && distanceTL <= 17 && distanceTR <= 17 && isRec == true {
+            if currentState != .vidStop {
+                currentState = .vidStop
                 timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
                     DispatchQueue.main.async {
                         self.timer = nil
-                        self.currentState = .pinchedVidStop
+                        self.currentState = .vidStop
                     }
                 }
-//                | distanceTM + distanceRM >= 19 || distanceTR + distanceRL >= 21
-            } else if distanceIT >= 13 || distanceTM >= 9 || distanceTL >= 17 {
-                currentState = .unknown
             }
+        } else if distanceTR <= 15 && isPaused == false {
+            if currentState != .pauseVid {
+                currentState = .pauseVid
+                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+                    DispatchQueue.main.async {
+                        self.timer = nil
+                        self.currentState = .pauseVid
+                    }
+                }
+            }
+        } else if distanceRL <= 17 && distanceIT >= 15 && distanceRM >= 15 && isPaused == true {
+            if currentState != .unpauseVid {
+                currentState = .unpauseVid
+                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+                    DispatchQueue.main.async {
+                        self.timer = nil
+                        self.currentState = .unpauseVid
+                    }
+                }
+            }
+        } else if distanceIT >= 13 || distanceTM >= 9 || distanceTL >= 19 || distanceTR >= 19 {
+            currentState = .unknown
         } else {
             currentState = .unknown
         }
-
+        
         return currentState
     }
 }
-
 
 // MARK: - CGPoint helpers
 extension CGPoint {

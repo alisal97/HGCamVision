@@ -16,8 +16,7 @@ extension VNRecognizedPoint {
 }
 
 
-//future implementation to pause recording
-
+//
 //// Declare a variable to keep track of whether recording is currently paused
 //var isRecordingPaused = false
 //
@@ -30,7 +29,6 @@ extension VNRecognizedPoint {
 //// Start recording
 //func startRecording() {
 //    let fileOutput = AVCaptureMovieFileOutput()
-//
 //    let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 //    let fileName = "\(UUID().uuidString).mp4"
 //    let fileURL = documentsURL.appendingPathComponent(fileName)
@@ -38,8 +36,8 @@ extension VNRecognizedPoint {
 //    currentRecordingFileURL = fileURL
 //    currentRecordingStartTime = CMClockGetTime(CMClockGetHostTimeClock())
 //}
-//
-//// Pause recording
+
+// Pause recording
 //func pauseRecording() {
 //    guard let currentRecordingStartTime = currentRecordingStartTime, let currentRecordingFileURL = currentRecordingFileURL else { return }
 //
@@ -93,4 +91,4 @@ extension VNRecognizedPoint {
 //    fileOutput.startRecording(to: currentRecordingFileURL, recordingDelegate: self)
 //    isRecordingPaused = false
 //}
-//
+
