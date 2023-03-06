@@ -53,7 +53,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         label.font = UIFont.systemFont(ofSize: 39, weight: .semibold)
         label.textColor = UIColor.white
         label.textAlignment = .center
-        label.isHidden = true
+//        label.isHidden = true
         return label
     }()
 //      camera switch button
@@ -337,7 +337,8 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     
 //  timer to start counting seconds and minutes when recording starts
     func startTimer() {
-        recordLabel.isHidden = false
+//        recordLabel.isHidden = false
+        recordLabel.textColor = UIColor.red
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             self?.counter += 1
             self?.recordLabel.text = self?.formattedTime()
@@ -349,7 +350,8 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         timer?.invalidate()
         timer = nil
         counter = 0
-        recordLabel.isHidden = true
+//        recordLabel.isHidden = true
+        recordLabel.textColor = UIColor.white
         recordLabel.text = "00:00"
     }
     func videoSaved(){
