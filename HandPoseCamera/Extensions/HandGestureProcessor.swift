@@ -61,7 +61,7 @@ class HandGestureProcessor: UIViewController {
                     }
                 }
             }
-        } else if distanceTM >= 11 && distanceRM >= 11 && distanceIR >= 11 && distanceRL <= 11 && distanceTL <= 17 && distanceTR <= 17 && isRec == true {
+        } else if distanceIR >= 11 && distanceRL <= 19 && distanceTL <= 21 && distanceTR <= 19 && isRec == true {
             if currentState != .vidStop {
                 currentState = .vidStop
                 timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
@@ -71,27 +71,27 @@ class HandGestureProcessor: UIViewController {
                     }
                 }
             }
-        } else if distanceTR <= 15 && isPaused == false {
-            if currentState != .pauseVid {
-                currentState = .pauseVid
-                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-                    DispatchQueue.main.async {
-                        self.timer = nil
-                        self.currentState = .pauseVid
-                    }
-                }
-            }
-        } else if distanceRL <= 17 && distanceIT >= 15 && distanceRM >= 15 && isPaused == true {
-            if currentState != .unpauseVid {
-                currentState = .unpauseVid
-                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-                    DispatchQueue.main.async {
-                        self.timer = nil
-                        self.currentState = .unpauseVid
-                    }
-                }
-            }
-        } else if distanceIT >= 13 || distanceTM >= 9 || distanceTL >= 19 || distanceTR >= 19 {
+//        } else if distanceTR <= 15 && isPaused == false {
+//            if currentState != .pauseVid {
+//                currentState = .pauseVid
+//                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+//                    DispatchQueue.main.async {
+//                        self.timer = nil
+//                        self.currentState = .pauseVid
+//                    }
+//                }
+//            }
+//        } else if distanceRL <= 17 && distanceIT >= 15 && distanceRM >= 15 && isPaused == true {
+//            if currentState != .unpauseVid {
+//                currentState = .unpauseVid
+//                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+//                    DispatchQueue.main.async {
+//                        self.timer = nil
+//                        self.currentState = .unpauseVid
+//                    }
+//                }
+//            }
+        } else if distanceIT >= 13 || distanceTM >= 11 || distanceTL >= 23 || distanceTR >= 23 {
             currentState = .unknown
         } else {
             currentState = .unknown
