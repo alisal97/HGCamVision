@@ -28,44 +28,49 @@ class HandGestureProcessor: UIViewController {
         let distanceIT = abs(indexTip.y - thumbTip.y) // index and thumb
         let distanceTM = abs(thumbTip.y - middleDIP.y)// middle finger and thumb
         let distanceRM = abs(ringDIP.y - middleDIP.y) // ring finger and ring finger
-        let distanceTR = abs(thumbTip.y - ringTip.y) // thumb and ring finger
+        let distanceTR = abs(ringTip.y - thumbTip.y) // thumb and ring finger
         let distanceRL = abs(ringDIP.y - littleDIP.y) // ring finger and little finger
         let distanceIM = abs(indexTip.y - middleDIP.y) // index and middle finger
         let distanceTL = abs(thumbTip.y - littleTip.y) // thumb and little finger
-        let distanceIR = abs(middleDIP.y - indexTip.y) // middle finger and index finger
+        let distanceIR = abs(ringDIP.y - indexTip.y) // middle finger and index finger
         let isRec = CameraViewController.isRecording
-        let isPaused = CameraViewController.isRecordingPaused
+//        let isPaused = CameraViewController.isRecordingPaused
         timer?.invalidate()
         
-        //        for _ in 1...3 {
-        //            print(distanceTR)
-        //        }
+        for _ in 1...3 {
+            print("thumb-little \(distanceTL)")
+        }
+        for _ in 1...3 {
+            print("thumb-ring \(distanceTR)")
+        }
         
         if distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
             if currentState != .capturePhoto {
                 currentState = .capturePhoto
-                timer = Timer.scheduledTimer(withTimeInterval: 1.5 , repeats: false) { _ in
+                timer = Timer.scheduledTimer(withTimeInterval: 2.97 , repeats: false) { _ in
                     if distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
                         self.timer = nil
                         self.currentState = .capturePhoto
                     }
                 }
             }
-        } else if distanceIM >= 11 && distanceTM <= 7 && distanceRL <= 11 && distanceRM <= 9 && isRec == false {
+        } else if distanceIM >= 17 && distanceIT >= 17 && distanceTM <= 5.3 && distanceRL <= 7 && distanceRM <= 7 && isRec == false {
             if currentState != .vidRec {
                 currentState = .vidRec
-                timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { _ in
-                    if distanceIM >= 11 && distanceTM <= 7 && distanceRL <= 11 && distanceRM <= 9 && isRec == false {
+                timer = Timer.scheduledTimer(withTimeInterval: 2.97 , repeats: false) { _ in
+                    if distanceIM >= 17 && distanceIT >= 17  && distanceTM <= 5.3 && distanceRL <= 7 && distanceRM <= 7 && isRec == false {
                         self.timer = nil
                         self.currentState = .vidRec
                     }
                 }
             }
-        } else if (distanceRL <= 13 || distanceTL <= 11.7) && distanceIR >= 11 && isRec == true {
+        } else if (distanceTR <= 14.7 || distanceTL <= 14.7) && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == true {
+        
             if currentState != .vidStop {
                 currentState = .vidStop
-                timer = Timer.scheduledTimer(withTimeInterval: 1.5 , repeats: false) { _ in
-                    if (distanceRL <= 13 || distanceTL <= 11.7) && distanceIR >= 11 && isRec == true {
+                timer = Timer.scheduledTimer(withTimeInterval: 2.97 , repeats: false) { _ in
+                    if (distanceTR <= 14.7 || distanceTL <= 14.7) && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17
+                        && distanceIT >= 17 && isRec == true {
                         self.timer = nil
                         self.currentState = .vidStop
                     }
@@ -91,7 +96,7 @@ class HandGestureProcessor: UIViewController {
 //                    }
 //                }
 //            }
-        } else if distanceIT >= 13 || distanceTM >= 11 || distanceTL >= 23 || distanceTR >= 23 {
+        } else if distanceIT >= 9.1 || distanceTM >= 7.3 || distanceTL >= 15.3 || distanceTR >= 15.3 {
             currentState = .unknown
         } else {
             currentState = .unknown

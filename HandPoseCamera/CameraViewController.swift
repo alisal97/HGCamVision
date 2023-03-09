@@ -190,7 +190,6 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
         }
     }
 
-
 // activity indicator / loading icon for when the video is saving.
 // since we are cutting the last 3 seconds of the recorded videos it takes a while to save.
 
@@ -554,59 +553,59 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
            stopTimer()
        }
    }
-    func pauseRecording() {
-        guard let currentRecordingStartTime = currentRecordingStartTime, let currentRecordingFileURL = currentRecordingFileURL else { return }
-
-        movieOutput.stopRecording()
-
-        let asset = AVAsset(url: currentRecordingFileURL)
-        let currentTime = CMClockGetTime(CMClockGetHostTimeClock())
-        let recordedDuration = CMTimeSubtract(currentTime, currentRecordingStartTime)
-
-        guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else { return }
-
-        let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("trimmedVideo.mp4")
-
-        if FileManager.default.fileExists(atPath: outputURL.path) {
-            do {
-                try FileManager.default.removeItem(at: outputURL)
-            } catch {
-                print("Error removing file at path: \(outputURL.path)")
-            }
-        }
-
-        let startTime = CMTime.zero
-        let endTime = CMTimeAdd(startTime, recordedDuration)
-        let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
-        exportSession.timeRange = timeRange
-        exportSession.outputURL = outputURL
-        exportSession.outputFileType = .mp4
-
-        exportSession.exportAsynchronously {
-            switch exportSession.status {
-            case .completed:
-                print("Export completed: \(outputURL)")
-            case .failed:
-                print("Export failed: \(exportSession.error?.localizedDescription ?? "unknown error")")
-            case .cancelled:
-                print("Export cancelled")
-            default:
-                print("Export in progress...")
-            }
-        }
-
-        CameraViewController.isRecordingPaused = true
-    }
-
-    // Resume recording
-    func resumeRecording() {
-        guard let currentRecordingFileURL = currentRecordingFileURL else { return }
-        addAudioInput()
-        movieOutput.startRecording(to: currentRecordingFileURL, recordingDelegate: self)
-        CameraViewController.isRecordingPaused = false
-    }
-    
-    
+//    func pauseRecording() {
+//        guard let currentRecordingStartTime = currentRecordingStartTime, let currentRecordingFileURL = currentRecordingFileURL else { return }
+//
+//        movieOutput.stopRecording()
+//
+//        let asset = AVAsset(url: currentRecordingFileURL)
+//        let currentTime = CMClockGetTime(CMClockGetHostTimeClock())
+//        let recordedDuration = CMTimeSubtract(currentTime, currentRecordingStartTime)
+//
+//        guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else { return }
+//
+//        let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("trimmedVideo.mp4")
+//
+//        if FileManager.default.fileExists(atPath: outputURL.path) {
+//            do {
+//                try FileManager.default.removeItem(at: outputURL)
+//            } catch {
+//                print("Error removing file at path: \(outputURL.path)")
+//            }
+//        }
+//
+//        let startTime = CMTime.zero
+//        let endTime = CMTimeAdd(startTime, recordedDuration)
+//        let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
+//        exportSession.timeRange = timeRange
+//        exportSession.outputURL = outputURL
+//        exportSession.outputFileType = .mp4
+//
+//        exportSession.exportAsynchronously {
+//            switch exportSession.status {
+//            case .completed:
+//                print("Export completed: \(outputURL)")
+//            case .failed:
+//                print("Export failed: \(exportSession.error?.localizedDescription ?? "unknown error")")
+//            case .cancelled:
+//                print("Export cancelled")
+//            default:
+//                print("Export in progress...")
+//            }
+//        }
+//
+//        CameraViewController.isRecordingPaused = true
+//    }
+//
+//    // Resume recording
+//    func resumeRecording() {
+//        guard let currentRecordingFileURL = currentRecordingFileURL else { return }
+//        addAudioInput()
+//        movieOutput.startRecording(to: currentRecordingFileURL, recordingDelegate: self)
+//        CameraViewController.isRecordingPaused = false
+//    }
+//    
+//    
     
 // view for countdown timer for when taking a photo or a video
     private func prepareTimerView() {
@@ -845,7 +844,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
             
             let duration = asset.duration
             let startTime = CMTime.zero
-            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds( 2.3 , preferredTimescale: 1)) // to make it cut 5 seconds for example, we just put 5 instead of 3.
+            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds( 3 , preferredTimescale: 1)) // to make it cut 5 seconds for example, we just put 5 instead of 3.
             let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
             exportSession.timeRange = timeRange
             
