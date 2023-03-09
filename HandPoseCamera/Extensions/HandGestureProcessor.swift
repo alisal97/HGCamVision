@@ -61,7 +61,7 @@ class HandGestureProcessor: UIViewController {
                     }
                 }
             }
-        } else if distanceIR >= 11 && distanceRL <= 19.7 && distanceTL <= 21.3 && distanceTR <= 19.1 && isRec == true {
+        } else if (distanceRL <= 13 || distanceTL <= 11.7) && distanceIR >= 11 && isRec == true {
             if currentState != .vidStop {
                 currentState = .vidStop
                 timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
