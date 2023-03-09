@@ -44,8 +44,8 @@ class HandGestureProcessor: UIViewController {
         if distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
             if currentState != .capturePhoto {
                 currentState = .capturePhoto
-                timer = Timer.scheduledTimer(withTimeInterval: 0.3 , repeats: false) { _ in
-                    DispatchQueue.main.async {
+                timer = Timer.scheduledTimer(withTimeInterval: 1.5 , repeats: false) { _ in
+                    if distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
                         self.timer = nil
                         self.currentState = .capturePhoto
                     }
@@ -54,8 +54,8 @@ class HandGestureProcessor: UIViewController {
         } else if distanceIM >= 11 && distanceTM <= 7 && distanceRL <= 11 && distanceRM <= 9 && isRec == false {
             if currentState != .vidRec {
                 currentState = .vidRec
-                timer = Timer.scheduledTimer(withTimeInterval: 0.3 , repeats: false) { _ in
-                    DispatchQueue.main.async {
+                timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { _ in
+                    if distanceIM >= 11 && distanceTM <= 7 && distanceRL <= 11 && distanceRM <= 9 && isRec == false {
                         self.timer = nil
                         self.currentState = .vidRec
                     }
@@ -64,8 +64,8 @@ class HandGestureProcessor: UIViewController {
         } else if (distanceRL <= 13 || distanceTL <= 11.7) && distanceIR >= 11 && isRec == true {
             if currentState != .vidStop {
                 currentState = .vidStop
-                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-                    DispatchQueue.main.async {
+                timer = Timer.scheduledTimer(withTimeInterval: 1.5 , repeats: false) { _ in
+                    if (distanceRL <= 13 || distanceTL <= 11.7) && distanceIR >= 11 && isRec == true {
                         self.timer = nil
                         self.currentState = .vidStop
                     }
