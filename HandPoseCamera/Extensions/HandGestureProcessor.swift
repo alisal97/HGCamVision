@@ -22,6 +22,7 @@ class HandGestureProcessor: UIViewController {
         case unknown
         
     }
+
     override func viewDidLoad() {
     }
     func getHandState(thumbTip: CGPoint, indexTip: CGPoint, littleDIP: CGPoint, ringDIP: CGPoint, middleDIP: CGPoint, ringTip: CGPoint, littleTip: CGPoint) -> State {
@@ -35,49 +36,64 @@ class HandGestureProcessor: UIViewController {
         let distanceTL = abs(thumbTip.y - littleTip.y) // thumb and little finger
         let distanceIR = abs(ringDIP.y - indexTip.y) // middle finger and index finger
         let isRec = CameraViewController.isRecording
-//        let isPaused = CameraViewController.isRecordingPaused
+        //        let isPaused = CameraViewController.isRecordingPaused
         timer?.invalidate()
         
-//        for _ in 1...3 {
-//            print("thumb-little \(distanceTL)")
-//        }
-//        for _ in 1...3 {
-//            print("thumb-ring \(distanceTR)")
-//        }
-//
-//    } else if (distanceTR <= 14.7 || distanceTL <= 14.7) && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == true {
-
-        if distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
-            if currentState != .capturePhoto {
-                currentState = .capturePhoto
-                timer = Timer.scheduledTimer(withTimeInterval: 2.97 , repeats: false) { _ in
-                    if distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
-                        self.timer = nil
-                        self.currentState = .capturePhoto
-                    }
-                }
-            }
-        } else if (distanceTR <= 14.7 || distanceRT <= 14.7) && distanceRL <= 15.3 && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == false {
-            if currentState != .vidRec {
-                currentState = .vidRec
-                timer = Timer.scheduledTimer(withTimeInterval: 2.97 , repeats: false) { _ in
-                    if  (distanceTR <= 14.7 || distanceRT <= 14.7) && distanceRL <= 15.3 && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == false {
-                        self.timer = nil
-                        self.currentState = .vidRec
-                    }
-                }
-            }
-        } else if distanceIM >= 17 && distanceIT >= 17 && distanceTM <= 5.3 && distanceRL <= 7 && distanceRM <= 7 && isRec == true {
+        //        for _ in 1...3 {
+        //            print("thumb-little \(distanceTL)")
+        //        }
+        //        for _ in 1...3 {
+        //            print("thumb-ring \(distanceTR)")
+        //        }
+        //
         
-            if currentState != .vidStop {
-                currentState = .vidStop
-                timer = Timer.scheduledTimer(withTimeInterval: 2.97 , repeats: false) { _ in
-                    if distanceIM >= 17 && distanceIT >= 17 && distanceTM <= 5.3 && distanceRL <= 7 && distanceRM <= 7 && isRec == true {
-                        self.timer = nil
-                        self.currentState = .vidStop
-                    }
-                }
-            }
+        if distanceIT <= 9 && distanceIM >= 9 && distanceRM >= 9 && distanceRL >= 9 && isRec == false {
+            currentState = .capturePhoto
+        } else if (distanceTR <= 14.7 || distanceRT <= 14.7) && distanceRL <= 15.3 && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == false {
+            currentState = .vidRec
+            guard distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false else { return currentState }
+        } else if distanceIM >= 17 && distanceIT >= 17 && distanceTM <= 7.3 && distanceRL <= 7.7 && distanceRM <= 7.5 && isRec == true {
+            currentState = .vidStop
+            guard distanceIM >= 17 && distanceIT >= 17 && distanceTM <= 7.3 && distanceRL <= 7.7 && distanceRM <= 7.7 && isRec == true else { return currentState }
+        } else {
+            currentState = .unknown
+        }
+        
+        return currentState
+    }
+    }
+
+
+//        if distanceIT <= 9 && distanceIM >= 9 && distanceRM >= 9 && distanceRL >= 9 && isRec == false {
+//            if currentState != .capturePhoto {
+//                currentState = .capturePhoto
+//                timer = Timer.scheduledTimer(withTimeInterval: 3.0 , repeats: false) { _ in
+//                    if distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
+//                        self.timer = nil
+//                        self.currentState = .capturePhoto
+//                    }
+//                }
+//            }
+//        } else if (distanceTR <= 14.7 || distanceRT <= 14.7) && distanceRL <= 15.3 && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == false {
+//            if currentState != .vidRec {
+//                currentState = .vidRec
+//                timer = Timer.scheduledTimer(withTimeInterval: 3.0 , repeats: false) { _ in
+//                    if  (distanceTR <= 14.7 || distanceRT <= 14.7) && distanceRL <= 15.3 && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == false {
+//                        self.timer = nil
+//                        self.currentState = .vidRec
+//                    }
+//                }
+//            }
+//        } else if distanceIM >= 17 && distanceIT >= 17 && distanceTM <= 6.7 && distanceRL <= 7 && distanceRM <= 7 && isRec == true {
+//            if currentState != .vidStop {
+//                currentState = .vidStop
+//                timer = Timer.scheduledTimer(withTimeInterval: 3.0 , repeats: false) { _ in
+//                    if distanceIM >= 17 && distanceIT >= 17 && distanceTM <= 6.7 && distanceRL <= 7 && distanceRM <= 7 && isRec == true {
+//                        self.timer = nil
+//                        self.currentState = .vidStop
+//                    }
+//                }
+//            }
 //        } else if distanceTR <= 15 && isPaused == false {
 //            if currentState != .pauseVid {
 //                currentState = .pauseVid
@@ -98,15 +114,15 @@ class HandGestureProcessor: UIViewController {
 //                    }
 //                }
 //            }
-        } else if distanceIT >= 9.1 || distanceTM >= 7.3 || distanceTL >= 15.3 || distanceTR >= 15.3 {
-            currentState = .unknown
-        } else {
-            currentState = .unknown
-        }
-        
-        return currentState
-    }
-}
+//        } else if distanceIT >= 9.1 || distanceTM >= 7.3 || distanceTL >= 15.3 || distanceTR >= 15.3 {
+//            currentState = .unknown
+//        } else {
+//            currentState = .unknown
+//        }
+//
+//        return currentState
+//    }
+//}
 
 // MARK: - CGPoint helpers
 extension CGPoint {

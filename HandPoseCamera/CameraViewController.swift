@@ -68,11 +68,11 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     
     let savedLabel: UILabel = {
         let label = UILabel()
-        label.text = "Video saved!"
+        label.text = "Video added to photos!"
         label.numberOfLines = 2
-        label.font = UIFont.systemFont(ofSize: 53, weight: .semibold)
+        label.font = UIFont.systemFont(ofSize: 37, weight: .semibold)
         label.textColor = UIColor.white
-        label.backgroundColor = UIColor.red
+        label.backgroundColor = UIColor.systemOrange
         label.textAlignment = .center
         label.alpha = 0.70
         label.isHidden = true
@@ -355,7 +355,7 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
     }
     func videoSaved(){
         savedLabel.isHidden = false
-        savedTimer = Timer.scheduledTimer(withTimeInterval: 1.5 , repeats: false) { _ in
+        savedTimer = Timer.scheduledTimer(withTimeInterval: 3.5 , repeats: false) { _ in
             DispatchQueue.main.async {
                 self.savedTimer = nil
                 self.savedLabel.isHidden = true
