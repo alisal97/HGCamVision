@@ -27,8 +27,9 @@ class HandGestureProcessor: UIViewController {
     func getHandState(thumbTip: CGPoint, indexTip: CGPoint, littleDIP: CGPoint, ringDIP: CGPoint, middleDIP: CGPoint, ringTip: CGPoint, littleTip: CGPoint) -> State {
         let distanceIT = abs(indexTip.y - thumbTip.y) // index and thumb
         let distanceTM = abs(thumbTip.y - middleDIP.y)// middle finger and thumb
-        let distanceRM = abs(ringDIP.y - middleDIP.y) // ring finger and ring finger
-        let distanceTR = abs(ringTip.y - thumbTip.y) // thumb and ring finger
+        let distanceRM = abs(ringDIP.y - middleDIP.y) // ring finger and middle finger
+        let distanceTR = abs(ringTip.y - thumbTip.y) // thumb and ring finger tips
+        let distanceRT = abs(ringDIP.y - thumbTip.y) // ringdip and thumb tip
         let distanceRL = abs(ringDIP.y - littleDIP.y) // ring finger and little finger
         let distanceIM = abs(indexTip.y - middleDIP.y) // index and middle finger
         let distanceTL = abs(thumbTip.y - littleTip.y) // thumb and little finger
@@ -37,13 +38,15 @@ class HandGestureProcessor: UIViewController {
 //        let isPaused = CameraViewController.isRecordingPaused
         timer?.invalidate()
         
-        for _ in 1...3 {
-            print("thumb-little \(distanceTL)")
-        }
-        for _ in 1...3 {
-            print("thumb-ring \(distanceTR)")
-        }
-        
+//        for _ in 1...3 {
+//            print("thumb-little \(distanceTL)")
+//        }
+//        for _ in 1...3 {
+//            print("thumb-ring \(distanceTR)")
+//        }
+//
+//    } else if (distanceTR <= 14.7 || distanceTL <= 14.7) && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == true {
+
         if distanceIT <= 9 && distanceIM >= 5 && distanceRM >= 5 && distanceRL >= 5 && isRec == false {
             if currentState != .capturePhoto {
                 currentState = .capturePhoto
@@ -54,23 +57,22 @@ class HandGestureProcessor: UIViewController {
                     }
                 }
             }
-        } else if distanceIM >= 17 && distanceIT >= 17 && distanceTM <= 5.3 && distanceRL <= 7 && distanceRM <= 7 && isRec == false {
+        } else if (distanceTR <= 14.7 || distanceRT <= 14.7) && distanceRL <= 15.3 && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == false {
             if currentState != .vidRec {
                 currentState = .vidRec
                 timer = Timer.scheduledTimer(withTimeInterval: 2.97 , repeats: false) { _ in
-                    if distanceIM >= 17 && distanceIT >= 17  && distanceTM <= 5.3 && distanceRL <= 7 && distanceRM <= 7 && isRec == false {
+                    if  (distanceTR <= 14.7 || distanceRT <= 14.7) && distanceRL <= 15.3 && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == false {
                         self.timer = nil
                         self.currentState = .vidRec
                     }
                 }
             }
-        } else if (distanceTR <= 14.7 || distanceTL <= 14.7) && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == true {
+        } else if distanceIM >= 17 && distanceIT >= 17 && distanceTM <= 5.3 && distanceRL <= 7 && distanceRM <= 7 && isRec == true {
         
             if currentState != .vidStop {
                 currentState = .vidStop
                 timer = Timer.scheduledTimer(withTimeInterval: 2.97 , repeats: false) { _ in
-                    if (distanceTR <= 14.7 || distanceTL <= 14.7) && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17
-                        && distanceIT >= 17 && isRec == true {
+                    if distanceIM >= 17 && distanceIT >= 17 && distanceTM <= 5.3 && distanceRL <= 7 && distanceRM <= 7 && isRec == true {
                         self.timer = nil
                         self.currentState = .vidStop
                     }
