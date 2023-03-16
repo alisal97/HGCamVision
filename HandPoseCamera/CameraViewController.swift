@@ -684,6 +684,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             else {
                 return
             }
+            let handBase = try observation.recognizedPoint(.wrist)
             
             let indexPoints =  try observation.recognizedPoints(.indexFinger)
             guard let indexTipPoint = indexPoints[.indexTip] else {
@@ -713,6 +714,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                                ringDIPPoint: ringDIPPoint,
                                middleDIPPoint: middleDIPPoint,
                                littleTipPoint: littleTipPoint,
+                               handBase: handBase,
                                ringTipPoint: ringTipPoint)
         } catch {
             print(error)
@@ -720,7 +722,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
     // after points are recognized, this function checks for the confidence of the points before processing them
-    private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint, littleTipPoint:VNRecognizedPoint, ringTipPoint: VNRecognizedPoint) {
+    private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint, littleTipPoint:VNRecognizedPoint, handBase: VNRecognizedPoint ,ringTipPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
         guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.89 && littleDIPPoint.confidence > 0.85 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89 && littleTipPoint.confidence > 0.83 && ringTipPoint.confidence > 0.85
@@ -728,6 +730,9 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
         
+        guard let handBaseUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: handBase.toAVFoundationPoint) else {
+            return
+        }
         guard let thumbTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: thumbTipPoint.toAVFoundationPoint) else {
             return
         }
@@ -751,7 +756,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
 // checking for hand gestures, it doesn't work well if I put them all in the same switch statement, I don't know why but I assume we have to call handGestureProcesor for each gesture using a different constant, because the processor might have a one time use limit.
-        let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint, ringTip: ringTipUIKitPoint, littleTip: littleTipUIKitPoint)
+        let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint, ringTip: ringTipUIKitPoint,handBase: handBaseUIKitPoint, littleTip: littleTipUIKitPoint)
         
         switch state {
         case .capturePhoto:
