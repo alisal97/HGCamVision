@@ -849,7 +849,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
             
             let duration = asset.duration
             let startTime = CMTime.zero
-            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds( 3 , preferredTimescale: 1)) // to make it cut 5 seconds for example, we just put 5 instead of 3.
+            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds( 5 , preferredTimescale: 1)) // to make it cut 5 seconds for example, we just put 5 instead of 3.
             let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
             exportSession.timeRange = timeRange
             
