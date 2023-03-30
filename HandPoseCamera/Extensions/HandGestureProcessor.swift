@@ -43,26 +43,27 @@ class HandGestureProcessor: UIViewController {
         let distanceMRP = abs(middlePIP.y - ringPIP.y)
         let distanceRLP = abs(ringPIP.y - littlePIP.y)
         let distanceTIP = abs(thumbTip.y - indexPIP.y)
+        let distanceTMP = abs(thumbTip.y - middlePIP.y)
         
         
         let isRec = CameraViewController.isRecording
         //        let isPaused = CameraViewController.isRecordingPaused
         timer?.invalidate()
         
-                for _ in 1...3 {
-                    print("wrist-littletip \(distanceBL)")
-                }
-                for _ in 1...3 {
-                    print("wrist-ring \(distanceBR)")
-                }
-        
+//                for _ in 1...3 {
+//                    print("wrist-littletip \(distanceBL)")
+//                }
+//                for _ in 1...3 {
+//                    print("wrist-ring \(distanceBR)")
+//                }
+//
         
         if distanceIT <= 9 && distanceIM >= 9 && distanceRM >= 9 && distanceRL >= 9 && isRec == false {
             currentState = .capturePhoto
         } else if (distanceTR <= 14.7 || distanceRT <= 14.7) && distanceRL <= 15.3 && distanceIR >= 17 && distanceRM >= 17 && distanceTM >= 17 && distanceIT >= 17 && isRec == false {
             currentState = .vidRec
             guard (distanceTR <= 14.7 || distanceRT <= 14.7) && distanceRM >= 5 && distanceRL >= 5 && isRec == false else { return currentState }
-        } else if distanceIMP <= 23 && distanceMRP <= 23 && distanceRLP <= 23 && distanceTIP <= 25 && isRec == true {
+        } else if distanceIMP <= 23 && distanceMRP <= 23 && distanceRLP <= 23 && (distanceTIP <= 25 || distanceTMP <= 25) && isRec == true {
             currentState = .vidStop
             guard  distanceIMP <= 23 && distanceMRP <= 23 && distanceRLP <= 23 && distanceTIP <= 25 && isRec == true else { return currentState }
         } else {
