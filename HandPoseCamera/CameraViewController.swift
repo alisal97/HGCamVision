@@ -1,4 +1,4 @@
-//
+
 //  CameraViewController.swift
 //  HGCam
 //
@@ -604,8 +604,8 @@ class CameraViewController: UIViewController, UIImagePickerControllerDelegate & 
 //        movieOutput.startRecording(to: currentRecordingFileURL, recordingDelegate: self)
 //        CameraViewController.isRecordingPaused = false
 //    }
-//    
-//    
+//
+//
     
 // view for countdown timer for when taking a photo or a video
     private func prepareTimerView() {
@@ -696,7 +696,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             let littlePoints = try observation.recognizedPoints(.littleFinger)
             guard let littleDIPPoint = littlePoints[.littleDIP],
                   let littleTipPoint = littlePoints[.littleTip],
-                  let littlePIPPoint = indexPoints[.littlePIP]
+                  let littlePIPPoint = littlePoints[.littlePIP]
             else {
                 return
             }
@@ -943,6 +943,5 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
 
 
     
-
 
 
