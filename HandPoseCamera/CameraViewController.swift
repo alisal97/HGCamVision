@@ -687,24 +687,31 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             let handBase = try observation.recognizedPoint(.wrist)
             
             let indexPoints =  try observation.recognizedPoints(.indexFinger)
-            guard let indexTipPoint = indexPoints[.indexTip] else {
-                return
-            }
-            
-            let littlePoints = try observation.recognizedPoints(.littleFinger)
-            guard let littleDIPPoint = littlePoints[.littleDIP],
-                  let littleTipPoint = littlePoints[.littleTip] else {
-                return
-            }
-            
-            let ringPoints =  try observation.recognizedPoints(.ringFinger)
-            guard let ringDIPPoint = ringPoints[.ringDIP],
-                  let ringTipPoint = ringPoints[.ringTip] else {
+            guard let indexTipPoint = indexPoints[.indexTip],
+                  let indexPIPPoint = indexPoints[.indexPIP]
+            else {
                 return
             }
 
-            let middlePPoints =  try observation.recognizedPoints(.middleFinger)
-            guard let middleDIPPoint = middlePPoints[.middleDIP] else {
+            let littlePoints = try observation.recognizedPoints(.littleFinger)
+            guard let littleDIPPoint = littlePoints[.littleDIP],
+                  let littleTipPoint = littlePoints[.littleTip],
+                  let littlePIPPoint = indexPoints[.littlePIP]
+            else {
+                return
+            }
+            let ringPoints =  try observation.recognizedPoints(.ringFinger)
+            guard let ringDIPPoint = ringPoints[.ringDIP],
+                  let ringTipPoint = ringPoints[.ringTip],
+                  let ringPIPPoint = ringPoints[.ringPIP]
+            else {
+                return
+            }
+
+            let middlePoints =  try observation.recognizedPoints(.middleFinger)
+            guard let middleDIPPoint = middlePoints[.middleDIP],
+                  let middlePIPPoint = middlePoints[.middlePIP]
+            else {
                 return
             }
             
@@ -715,17 +722,21 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                                middleDIPPoint: middleDIPPoint,
                                littleTipPoint: littleTipPoint,
                                handBase: handBase,
-                               ringTipPoint: ringTipPoint)
+                               ringTipPoint: ringTipPoint,
+                               indexPIPPoint: indexPIPPoint,
+                               littlePIPPoint: littlePIPPoint,
+                               ringPIPPoint: ringPIPPoint,
+                               middlePIPPoint: middlePIPPoint )
         } catch {
             print(error)
         }
     }
     
     // after points are recognized, this function checks for the confidence of the points before processing them
-    private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint, littleTipPoint:VNRecognizedPoint, handBase: VNRecognizedPoint ,ringTipPoint: VNRecognizedPoint) {
+    private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint, littleTipPoint:VNRecognizedPoint, handBase: VNRecognizedPoint ,ringTipPoint: VNRecognizedPoint, indexPIPPoint: VNRecognizedPoint, littlePIPPoint: VNRecognizedPoint, ringPIPPoint: VNRecognizedPoint, middlePIPPoint: VNRecognizedPoint) {
         
         // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.89 && littleDIPPoint.confidence > 0.85 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89 && littleTipPoint.confidence > 0.83 && ringTipPoint.confidence > 0.85
+        guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.89 && littleDIPPoint.confidence > 0.85 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89 && littleTipPoint.confidence > 0.83 && ringTipPoint.confidence > 0.85 && indexPIPPoint.confidence > 0.85 && indexPIPPoint.confidence > 0.85 && littlePIPPoint.confidence > 0.85 && ringPIPPoint.confidence > 0.85 && middlePIPPoint.confidence > 0.85
         else {
             return
         }
@@ -737,26 +748,36 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
         
-        guard let indexTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: indexTipPoint.toAVFoundationPoint) else {
-            return
-        }
-        
-        guard let littleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleDIPPoint.toAVFoundationPoint),
-              let littleTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleTipPoint.toAVFoundationPoint) else {
-            return
-        }
-        
-        guard let ringDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringDIPPoint.toAVFoundationPoint),
-              let ringTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringTipPoint.toAVFoundationPoint)
+        guard let indexTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: indexTipPoint.toAVFoundationPoint),
+        let indexPIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: indexPIPPoint.toAVFoundationPoint)
         else {
             return
         }
         
-        guard let middleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: middleDIPPoint.toAVFoundationPoint) else {
+        guard let littleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleDIPPoint.toAVFoundationPoint),
+              let littleTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleTipPoint.toAVFoundationPoint),
+              let littlePIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littlePIPPoint.toAVFoundationPoint)
+        else {
             return
         }
+        
+        guard let ringDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringDIPPoint.toAVFoundationPoint),
+              let ringTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringTipPoint.toAVFoundationPoint),
+              let ringPIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringPIPPoint.toAVFoundationPoint)
+        else {
+            return
+        }
+        
+        guard let middleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: middleDIPPoint.toAVFoundationPoint),
+        let middlePIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: middlePIPPoint.toAVFoundationPoint) else {
+            return
+        }
+        
+        
+
+
 // checking for hand gestures, it doesn't work well if I put them all in the same switch statement, I don't know why but I assume we have to call handGestureProcesor for each gesture using a different constant, because the processor might have a one time use limit.
-        let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint, ringTip: ringTipUIKitPoint,handBase: handBaseUIKitPoint, littleTip: littleTipUIKitPoint)
+        let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint, ringTip: ringTipUIKitPoint,handBase: handBaseUIKitPoint, littleTip: littleTipUIKitPoint, indexPIP: indexPIPUIKitPoint, littlePIP: littlePIPUIKitPoint, ringPIP: ringPIPUIKitPoint, middlePIP: middlePIPUIKitPoint)
         
         switch state {
         case .capturePhoto:
