@@ -3,11 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 53;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		100314982A35DC2100317E5C /* hflip120.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 100314972A35DC2100317E5C /* hflip120.mlmodel */; };
+		104A12BC2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */; };
+		104A12BE2A3644B100990438 /* hflip150cleaned.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 104A12BD2A3644B100990438 /* hflip150cleaned.mlmodel */; };
 		10E9A63229AC122100311FC3 /* GuideScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E9A63129AC122100311FC3 /* GuideScreen.swift */; };
 		10F6C3EA29AF8F3F00A02651 /* CamMicInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F6C3E929AF8F3F00A02651 /* CamMicInputs.swift */; };
 		10FA2AF629B0EE3C00552813 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FA2AF529B0EE3C00552813 /* GalleryView.swift */; };
@@ -21,7 +22,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		100314972A35DC2100317E5C /* hflip120.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = hflip120.mlmodel; sourceTree = "<group>"; };
+		104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = fullyaugmented175cleaned.mlmodel; sourceTree = "<group>"; };
+		104A12BD2A3644B100990438 /* hflip150cleaned.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = hflip150cleaned.mlmodel; sourceTree = "<group>"; };
 		10874CD929A7C837004B68FC /* HGCamRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCamRelease.entitlements; sourceTree = "<group>"; };
 		10A9CE3229AEB5C900EEA4CA /* HGCam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCam.entitlements; sourceTree = "<group>"; };
 		10E9A63129AC122100311FC3 /* GuideScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideScreen.swift; sourceTree = "<group>"; };
@@ -82,7 +84,8 @@
 				AC5F900F24C36CD000C85582 /* Extensions */,
 				ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */,
 				ACBD85EF24A4E3A7002F7C9C /* CameraViewController.swift */,
-				100314972A35DC2100317E5C /* hflip120.mlmodel */,
+				104A12BD2A3644B100990438 /* hflip150cleaned.mlmodel */,
+				104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */,
 				ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */,
 				10E9A63129AC122100311FC3 /* GuideScreen.swift */,
 				ACBD85F124A4E3A7002F7C9C /* Main.storyboard */,
@@ -122,8 +125,9 @@
 		ACBD85E024A4E3A7002F7C9C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1150;
-				LastUpgradeCheck = 1420;
+				LastUpgradeCheck = 1430;
 				ORGANIZATIONNAME = "CB Gang";
 				TargetAttributes = {
 					ACBD85E724A4E3A7002F7C9C = {
@@ -170,12 +174,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				100314982A35DC2100317E5C /* hflip120.mlmodel in Sources */,
+				104A12BE2A3644B100990438 /* hflip150cleaned.mlmodel in Sources */,
 				10E9A63229AC122100311FC3 /* GuideScreen.swift in Sources */,
 				ACBD85F024A4E3A7002F7C9C /* CameraViewController.swift in Sources */,
 				10F6C3EA29AF8F3F00A02651 /* CamMicInputs.swift in Sources */,
 				ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */,
 				ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */,
+				104A12BC2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel in Sources */,
 				10FA2AF629B0EE3C00552813 /* GalleryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

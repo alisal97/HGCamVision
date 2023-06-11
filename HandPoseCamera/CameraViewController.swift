@@ -37,16 +37,13 @@ class CameraViewController: UIViewController {
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private var activityIndicator: UIActivityIndicatorView!
     var savedTimer: Timer?
-    static var isRecordingPaused = false
-    var currentRecordingFileURL: URL?
-    var currentRecordingStartTime: CMTime?
 
 
     
     var frameCounter = 0
     let handPosePredictionInterval = 30
     
-    let model = try? hflip120(configuration: MLModelConfiguration())
+    let model = try? hflip150cleaned(configuration: MLModelConfiguration())
 
         
 
@@ -349,6 +346,8 @@ class CameraViewController: UIViewController {
     func startTimer() {
 //        recordLabel.isHidden = false
         recordLabel.textColor = UIColor.red
+        switchCameraButton.isUserInteractionEnabled = false
+        galleryButton.isUserInteractionEnabled = false
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             self?.counter += 1
             self?.recordLabel.text = self?.formattedTime()
@@ -360,6 +359,8 @@ class CameraViewController: UIViewController {
         timer?.invalidate()
         timer = nil
         counter = 0
+        switchCameraButton.isUserInteractionEnabled = true
+        galleryButton.isUserInteractionEnabled = true
 //        recordLabel.isHidden = true
         recordLabel.textColor = UIColor.white
         recordLabel.text = "00:00"
@@ -550,8 +551,6 @@ class CameraViewController: UIViewController {
            let fileURL = documentsURL.appendingPathComponent(fileName)
            startTimer()
            movieOutput.startRecording(to: fileURL, recordingDelegate: self)
-           currentRecordingFileURL = fileURL
-           currentRecordingStartTime = CMClockGetTime(CMClockGetHostTimeClock())
            
        }
    }
@@ -655,32 +654,31 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             let label = prediction.label
             guard let confidence = prediction.labelProbabilities[label] else { return }
             print("label:\(prediction.label)\nconfidence:\(confidence)")
-            if confidence > 0.95 {
+            if confidence > 0.99 {
                 DispatchQueue.main.async { [self] in
                     switch label {
-                    case "okay":
-                        if isTimerRunning == false, isRecording == false {
-                            runTimer(seconds: 3, completion: { [weak self] in
-                                guard let self else { return }
-                                captureImage()
-                            })
+                    case "ok":
+                        if self.isTimerRunning == false && self.isRecording == false {
+                            self.runTimer(seconds: 3) {
+                                self.captureImage()
+                            }
                         }
-                    case "peaces":
-                        if isTimerRunning == false, isRecording == false {
-                            runTimer(seconds: 3, completion: { [weak self] in
-                                guard let self else { return }
-                                startRecording()
-                                isRecording.toggle()
-                            })
+                    case "peace":
+                        if self.isTimerRunning == false && self.isRecording == false {
+                            self.runTimer(seconds: 3) {
+                                self.startRecording()
+                                self.isRecording = true
+                            }
+                        } else if self.isTimerRunning == false && self.isRecording == true {
+                            self.stopRecording()
+                            self.isRecording = false
                         }
-                        if isTimerRunning == false, isRecording == true {
-                            stopRecording()
-                            isRecording = false
-                        }
-                    default : break
+                    default:
+                        break
                     }
                 }
             }
+
         } catch {
             print("Prediction error")
         }
