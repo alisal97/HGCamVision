@@ -31,7 +31,7 @@ class CameraViewController: UIViewController {
     private var videoDeviceInput: AVCaptureDeviceInput!
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
     
-    static var isRecording = false
+    private var isRecording = false
     private weak var timerLabel: UILabel?
     private var isTimerRunning = false
     var currentCameraPosition: AVCaptureDevice.Position = .front
@@ -46,9 +46,9 @@ class CameraViewController: UIViewController {
     var frameCounter = 0
     let handPosePredictionInterval = 30
     
-//    let model = try? MyHandPoseClassifier_1(configuration: MLModelConfiguration())
+    let model = try? hflip120(configuration: MLModelConfiguration())
 
-    
+        
 
     
     
@@ -545,7 +545,6 @@ class CameraViewController: UIViewController {
 //  to record video
     func startRecording() {
        if !movieOutput.isRecording {
-           CameraViewController.isRecording = true
            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
            let fileName = "\(UUID().uuidString).mp4"
            let fileURL = documentsURL.appendingPathComponent(fileName)
@@ -560,7 +559,7 @@ class CameraViewController: UIViewController {
     func stopRecording() {
        if movieOutput.isRecording {
            movieOutput.stopRecording()
-           CameraViewController.isRecording = false
+          isRecording = false
            stopTimer()
        }
    }
@@ -628,7 +627,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         
-        let handler = VNImageRequestHandler(cmSampleBuffer: sampleBuffer, orientation: .up, options: [:])
+        let handler = VNImageRequestHandler(cmSampleBuffer: sampleBuffer, orientation: .leftMirrored, options: [:])
         
         do {
             try handler.perform([handPoseRequest])
@@ -656,32 +655,27 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             let label = prediction.label
             guard let confidence = prediction.labelProbabilities[label] else { return }
             print("label:\(prediction.label)\nconfidence:\(confidence)")
-            if confidence > 0.9 {
+            if confidence > 0.95 {
                 DispatchQueue.main.async { [self] in
                     switch label {
                     case "okay":
                         if isTimerRunning == false, isRecording == false {
                             runTimer(seconds: 3, completion: { [weak self] in
                                 guard let self else { return }
-                                self.captureImage()
+                                captureImage()
                             })
                         }
-                    case "peace":
+                    case "peaces":
                         if isTimerRunning == false, isRecording == false {
                             runTimer(seconds: 3, completion: { [weak self] in
                                 guard let self else { return }
-                                print("pinched to start vid")
-                                self.startRecording()
-                                self.isRecording.toggle()
+                                startRecording()
+                                isRecording.toggle()
                             })
                         }
-                    case "fist":
                         if isTimerRunning == false, isRecording == true {
-                            self.stopRecording()
-                            self.isRecording = false
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                self.cameraVM.videoAdd = false
-                            }
+                            stopRecording()
+                            isRecording = false
                         }
                     default : break
                     }
@@ -692,7 +686,6 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
     }
 }
-    
 // output for captured photos
 extension CameraViewController: AVCapturePhotoCaptureDelegate {
     

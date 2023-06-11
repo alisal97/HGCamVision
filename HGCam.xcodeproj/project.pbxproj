@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		100314982A35DC2100317E5C /* hflip120.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 100314972A35DC2100317E5C /* hflip120.mlmodel */; };
 		10E9A63229AC122100311FC3 /* GuideScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E9A63129AC122100311FC3 /* GuideScreen.swift */; };
 		10F6C3EA29AF8F3F00A02651 /* CamMicInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F6C3E929AF8F3F00A02651 /* CamMicInputs.swift */; };
 		10FA2AF629B0EE3C00552813 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FA2AF529B0EE3C00552813 /* GalleryView.swift */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		100314972A35DC2100317E5C /* hflip120.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = hflip120.mlmodel; sourceTree = "<group>"; };
 		10874CD929A7C837004B68FC /* HGCamRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCamRelease.entitlements; sourceTree = "<group>"; };
 		10A9CE3229AEB5C900EEA4CA /* HGCam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCam.entitlements; sourceTree = "<group>"; };
 		10E9A63129AC122100311FC3 /* GuideScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideScreen.swift; sourceTree = "<group>"; };
@@ -80,6 +82,7 @@
 				AC5F900F24C36CD000C85582 /* Extensions */,
 				ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */,
 				ACBD85EF24A4E3A7002F7C9C /* CameraViewController.swift */,
+				100314972A35DC2100317E5C /* hflip120.mlmodel */,
 				ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */,
 				10E9A63129AC122100311FC3 /* GuideScreen.swift */,
 				ACBD85F124A4E3A7002F7C9C /* Main.storyboard */,
@@ -167,6 +170,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				100314982A35DC2100317E5C /* hflip120.mlmodel in Sources */,
 				10E9A63229AC122100311FC3 /* GuideScreen.swift in Sources */,
 				ACBD85F024A4E3A7002F7C9C /* CameraViewController.swift in Sources */,
 				10F6C3EA29AF8F3F00A02651 /* CamMicInputs.swift in Sources */,
@@ -250,7 +254,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = UILaunchScreen;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -306,7 +310,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = UILaunchScreen;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
