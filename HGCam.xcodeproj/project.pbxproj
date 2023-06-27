@@ -3,15 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		10A9CE3129AE988D00EEA4CA /* helperFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A9CE3029AE988D00EEA4CA /* helperFunc.swift */; };
 		10E9A63229AC122100311FC3 /* GuideScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10E9A63129AC122100311FC3 /* GuideScreen.swift */; };
 		10F6C3EA29AF8F3F00A02651 /* CamMicInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F6C3E929AF8F3F00A02651 /* CamMicInputs.swift */; };
-		10FA2AF629B0EE3C00552813 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FA2AF529B0EE3C00552813 /* GalleryView.swift */; };
-		AC5F900B24C3526700C85582 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = AC5F900A24C3526700C85582 /* SnapKit */; };
 		AC5F901124C36D2300C85582 /* VNRecognizedPoint+.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5F901024C36D2300C85582 /* VNRecognizedPoint+.swift */; };
 		AC99CF3324B0A15500C54CE2 /* HandGestureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC99CF3224B0A15500C54CE2 /* HandGestureProcessor.swift */; };
 		ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */; };
@@ -24,11 +21,9 @@
 
 /* Begin PBXFileReference section */
 		10874CD929A7C837004B68FC /* HGCamRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCamRelease.entitlements; sourceTree = "<group>"; };
-		10A9CE3029AE988D00EEA4CA /* helperFunc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = helperFunc.swift; sourceTree = "<group>"; };
 		10A9CE3229AEB5C900EEA4CA /* HGCam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCam.entitlements; sourceTree = "<group>"; };
 		10E9A63129AC122100311FC3 /* GuideScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideScreen.swift; sourceTree = "<group>"; };
 		10F6C3E929AF8F3F00A02651 /* CamMicInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CamMicInputs.swift; sourceTree = "<group>"; };
-		10FA2AF529B0EE3C00552813 /* GalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryView.swift; sourceTree = "<group>"; };
 		AC5F901024C36D2300C85582 /* VNRecognizedPoint+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VNRecognizedPoint+.swift"; sourceTree = "<group>"; };
 		AC99CF3224B0A15500C54CE2 /* HandGestureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandGestureProcessor.swift; sourceTree = "<group>"; };
 		ACBD85E824A4E3A7002F7C9C /* HGCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HGCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -46,7 +41,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC5F900B24C3526700C85582 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -58,9 +52,7 @@
 			children = (
 				AC99CF3224B0A15500C54CE2 /* HandGestureProcessor.swift */,
 				AC5F901024C36D2300C85582 /* VNRecognizedPoint+.swift */,
-				10A9CE3029AE988D00EEA4CA /* helperFunc.swift */,
 				10F6C3E929AF8F3F00A02651 /* CamMicInputs.swift */,
-				10FA2AF529B0EE3C00552813 /* GalleryView.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -116,7 +108,6 @@
 			);
 			name = HGCam;
 			packageProductDependencies = (
-				AC5F900A24C3526700C85582 /* SnapKit */,
 			);
 			productName = HandPoseCamera;
 			productReference = ACBD85E824A4E3A7002F7C9C /* HGCam.app */;
@@ -147,7 +138,6 @@
 			);
 			mainGroup = ACBD85DF24A4E3A7002F7C9C;
 			packageReferences = (
-				AC5F900924C3526700C85582 /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			productRefGroup = ACBD85E924A4E3A7002F7C9C /* Products */;
 			projectDirPath = "";
@@ -179,11 +169,9 @@
 				10E9A63229AC122100311FC3 /* GuideScreen.swift in Sources */,
 				ACBD85F024A4E3A7002F7C9C /* CameraViewController.swift in Sources */,
 				10F6C3EA29AF8F3F00A02651 /* CamMicInputs.swift in Sources */,
-				10A9CE3129AE988D00EEA4CA /* helperFunc.swift in Sources */,
 				ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */,
 				ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */,
 				AC99CF3324B0A15500C54CE2 /* HandGestureProcessor.swift in Sources */,
-				10FA2AF629B0EE3C00552813 /* GalleryView.swift in Sources */,
 				AC5F901124C36D2300C85582 /* VNRecognizedPoint+.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -262,7 +250,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = UILaunchScreen;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -318,7 +306,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = UILaunchScreen;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -344,12 +332,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 1.01;
 				PRODUCT_BUNDLE_IDENTIFIER = aly.CB.Gang.HGCam;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -371,12 +359,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 1.01;
 				PRODUCT_BUNDLE_IDENTIFIER = CBGang.HGCam.Aly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -404,25 +392,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		AC5F900924C3526700C85582 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SnapKit/SnapKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.0.1;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		AC5F900A24C3526700C85582 /* SnapKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AC5F900924C3526700C85582 /* XCRemoteSwiftPackageReference "SnapKit" */;
-			productName = SnapKit;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = ACBD85E024A4E3A7002F7C9C /* Project object */;
 }
