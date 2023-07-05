@@ -728,7 +728,6 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
 
 
-// checking for hand gestures, it doesn't work well if I put them all in the same switch statement, I don't know why but I assume we have to call handGestureProcesor for each gesture using a different constant, because the processor might have a one time use limit.
     func isHandPoseMoving(previous: MLMultiArray?, current: MLMultiArray) -> Bool {
         guard let previous = previous else { return true }
 
