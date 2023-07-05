@@ -728,42 +728,6 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
 
 
-    func isHandPoseMoving(previous: MLMultiArray?, current: MLMultiArray) -> Bool {
-        guard let previous = previous else { return true }
-
-        let poseDistance = calculatePoseDistance(previous, current)
-
-        let movementThreshold: Double = 0.1
-
-        return poseDistance > movementThreshold
-    }
-
-    func calculatePoseDistance(_ pose1: MLMultiArray, _ pose2: MLMultiArray) -> Double {
-        let numKeypoints = 21
-
-        var distanceSum: Double = 0.0
-
-        for i in 0..<numKeypoints {
-            let pose1X = pose1[i].doubleValue
-            let pose1Y = pose1[i + numKeypoints].doubleValue
-            let pose1Z = pose1[i + (2 * numKeypoints)].doubleValue
-
-            let pose2X = pose2[i].doubleValue
-            let pose2Y = pose2[i + numKeypoints].doubleValue
-            let pose2Z = pose2[i + (2 * numKeypoints)].doubleValue
-
-            let distance = sqrt(pow(pose2X - pose1X, 2) + pow(pose2Y - pose1Y, 2) + pow(pose2Z - pose1Z, 2))
-
-            distanceSum += distance
-        }
-
-        let averageDistance = distanceSum / Double(numKeypoints)
-
-        return averageDistance
-    }
-
-
-
     let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint, ringTip: ringTipUIKitPoint,handBase: handBaseUIKitPoint, littleTip: littleTipUIKitPoint, indexPIP: indexPIPUIKitPoint, littlePIP: littlePIPUIKitPoint, ringPIP: ringPIPUIKitPoint, middlePIP: middlePIPUIKitPoint)
             
             switch state {
