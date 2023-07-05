@@ -43,7 +43,7 @@ class CameraViewController: UIViewController {
     var frameCounter = 0
     let handPosePredictionInterval = 30
     
-    let model = try? hflip150cleaned(configuration: MLModelConfiguration())
+    let model = try? fullyaugmented175cleaned(configuration: MLModelConfiguration())
 
         
 
