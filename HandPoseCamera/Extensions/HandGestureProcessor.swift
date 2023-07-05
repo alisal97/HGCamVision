@@ -16,9 +16,6 @@ class HandGestureProcessor: UIViewController {
         case capturePhoto
         case vidRec
         case vidStop
-        case pauseVid
-        case unpauseVid
-        
         case unknown
         
     }

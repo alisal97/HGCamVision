@@ -18,7 +18,6 @@ import Foundation
 import AVFoundation
 import Vision
 import Photos
-import SnapKit
 
 class CameraViewController: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
     
@@ -785,10 +784,6 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 if isTimerRunning == false {
                     self.stopRecording()
                 }
-            case .pauseVid:
-                break
-            case .unpauseVid:
-                break
             case .unknown:
                 break
             }
