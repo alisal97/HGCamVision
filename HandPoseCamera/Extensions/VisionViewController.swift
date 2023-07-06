@@ -41,7 +41,15 @@ class VisionViewController: UIViewController {
 
     var frameCounter = 0
     
-    
+    static let viewTitle: UILabel = {
+    let label = UILabel()
+    label.text = "Hand Gesture Mode"
+    label.font = UIFont.systemFont(ofSize: 25, weight: .regular)
+    label.textColor = UIColor.white
+    label.textAlignment = .center
+    return label
+    }()
+
 
     let activityLabel: UILabel = {
         let activityLabel = UILabel()
@@ -153,7 +161,15 @@ class VisionViewController: UIViewController {
             activityLabel.centerYAnchor.constraint(equalTo: self.view.centerYAnchor)
         ])
 
-        
+        self.view.addSubview(VisionViewController.viewTitle)
+        VisionViewController.viewTitle.translatesAutoresizingMaskIntoConstraints = false
+
+        let bottomOffset: CGFloat = 50
+        NSLayoutConstraint.activate([
+            VisionViewController.viewTitle.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            VisionViewController.viewTitle.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -bottomOffset)
+        ])
+
     }
     @objc func handleBackgroundTask(_ notification: Notification) {
         UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
@@ -486,149 +502,6 @@ class VisionViewController: UIViewController {
 
 extension VisionViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        
-        let handler = VNImageRequestHandler(cmSampleBuffer: sampleBuffer, orientation: .up, options: [:])
-        
-        do {
-            try handler.perform([handPoseRequest])
-            guard let observation = handPoseRequest.results?.first else {
-                return
-            }
-            
-            let thumbPoints = try observation.recognizedPoints(.thumb)
-            guard let thumbTipPoint = thumbPoints[.thumbTip]
-            else {
-                return
-            }
-            let handBase = try observation.recognizedPoint(.wrist)
-            
-            let indexPoints =  try observation.recognizedPoints(.indexFinger)
-            guard let indexTipPoint = indexPoints[.indexTip],
-                  let indexPIPPoint = indexPoints[.indexPIP]
-            else {
-                return
-            }
-
-            let littlePoints = try observation.recognizedPoints(.littleFinger)
-            guard let littleDIPPoint = littlePoints[.littleDIP],
-                  let littleTipPoint = littlePoints[.littleTip],
-                  let littlePIPPoint = littlePoints[.littlePIP]
-            else {
-                return
-            }
-            let ringPoints =  try observation.recognizedPoints(.ringFinger)
-            guard let ringDIPPoint = ringPoints[.ringDIP],
-                  let ringTipPoint = ringPoints[.ringTip],
-                  let ringPIPPoint = ringPoints[.ringPIP]
-            else {
-                return
-            }
-
-            let middlePoints =  try observation.recognizedPoints(.middleFinger)
-            guard let middleDIPPoint = middlePoints[.middleDIP],
-                  let middlePIPPoint = middlePoints[.middlePIP]
-            else {
-                return
-            }
-            
-            self.processPoints(thumbTipPoint: thumbTipPoint,
-                               indexTipPoint: indexTipPoint,
-                               littleDIPPoint: littleDIPPoint,
-                               ringDIPPoint: ringDIPPoint,
-                               middleDIPPoint: middleDIPPoint,
-                               littleTipPoint: littleTipPoint,
-                               handBase: handBase,
-                               ringTipPoint: ringTipPoint,
-                               indexPIPPoint: indexPIPPoint,
-                               littlePIPPoint: littlePIPPoint,
-                               ringPIPPoint: ringPIPPoint,
-                               middlePIPPoint: middlePIPPoint )
-        } catch {
-            print(error)
-        }
-    }
-    
-    // after points are recognized, this function checks for the confidence of the points before processing them
-    private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint, littleTipPoint:VNRecognizedPoint, handBase: VNRecognizedPoint ,ringTipPoint: VNRecognizedPoint, indexPIPPoint: VNRecognizedPoint, littlePIPPoint: VNRecognizedPoint, ringPIPPoint: VNRecognizedPoint, middlePIPPoint: VNRecognizedPoint ) {
-        
-        // Ignore low confidence points.
-        guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.89 && littleDIPPoint.confidence > 0.85 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89 && littleTipPoint.confidence > 0.83 && ringTipPoint.confidence > 0.85 && indexPIPPoint.confidence > 0.81  && littlePIPPoint.confidence > 0.87 && ringPIPPoint.confidence > 0.81 && middlePIPPoint.confidence > 0.81 && handBase.confidence > 0.83
-        else {
-            return
-        }
-
-        guard let handBaseUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: handBase.toAVFoundationPoint) else {
-            return
-        }
-        guard let thumbTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: thumbTipPoint.toAVFoundationPoint) else {
-            return
-        }
-        
-        guard let indexTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: indexTipPoint.toAVFoundationPoint) else {
-            return
-        }
-        
-        guard let littleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleDIPPoint.toAVFoundationPoint),
-              let littleTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleTipPoint.toAVFoundationPoint) else {
-            return
-        }
-        
-        guard let ringDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringDIPPoint.toAVFoundationPoint),
-              let ringTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringTipPoint.toAVFoundationPoint)
-        else {
-            return
-        }
-        
-        guard let middleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: middleDIPPoint.toAVFoundationPoint) else {
-            return
-        }
-        
-        guard let indexPIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: indexPIPPoint.toAVFoundationPoint) else {
-            return
-        }
-
-        guard let littlePIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littlePIPPoint.toAVFoundationPoint) else {
-            return
-        }
-
-        guard let ringPIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringPIPPoint.toAVFoundationPoint) else {
-            return
-        }
-        guard let middlePIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: middlePIPPoint.toAVFoundationPoint) else {
-            return
-        }
-
-
-    let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint, ringTip: ringTipUIKitPoint,handBase: handBaseUIKitPoint, littleTip: littleTipUIKitPoint, indexPIP: indexPIPUIKitPoint, littlePIP: littlePIPUIKitPoint, ringPIP: ringPIPUIKitPoint, middlePIP: middlePIPUIKitPoint)
-            
-            switch state {
-            case .capturePhoto:
-                if isTimerRunning == false {
-                    runTimer(seconds: 3, completion: {
-                        self.captureImage()
-                    })
-                }
-            case .quickPhoto:
-                if isTimerRunning == false {
-                    runTimer(seconds: 1, completion: {
-                        self.captureImage()
-                    })
-                }
-            case .vidRec:
-                if isTimerRunning == false {
-                    runTimer(seconds: 3, completion: {
-                        self.startRecording()
-                    })
-                }
-            case .vidStop:
-                if isTimerRunning == false {
-                    self.stopRecording()
-                }
-            case .unknown:
-                break
-            }
-        }
         
         }
 
