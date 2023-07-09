@@ -322,7 +322,6 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 43KKKRBAP2;
 				INFOPLIST_FILE = HandPoseCamera/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "HGCam: handsfree camera for those who get their hands dirty!";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -330,7 +329,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = aly.CB.Gang.HGCam;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cheese.aly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -349,7 +348,6 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 43KKKRBAP2;
 				INFOPLIST_FILE = HandPoseCamera/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "HGCam: handsfree camera for those who get their hands dirty!";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -357,7 +355,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = CBGang.HGCam.Aly;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cheese.aly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
