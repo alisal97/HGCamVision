@@ -4,13 +4,7 @@
 //
 //  Created by Aly Salman on 18/02/23.
 //  Copyright © 2023 CB Gang. All rights reserved.
-////
-//  CameraViewController.swift
-//  HGCam
-//
-//  Created by Aly Salman on 18/02/23.
-//  Copyright © 2023 CB Gang. All rights reserved.
-//
+
 
 import UIKit
 import AVKit
@@ -18,11 +12,12 @@ import Foundation
 import AVFoundation
 import Vision
 import Photos
-import SnapKit
+import Speech
+import AVFAudio
 
-class CameraViewController: UIViewController {
+class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
-    let videoQueue = DispatchQueue(label: "com.example.videoQueue") // queue for saving video, so we can pioritize video saving and keep it from interruptions
+    let videoQueue = DispatchQueue(label: "com.example.videoQueue")
     private var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     var audioPlayer: AVAudioPlayer? //for playing shutter sound
@@ -31,40 +26,83 @@ class CameraViewController: UIViewController {
     private var videoDeviceInput: AVCaptureDeviceInput!
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
     
-    private var isRecording = false
+    static var isRecording = false
     private weak var timerLabel: UILabel?
-    private var isTimerRunning = false
+    static var isTimerRunning = false
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private var activityIndicator: UIActivityIndicatorView!
     var savedTimer: Timer?
-
-
     
-    var frameCounter = 0
-    let handPosePredictionInterval = 30
-    
-    let model = try? fullyaugmented175cleaned(configuration: MLModelConfiguration())
-
-        
-
-    
-    
-    // Declare a timer and a counter variable to track elapsed time
-    var timer: Timer?
+    static var isCap = false
+    private var timer: DispatchSourceTimer?
     var counter = 0
     
+    var previousKeypointsMultiArray: MLMultiArray?
     
+    var frameCounter = 0
+    let handPosePredictionInterval = 9
+    
+    let model = try? fullyaugmented175cleaned(configuration: MLModelConfiguration())
+    private let handGestureProcessor = HandGestureProcessor()
+
+    let segmentedControl = UISegmentedControl(items: ["Pose", "Gesture", "Voice", "Face"])
+
+    var userSelection: Int = 1
+    
+    private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))!
+    
+    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    
+    private var recognitionTask: SFSpeechRecognitionTask?
+    
+    private let audioEngine = AVAudioEngine()
+    let targetWords = ["cheese", "action", "stop"]
+    private var lastSpokenWord: String = ""
+
+    
+    let activityLabel: UILabel = {
+        let activityLabel = UILabel()
+        activityLabel.text = "Saving Video..."
+        activityLabel.textColor = UIColor.darkGray
+        activityLabel.font = UIFont.boldSystemFont(ofSize: 28) // Set the font to bold
+        activityLabel.textAlignment = .center // Center the text horizontally
+        activityLabel.sizeToFit()
+        activityLabel.isHidden = true
+        activityLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        // Apply a subtle shadow
+        activityLabel.layer.shadowColor = UIColor.white.cgColor
+        activityLabel.layer.shadowOffset = CGSize(width: 1.5, height: 1.5)
+        activityLabel.layer.shadowOpacity = 0.75
+        activityLabel.layer.shadowRadius = 1
+        
+        // Add a pulsating animation
+        UIView.animate(withDuration: 1.0, delay: 0, options: [.autoreverse, .repeat], animations: {
+            activityLabel.alpha = 0.75
+            activityLabel.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+        }, completion: nil)
+        
+        
+        return activityLabel
+    }()
+
     // Declare a UILabel to display the time elapsed
-    let recordLabel: UILabel = {
+    static let recordLabel: UILabel = {
         let label = UILabel()
         label.text = "00:00"
-        label.font = UIFont.systemFont(ofSize: 39, weight: .semibold)
+        label.font = UIFont.systemFont(ofSize: 39, weight: .regular)
         label.textColor = UIColor.white
+        //        label.backgroundColor = UIColor.systemRed
         label.textAlignment = .center
-//        label.isHidden = true
+        //        label.isHidden = true
         return label
     }()
-//      camera switch button
+    
+    
+
+    
+    
+    //      camera switch button
     let switchCameraButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -74,176 +112,27 @@ class CameraViewController: UIViewController {
         return button
     }()
     
-    let savedLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Video added to photos!"
-        label.numberOfLines = 2
-        label.font = UIFont.systemFont(ofSize: 37, weight: .semibold)
-        label.textColor = UIColor.white
-        label.backgroundColor = UIColor.systemOrange
-        label.textAlignment = .center
-        label.alpha = 0.70
-        label.isHidden = true
-        return label
-    }()
-
     
-    let flashButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        let config = UIImage.SymbolConfiguration(pointSize: 35)
-        button.setImage(UIImage(systemName:"bolt.slash.circle", withConfiguration: config), for: .normal)
-        button.tintColor = .white
-        return button
-    }()
-
     
-//     gallery button
-    let galleryButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        let config = UIImage.SymbolConfiguration(pointSize: 50)
-        button.setImage(UIImage(systemName: "photo.fill", withConfiguration: config), for: .normal)
-        button.tintColor = .white
-        return button
-    }()
-
-    //function to get the most recent media from the photos app
-    @objc private func openPhotosApp() {
-        PHPhotoLibrary.requestAuthorization { status in
-            switch status {
-            case .authorized:
-                let fetchOptions = PHFetchOptions()
-                fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-                let allAssets = PHAsset.fetchAssets(with: fetchOptions)
-                guard let mostRecentAsset = allAssets.firstObject else { return }
-                
-                if mostRecentAsset.mediaType == .image {
-                    PHImageManager.default().requestImageDataAndOrientation(for: mostRecentAsset, options: nil) { (data, _, _, info) in
-                        if let imageData = data, let image = UIImage(data: imageData) {
-                            DispatchQueue.main.async {
-                                let imageView = UIImageView(image: image)
-                                imageView.frame = self.view.bounds
-                                imageView.contentMode = .scaleAspectFit
-                                imageView.backgroundColor = .black
-                                imageView.isUserInteractionEnabled = true
-                                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissImageView))
-                                imageView.addGestureRecognizer(tapGesture)
-                                self.view.addSubview(imageView)
-                            }
-                        }
-                    }
-                } else if mostRecentAsset.mediaType == .video {
-                    let requestOptions = PHVideoRequestOptions()
-                    requestOptions.version = .original
-                    
-                    PHImageManager.default().requestAVAsset(forVideo: mostRecentAsset, options: requestOptions) { (asset, audioMix, info) in
-                        if let urlAsset = asset as? AVURLAsset {
-                            let videoURL = urlAsset.url
-                            DispatchQueue.main.async {
-                                let player = AVPlayer(url: videoURL)
-                                let playerViewController = AVPlayerViewController()
-                                playerViewController.player = player
-                                self.present(playerViewController, animated: true) {
-                                    playerViewController.player?.play()
-                                }
-                            }
-                        }
-                    }
-                }
-            case .denied, .restricted:
-                print("Access to photo library is denied or restricted")
-            case .notDetermined:
-                print("Access to photo library has not been determined")
-            case .limited:
-                print("Allow access to all photos")
-            @unknown default:
-                fatalError("Unexpected case occurred while requesting photo library authorization")
-            }
-        }
-    }
-//  function to exit the gallery view defined in the function above, you can use by clicking on the black borders
-    @objc private func dismissImageView() {
-        for subview in self.view.subviews {
-            if let imageView = subview as? UIImageView {
-                imageView.removeFromSuperview()
-            }
-        }
-        self.setNeedsStatusBarAppearanceUpdate()
-        self.navigationController?.setNavigationBarHidden(false, animated: true)
-    }
-    
-//  function to get a thumbnail of the most recent media for the gallery button.
-    private func setupGalleryButton() {
-        let fetchOptions = PHFetchOptions()
-        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        let fetchResult = PHAsset.fetchAssets(with: fetchOptions)
-
-        guard let latestAsset = fetchResult.firstObject else {
-            // There are no assets in the user's library
-            return
-        }
-
-        let imageManager = PHImageManager.default()
-        let requestOptions = PHImageRequestOptions()
-        requestOptions.deliveryMode = .fastFormat
-        requestOptions.isSynchronous = true
-
-        imageManager.requestImage(for: latestAsset, targetSize: CGSize(width: 75, height: 75), contentMode: .aspectFill, options: requestOptions) { (image, info) in
-            if let image = image {
-                DispatchQueue.main.async {
-                    self.galleryButton.setImage(image, for: .normal)
-                }
-            }
-        }
-    }
-
-// activity indicator / loading icon for when the video is saving.
-// since we are cutting the last 3 seconds of the recorded videos it takes a while to save.
-
     private func setupActivityIndicator() {
         activityIndicator = UIActivityIndicatorView(style: .large)
         activityIndicator.transform = CGAffineTransform(scaleX: 3.5, y: 3.5)
         activityIndicator.color = UIColor.darkGray
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
-        DispatchQueue.main.async { [self] in
-            view.addSubview(activityIndicator)
-        }
-    }
+        view.addSubview(activityIndicator)
 
-//  toggle the camera flash light
-    @objc private func toggleFlash() {
-        guard let device = AVCaptureDevice.default(for: .video) else { return }
-        guard device.hasTorch else { return }
-        if currentCameraPosition == .back { // if statement to check if the back camera is in use before toggling on the flash
-            do {
-                try device.lockForConfiguration()
-                
-                if device.torchMode == .off {
-                    device.torchMode = .on
-                    let config = UIImage.SymbolConfiguration(pointSize: 35)
-                    flashButton.setImage(UIImage(systemName:"bolt.circle.fill", withConfiguration: config), for: .normal)
-                } else {
-                    device.torchMode = .off
-                    let config = UIImage.SymbolConfiguration(pointSize: 35)
-                    flashButton.setImage(UIImage(systemName:"bolt.slash.circle", withConfiguration: config), for: .normal)
-                }
-                
-                device.unlockForConfiguration()
-            } catch {
-                print("Error toggling flash: \(error.localizedDescription)")
-            }
-        }
+        
     }
-    // in viewDidLoad you should add all the UI elements and "constant" tasks like calling the cameraView, because viewDidLoad job's is to keep calling the functions constantly.
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         UIApplication.shared.isIdleTimerDisabled = true
         prepareCaptureSession()
         prepareCaptureUI()
         NotificationCenter.default.addObserver(self, selector: #selector(self.handleBackgroundTask(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
-
+        
         if let sound = Bundle.main.path(forResource: "shutter", ofType: "mp3") {
             do {
                 audioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: sound))
@@ -252,80 +141,162 @@ class CameraViewController: UIViewController {
             }
             
         }
+        segmentedControl.selectedSegmentIndex = 1
+
+        segmentedControl.addTarget(self, action: #selector(segmentedControlValueChanged), for: .valueChanged)
+
         addAudioInput()
         setupActivityIndicator()
         prepareTimerView()
-        setupGalleryButton()
         cameraUI()
         handPoseRequest.maximumHandCount = 1
+        segmentedControl.isEnabled = !(CameraViewController.isRecording && CameraViewController.isCap)
+        stopSpeechRecognition()
         
-        // Add the timerLabel to the view and position it at the top
-        view.addSubview(recordLabel)
-        recordLabel.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -16),
-            recordLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        ])
-        
-        view.addSubview(savedLabel)
-        savedLabel.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            savedLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            savedLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
+        NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
 
-
-        view.addSubview(switchCameraButton)
-
-        switchCameraButton.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            switchCameraButton.widthAnchor.constraint(equalToConstant: 44),
-            switchCameraButton.heightAnchor.constraint(equalToConstant: 44),
-            switchCameraButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            switchCameraButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
-        ])
-        
-        
-        switchCameraButton.addTarget(self, action: #selector(toggleCamera), for: .touchUpInside)
-
-        
-        view.addSubview(galleryButton)
-
-        NSLayoutConstraint.activate([
-            galleryButton.widthAnchor.constraint(equalToConstant: 44),
-            galleryButton.heightAnchor.constraint(equalToConstant: 44),
-            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            galleryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
-        ])
-
-        galleryButton.addTarget(self, action: #selector(openPhotosApp), for: .touchUpInside)
-        
-        flashButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(flashButton)
-
-        // Add constraints to position the flash button in the top right corner
-        NSLayoutConstraint.activate([
-            flashButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -16),
-            flashButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-        ])
-        flashButton.addTarget(self, action: #selector(toggleFlash), for: .touchUpInside)
+        // Add observer for entering foreground
+        NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
 
 
     }
-    // enabling backgroundTask, this way video saving will keep on working even if the user switches to another app or to home screen
+    
+    @objc func appDidEnterBackground() {
+        // Stop speech recognition when app enters the background
+        stopSpeechRecognition()
+    }
+
+    @objc func appWillEnterForeground() {
+        // Start speech recognition if userSelection == 2 when app enters the foreground
+        if userSelection == 2 {
+            startSpeechRecognition()
+        }
+    }
+
+    
+    
+    func stopSpeechRecognition() {
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        recognitionRequest?.endAudio()
+        recognitionRequest = nil
+        recognitionTask?.cancel()
+        recognitionTask = nil
+    }
+
+    
+    private func startSpeechRecognition() {
+        speechRecognizer.delegate = self
+        
+        SFSpeechRecognizer.requestAuthorization { authStatus in
+            OperationQueue.main.addOperation {
+                if authStatus == .authorized && self.userSelection == 2 {
+                    self.startRecognizing()
+                }
+            }
+        }
+    }
+    
+    private func startRecognizing() {
+        guard !audioEngine.isRunning else { return }
+        
+        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+        guard let recognitionRequest = recognitionRequest else { return }
+        recognitionRequest.shouldReportPartialResults = true
+        
+        let inputNode = audioEngine.inputNode
+        let format = inputNode.outputFormat(forBus: 0)
+        
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
+            recognitionRequest.append(buffer)
+        }
+        
+        audioEngine.prepare()
+        
+        do {
+            try audioEngine.start()
+        } catch {
+            print("Failed to start audio engine: \(error.localizedDescription)")
+        }
+        
+        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { result, error in
+            if let result = result {
+                self.processRecognitionResult(result)
+            }
+            
+            if let error = error {
+                print("Speech recognition error: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func processRecognitionResult(_ result: SFSpeechRecognitionResult) {
+        
+        if let lastSegment = result.bestTranscription.segments.last {
+            let currentWord = lastSegment.substring
+            print("Last spoken word: \(currentWord)")
+            
+            for targetWord in targetWords {
+                if currentWord.lowercased().contains(targetWord) {
+                    switch targetWord {
+                        
+                    case "cheese":
+                        if !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
+                            runTimer(seconds: 3, completion: { [weak self] in
+                                guard let self else { return }
+                                CameraViewController.isCap = true
+                                self.captureImage()
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.95) {
+                                    CameraViewController.isCap = false
+                                }
+                            })
+                        }
+                        else if !CameraViewController.isTimerRunning && CameraViewController.isRecording && !CameraViewController.isCap {
+                            
+                            runTimer(seconds: 1, completion: { [weak self] in
+                                guard let self else { return }
+                                
+                                self.captureImage()
+                                CameraViewController.isCap = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                    CameraViewController.isCap = false
+                                }
+                                
+                            }
+                                )
+                                     }
+                    case "action":
+                        if !CameraViewController.isTimerRunning && !CameraViewController.isRecording {
+                            runTimer(seconds: 3, completion: { [weak self] in
+                                guard let self else { return }
+                                self.startRecording()
+                            })
+                        }
+                    case "stop":
+                        if !CameraViewController.isTimerRunning && CameraViewController.isRecording {
+                            self.stopRecording()
+                        }
+                    
+                    default:
+                        break
+                    }
+                }
+            }
+            
+            // Update the last spoken word
+            lastSpokenWord = currentWord
+        }
+    }
+    
     @objc func handleBackgroundTask(_ notification: Notification) {
-       UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
+        UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
         
     }
-//  adding support for landscape views.
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
-        // Get the new device orientation
         let newOrientation = UIDevice.current.orientation
         
-        // Update the video orientation of the preview layer based on the new device orientation
         if let connection = self.videoPreviewLayer?.connection {
             switch newOrientation {
             case .portrait:
@@ -342,102 +313,123 @@ class CameraViewController: UIViewController {
         }
     }
     
-//  timer to start counting seconds and minutes when recording starts
     func startTimer() {
-//        recordLabel.isHidden = false
-        recordLabel.textColor = UIColor.red
-        switchCameraButton.isUserInteractionEnabled = false
-        galleryButton.isUserInteractionEnabled = false
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            self?.counter += 1
-            self?.recordLabel.text = self?.formattedTime()
+        if timer == nil {
+            timer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
+            timer?.schedule(deadline: .now(), repeating: .seconds(1))
+            CameraViewController.recordLabel.textColor = .red
+            timer?.setEventHandler { [weak self] in
+                self?.counter += 1
+                DispatchQueue.main.async {
+                    self?.updateTimerLabel()
+                }
+            }
+            timer?.resume()
         }
     }
 
-    // Stop the timer when recording ends
     func stopTimer() {
-        timer?.invalidate()
+        timer?.cancel()
         timer = nil
         counter = 0
-        switchCameraButton.isUserInteractionEnabled = true
-        galleryButton.isUserInteractionEnabled = true
-//        recordLabel.isHidden = true
-        recordLabel.textColor = UIColor.white
-        recordLabel.text = "00:00"
+        CameraViewController.recordLabel.textColor = .white
+        updateTimerLabel()
     }
-    func videoSaved(){
-        savedLabel.isHidden = false
-        savedTimer = Timer.scheduledTimer(withTimeInterval: 3.5 , repeats: false) { _ in
-            DispatchQueue.main.async {
-                self.savedTimer = nil
-                self.savedLabel.isHidden = true
-            }
-            
+    func updateTimerLabel() {
+        let minutes = counter / 60
+        let seconds = counter % 60
+        CameraViewController.recordLabel.text = String(format: "%02d:%02d", minutes, seconds)
+    }
+    
+
+    func videoSaved() {
+        let alert = UIAlertController(title: nil, message: "Video added to Photos successfully", preferredStyle: .alert)
+        
+        self.present(alert, animated: true, completion: nil)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            alert.dismiss(animated: true, completion: nil)
         }
     }
-// for every 60 seconds it will add a minute
+
+    // for every 60 seconds it will add a minute
     func formattedTime() -> String {
         let minutes = counter / 60
         let seconds = counter % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
-// to keep screen on when recording.
+    // to keep screen on when recording.
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
         // Re-enable idle timer when the app goes into the background or is closed
         UIApplication.shared.isIdleTimerDisabled = false
+        
+        stopSpeechRecognition()
+
     }
     
-    //instead of putting all these methods in viewDidLoad we wrap them in this function and call it in viewDidLoad
-
-    private func prepareCaptureSession() {
-            captureSession?.beginConfiguration()
-            let captureSession = AVCaptureSession()
-            
-            // Select a front facing camera, make an input.
-            
-            guard let captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: currentCameraPosition) else { return }
-            guard let input = try? AVCaptureDeviceInput(device: captureDevice) else { return }
-            
-            captureSession.addInput(input)
-            
-            let videoOutput = AVCaptureVideoDataOutput()
-            videoOutput.setSampleBufferDelegate(self, queue: .main)
-            captureSession.addOutput(videoOutput)
-            
-            
-            let photoOutput = AVCapturePhotoOutput()
-            captureSession.addOutput(photoOutput)
-        
-            // Add video input
-
-            do {
-                let videoDeviceInput = try AVCaptureDeviceInput(device: captureDevice)
-                if captureSession.canAddInput(videoDeviceInput) {
-                    captureSession.addInput(videoDeviceInput)
-                }
-            } catch {
-                fatalError("Could not create video device input: \(error.localizedDescription)")
-            }
-            
-            // Add video output
-            if captureSession.canAddOutput(movieOutput) {
-                captureSession.addOutput(movieOutput)
-            }
-            
-            self.captureSession?.sessionPreset = .high
-            self.captureSession = captureSession
-            
-            DispatchQueue.global(qos: .background).async {
-                self.captureSession?.startRunning()
-            }
-
-            
-            captureSession.commitConfiguration()
-
-        }
     
+    private func prepareCaptureSession() {
+        let captureSession = AVCaptureSession()
+        
+        // Select a front facing camera, make an input.
+        guard let captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else { return }
+        
+        // Lock the device for configuration
+        do {
+            try captureDevice.lockForConfiguration()
+            
+            let desiredFrameRate: Double = 60.0
+            
+            for format in captureDevice.formats {
+                for range in format.videoSupportedFrameRateRanges {
+                    if range.maxFrameRate >= desiredFrameRate && range.minFrameRate <= desiredFrameRate {
+                        captureDevice.activeFormat = format
+                        captureDevice.activeVideoMinFrameDuration = CMTime(value: 1, timescale: CMTimeScale(desiredFrameRate))
+                        captureDevice.activeVideoMaxFrameDuration = CMTime(value: 1, timescale: CMTimeScale(desiredFrameRate))
+                        break
+                    }
+                }
+            }
+            
+            // Unlock the device after configuration
+            captureDevice.unlockForConfiguration()
+        } catch {
+            fatalError("Failed to configure video capture device: \(error)")
+        }
+        
+        guard let input = try? AVCaptureDeviceInput(device: captureDevice) else { return }
+        
+        captureSession.addInput(input)
+        
+        let videoOutput = AVCaptureVideoDataOutput()
+        videoOutput.setSampleBufferDelegate(self, queue: .main)
+        captureSession.addOutput(videoOutput)
+        
+        let photoOutput = AVCapturePhotoOutput()
+        captureSession.addOutput(photoOutput)
+        
+        guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
+            fatalError("Could not get video device")
+        }
+        
+        do {
+            let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
+            if captureSession.canAddInput(videoDeviceInput) {
+                captureSession.addInput(videoDeviceInput)
+            }
+        } catch {
+            fatalError("Could not create video device input: \(error.localizedDescription)")
+        }
+        
+        captureSession.sessionPreset = .high
+        self.captureSession = captureSession
+        captureSession.addOutput(movieOutput)
+        DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+            self?.captureSession?.startRunning()
+        }
+    }
     func addAudioInput() {
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -448,12 +440,14 @@ class CameraViewController: UIViewController {
             if ((captureSession?.canAddInput(audioInput)) != nil) {
                 captureSession!.addInput(audioInput)
             }
+            
+            
         } catch {
             print("Error setting up audio input: \(error.localizedDescription)")
         }
     }
-
-//  function in objectiveC to switch the camera between back and front. we have to add audio input again after switching camera, otherwise it will not work.
+    
+    
     @objc private func toggleCamera() {
         
         // Toggle the camera position
@@ -477,34 +471,75 @@ class CameraViewController: UIViewController {
         DispatchQueue.global(qos: .background).async { [self] in
             captureSession?.startRunning()
         }
-
+        
     }
+    
+
     private func cameraUI() {
         // Create a new view for the grey rectangle
         let topView = UIView()
         topView.translatesAutoresizingMaskIntoConstraints = false
         topView.backgroundColor = UIColor.black.withAlphaComponent(0.79) // set the background color to transparent grey
         view.addSubview(topView)
-
-        // Add constraints to position the top view at the top of the screen, taking up 9% of the screen height
+        
         topView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         topView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         topView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         topView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.15).isActive = true
-
+        
         // Create a new view for the grey rectangle
         let bottomView = UIView()
         bottomView.translatesAutoresizingMaskIntoConstraints = false
         bottomView.backgroundColor = UIColor.black.withAlphaComponent(0.79) // set the background color to transparent grey
         view.addSubview(bottomView)
-
-        // Add constraints to position the bottom view at the bottom of the screen, taking up 17% of the screen height
+        
         bottomView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         bottomView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         bottomView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         bottomView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.17).isActive = true
-            
+        
+        view.addSubview(CameraViewController.recordLabel)
+        CameraViewController.recordLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            CameraViewController.recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -49),
+            CameraViewController.recordLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+
+        
+        
+        view.addSubview(switchCameraButton)
+        
+        switchCameraButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            switchCameraButton.widthAnchor.constraint(equalToConstant: 44),
+            switchCameraButton.heightAnchor.constraint(equalToConstant: 44),
+            switchCameraButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            switchCameraButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+        ])
+        
+        
+        switchCameraButton.addTarget(self, action: #selector(toggleCamera), for: .touchUpInside)
+        
+        view.addSubview(activityLabel)
+        
+        NSLayoutConstraint.activate([
+            activityLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            activityLabel.centerYAnchor.constraint(equalTo: self.view.centerYAnchor)
+        ])
+
+        
+        view.addSubview(segmentedControl)
+
+
+        segmentedControl.translatesAutoresizingMaskIntoConstraints = false
+
+        segmentedControl.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+
+
     }
+    
     
     private func prepareCaptureUI() {
         guard let session = captureSession else { return }
@@ -514,8 +549,7 @@ class CameraViewController: UIViewController {
         view.layer.addSublayer(videoPreviewLayer)
         
         self.videoPreviewLayer = videoPreviewLayer
-    }
-    // also to add support to landscape mode.
+        }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -523,7 +557,7 @@ class CameraViewController: UIViewController {
             let currentDevice: UIDevice = UIDevice.current
             let orientation: UIDeviceOrientation = currentDevice.orientation
             let previewLayerConnection : AVCaptureConnection = connection
-
+            
             if previewLayerConnection.isVideoOrientationSupported {
                 switch (orientation) {
                 case .portrait:
@@ -541,41 +575,61 @@ class CameraViewController: UIViewController {
             }
         }
     }
-
-
-//  to record video
-    func startRecording() {
-       if !movieOutput.isRecording {
-           let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-           let fileName = "\(UUID().uuidString).mp4"
-           let fileURL = documentsURL.appendingPathComponent(fileName)
-           startTimer()
-           movieOutput.startRecording(to: fileURL, recordingDelegate: self)
-           
-       }
-   }
-// to stop recording video
-    func stopRecording() {
-       if movieOutput.isRecording {
-           movieOutput.stopRecording()
-          isRecording = false
-           stopTimer()
-       }
-   }
     
-// view for countdown timer for when taking a photo or a video
+    
+    //  to record video
+    func startRecording() {
+        if !movieOutput.isRecording {
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let fileName = "\(UUID().uuidString).mp4"
+            let fileURL = documentsURL.appendingPathComponent(fileName)
+            startTimer()
+            CameraViewController.isRecording = true
+            movieOutput.startRecording(to: fileURL, recordingDelegate: self)
+            
+        }
+    }
+
+    func startRecGesture() {
+        if !movieOutput.isRecording {
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let fileName = "\(UUID().uuidString).mp4"
+            let fileURL = documentsURL.appendingPathComponent(fileName)
+            startTimer()
+            movieOutput.startRecording(to: fileURL, recordingDelegate: self)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                CameraViewController.isRecording = true
+
+            }
+
+            
+        }
+    }
+
+
+    // to stop recording video
+    func stopRecording() {
+        if movieOutput.isRecording {
+            movieOutput.stopRecording()
+            stopTimer()
+        }
+    }
+    
     private func prepareTimerView() {
         let timerLabel = UILabel()
         timerLabel.textAlignment = .center
-        timerLabel.font = UIFont.systemFont(ofSize: 41)
-        
+        timerLabel.font = UIFont.systemFont(ofSize: 300)
+
         view.addSubview(timerLabel)
-        timerLabel.snp.makeConstraints { maker in
-            maker.center.equalToSuperview()
-        }
-        
+        timerLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            timerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            timerLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
         self.timerLabel = timerLabel
     }
+
     // capturing images
     private func captureImage() {
         guard let photoOutput = captureSession?.outputs.first(where: { $0 is AVCapturePhotoOutput }) as? AVCapturePhotoOutput else { return }
@@ -586,7 +640,7 @@ class CameraViewController: UIViewController {
         shutterView.backgroundColor = UIColor.black
         shutterView.alpha = 0.0
         view.addSubview(shutterView)
-
+        
         UIView.animate(withDuration: 0.1, animations: {
             shutterView.alpha = 1.0
         }, completion: { _ in
@@ -597,92 +651,459 @@ class CameraViewController: UIViewController {
             })
         })
         audioPlayer?.play()
-
+        
     }
-// function that actually defines the timer
     private func runTimer(seconds: Int, completion: @escaping () -> Void) {
-        isTimerRunning = true
-
+        CameraViewController.isTimerRunning = true
+        
         var timeLeft = seconds
         
-        let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { timer in
-            self.timerLabel?.text = "Action in... \(timeLeft) "
+        let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
+        timer.schedule(deadline: .now(), repeating: .seconds(1))
+        
+        timer.setEventHandler { [weak self] in
+            self?.timerLabel?.text = "\(timeLeft)"
             timeLeft -= 1
             
             if timeLeft < 0 {
-                timer.invalidate()
-                self.isTimerRunning = false
-                self.timerLabel?.text = nil
-            
+                timer.cancel()
+                CameraViewController.isTimerRunning = false
+                self?.timerLabel?.text = nil
+                
                 completion()
             }
-        })
+        }
         
-        RunLoop.current.add(timer, forMode: RunLoop.Mode.common)
+        timer.resume()
     }
+
 }
 
 extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
+    
+    @objc func segmentedControlValueChanged(sender: UISegmentedControl) {
+        switch sender.selectedSegmentIndex {
+        case 0:
+            userSelection = 0
+            stopSpeechRecognition()
 
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        
-        let handler = VNImageRequestHandler(cmSampleBuffer: sampleBuffer, orientation: .leftMirrored, options: [:])
-        
-        do {
-            try handler.perform([handPoseRequest])
-        } catch {
-            print(error)
-        }
-        
-        guard let handPoses = handPoseRequest.results, !handPoses.isEmpty else {
-            return
-        }
-        
-        guard let observation = handPoses.first else {return}
-        
-        frameCounter += 1
-        if frameCounter % handPosePredictionInterval == 0 {
-            makePrediction(handPoseObservation: observation)
-            frameCounter = 0
+        case 1:
+            userSelection = 1
+            stopSpeechRecognition()
+
+        case 2:
+            userSelection = 2
+            if userSelection == 2 {
+                startSpeechRecognition()
+            }
+
+        case 3:
+            userSelection = 3
+            stopSpeechRecognition()
+        default:
+            break
         }
     }
     
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        if userSelection == 0 {
+            let handler = VNImageRequestHandler(cmSampleBuffer: sampleBuffer, orientation: .leftMirrored, options: [:])
+            
+            do {
+                try handler.perform([handPoseRequest])
+            } catch {
+                print(error)
+            }
+            
+            guard let handPoses = handPoseRequest.results, !handPoses.isEmpty else {
+                return
+            }
+            
+            guard let observation = handPoses.first else {return}
+            
+            frameCounter += 1
+            if frameCounter % handPosePredictionInterval == 0 {
+                makePrediction(handPoseObservation: observation)
+                frameCounter = 0
+            }
+        }
+        else if userSelection == 1 {
+            
+            let handler = VNImageRequestHandler(cmSampleBuffer: sampleBuffer, options: [:])
+            
+            do {
+                try handler.perform([handPoseRequest])
+                guard let observation = handPoseRequest.results?.first else {
+                    return
+                }
+                
+                let thumbPoints = try observation.recognizedPoints(.thumb)
+                guard let thumbTipPoint = thumbPoints[.thumbTip]
+                else {
+                    return
+                }
+                let handBase = try observation.recognizedPoint(.wrist)
+                
+                let indexPoints =  try observation.recognizedPoints(.indexFinger)
+                guard let indexTipPoint = indexPoints[.indexTip],
+                      let indexPIPPoint = indexPoints[.indexPIP]
+                else {
+                    return
+                }
+                
+                let littlePoints = try observation.recognizedPoints(.littleFinger)
+                guard let littleDIPPoint = littlePoints[.littleDIP],
+                      let littleTipPoint = littlePoints[.littleTip],
+                      let littlePIPPoint = littlePoints[.littlePIP]
+                else {
+                    return
+                }
+                let ringPoints =  try observation.recognizedPoints(.ringFinger)
+                guard let ringDIPPoint = ringPoints[.ringDIP],
+                      let ringTipPoint = ringPoints[.ringTip],
+                      let ringPIPPoint = ringPoints[.ringPIP]
+                else {
+                    return
+                }
+                
+                let middlePoints =  try observation.recognizedPoints(.middleFinger)
+                guard let middleDIPPoint = middlePoints[.middleDIP],
+                      let middlePIPPoint = middlePoints[.middlePIP]
+                else {
+                    return
+                }
+                
+                self.processPoints(thumbTipPoint: thumbTipPoint,
+                                   indexTipPoint: indexTipPoint,
+                                   littleDIPPoint: littleDIPPoint,
+                                   ringDIPPoint: ringDIPPoint,
+                                   middleDIPPoint: middleDIPPoint,
+                                   littleTipPoint: littleTipPoint,
+                                   handBase: handBase,
+                                   ringTipPoint: ringTipPoint,
+                                   indexPIPPoint: indexPIPPoint,
+                                   littlePIPPoint: littlePIPPoint,
+                                   ringPIPPoint: ringPIPPoint,
+                                   middlePIPPoint: middlePIPPoint )
+            } catch {
+                print(error)
+            }
+            
+        }
+        else if userSelection == 3 {
+            
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+            
+            let faceDetectionRequest = VNDetectFaceLandmarksRequest(completionHandler: { [weak self] request, error in
+                guard let observations = request.results as? [VNFaceObservation], !observations.isEmpty else { return }
+                
+                for observation in observations {
+                    if let landmarks = observation.landmarks,
+//                       let faceContour = landmarks.faceContour,
+                       let leftEye = landmarks.leftEye,
+                       let rightEye = landmarks.rightEye,
+//                       let outerLips = landmarks.outerLips,
+//                       let rightBrow = landmarks.rightEyebrow,
+//                       let leftBrow = landmarks.leftEyebrow
+                        let innerLips = landmarks.innerLips {
+                        
+                        
+//                        let faceContourPoints = faceContour.normalizedPoints
+                        let leftEyePoints = leftEye.normalizedPoints
+                        let rightEyePoints = rightEye.normalizedPoints
+//                        let outerLipsPoints = outerLips.normalizedPoints
+                        let innerLipsPoints = innerLips.normalizedPoints
+//                        let leftEyebrowPoints = leftBrow.normalizedPoints
+//                        let rightEyebrowPoints = rightBrow.normalizedPoints
+//
+//                        let eyebrowRaiseThreshold: CGFloat = 0.06 // Adjust the threshold value as needed
+//
+//
+//
+//
+//                        let leftEyebrowTopPoint = leftEyebrowPoints[2]
+//                        let leftEyebrowBottomPoint = leftEyebrowPoints[5]
+//                        let leftEyebrowRaiseDistance = abs(leftEyebrowTopPoint.y - leftEyebrowBottomPoint.y)
+//                        let isLeftEyebrowRaised = leftEyebrowRaiseDistance >= eyebrowRaiseThreshold
+//
+//                        let rightEyebrowTopPoint = rightEyebrowPoints[2]
+//                        let rightEyebrowBottomPoint = rightEyebrowPoints[5]
+//                        let rightEyebrowRaiseDistance = abs(rightEyebrowTopPoint.y - rightEyebrowBottomPoint.y)
+//                        let isRightEyebrowRaised = rightEyebrowRaiseDistance >= eyebrowRaiseThreshold
+
+                        
+                        
+                        let smileThreshold: CGFloat = 0.15
+                        let topLipCenter = innerLipsPoints[3].y
+                        let bottomLipCenter = innerLipsPoints[0].y
+                        let mouthOpenDistance = topLipCenter - bottomLipCenter
+                        let isSmiling = mouthOpenDistance > smileThreshold
+                        
+
+                        
+                        // Check if the left eye is closed
+                        let eyeClosedThreshold: CGFloat = 0.06
+                        let leftEyeTopPoint = leftEyePoints[1]
+                        let leftEyeBottomPoint = leftEyePoints[4]
+                        let leftEyeOpenDistance = abs(leftEyeTopPoint.y - leftEyeBottomPoint.y)
+                        let isLeftEyeClosed = leftEyeOpenDistance <= eyeClosedThreshold
+                        
+
+                        print(leftEyeOpenDistance)
+
+                        let rightEyeTopPoint = rightEyePoints[1]
+                        let rightEyeBottomPoint = rightEyePoints[4]
+                        let rightEyeOpenDistance = abs(rightEyeTopPoint.y - rightEyeBottomPoint.y)
+                        let isRightEyeClosed = rightEyeOpenDistance <= eyeClosedThreshold
+                        
+
+
+                        if !isSmiling && (isLeftEyeClosed && isRightEyeClosed) && !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
+                            self?.runTimer(seconds: 3, completion: {
+                                CameraViewController.isCap = true
+                                self?.captureImage()
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.95) {
+                                    CameraViewController.isCap = false
+                                }
+                            })
+                        } else if !isSmiling && (isLeftEyeClosed && isRightEyeClosed) && !CameraViewController.isTimerRunning && CameraViewController.isRecording && !CameraViewController.isCap {
+                            self?.runTimer(seconds: 1, completion: {
+                                CameraViewController.isCap = true
+                                self?.captureImage()
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                    CameraViewController.isCap = false
+                                }
+                            })
+                            
+                        } else if isSmiling && ( isLeftEyeClosed || isRightEyeClosed ) && !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
+                            self?.runTimer(seconds: 3, completion: {
+                                self?.startRecGesture()
+                            })
+                        } else if isSmiling && ( isLeftEyeClosed || isRightEyeClosed ) && !CameraViewController.isTimerRunning && CameraViewController.isRecording {
+                            self?.stopRecording()
+                        }
+                    }
+                }
+            }
+            )
+            faceDetectionRequest.revision = VNDetectFaceLandmarksRequestRevision3
+
+            // Create a request handler
+            let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer ,options: [:])
+            
+            // Perform the face detection request
+            do {
+                try requestHandler.perform([faceDetectionRequest])
+            } catch {
+                print("Error performing face detection: \(error)")
+            }
+            
+        }
+    }
+
     func makePrediction(handPoseObservation: VNHumanHandPoseObservation) {
         guard let keypointsMultiArray = try? handPoseObservation.keypointsMultiArray() else { fatalError() }
         do {
             let prediction = try model!.prediction(poses: keypointsMultiArray)
             let label = prediction.label
             guard let confidence = prediction.labelProbabilities[label] else { return }
-            print("label:\(prediction.label)\nconfidence:\(confidence)")
-            if confidence > 0.99 {
+            print("label: \(prediction.label)\nconfidence: \(confidence)")
+
+            if confidence > 0.95 {
                 DispatchQueue.main.async { [self] in
-                    switch label {
-                    case "ok":
-                        if self.isTimerRunning == false && self.isRecording == false {
-                            self.runTimer(seconds: 3) {
-                                self.captureImage()
+                    let currentPrediction = try? model!.prediction(poses: keypointsMultiArray)
+                    let currentLabel = currentPrediction?.label
+
+                    let isHandMoving = isHandPoseMoving(previous: previousKeypointsMultiArray, current: keypointsMultiArray)
+
+                    previousKeypointsMultiArray = keypointsMultiArray
+
+                    if currentLabel == label && confidence > 0.95 && !isHandMoving {
+                        switch label {
+                        case "ok":
+                            if !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
+                                runTimer(seconds: 3, completion: { [weak self] in
+                                    guard let self else { return }
+                                    CameraViewController.isCap = true
+                                    self.captureImage()
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.95) {
+                                        CameraViewController.isCap = false
+                                    }
+                                })
                             }
-                        }
-                    case "peace":
-                        if self.isTimerRunning == false && self.isRecording == false {
-                            self.runTimer(seconds: 3) {
-                                self.startRecording()
-                                self.isRecording = true
+                            else if !CameraViewController.isTimerRunning && CameraViewController.isRecording && !CameraViewController.isCap {
+                                
+                                runTimer(seconds: 1, completion: { [weak self] in
+                                    guard let self else { return }
+                                    
+                                    self.captureImage()
+                                    CameraViewController.isCap = true
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                        CameraViewController.isCap = false
+                                    }
+                                    
+                                }
+                                    )
+                                         }
+                        case "peace":
+                            if !CameraViewController.isTimerRunning && !CameraViewController.isRecording {
+                                runTimer(seconds: 3, completion: { [weak self] in
+                                    guard let self else { return }
+                                    self.startRecording()
+                                })
                             }
-                        } else if self.isTimerRunning == false && self.isRecording == true {
-                            self.stopRecording()
-                            self.isRecording = false
+                            else if !CameraViewController.isTimerRunning && CameraViewController.isRecording {
+                                self.stopRecording()
+                            }
+                        
+                        default:
+                            break
                         }
-                    default:
-                        break
                     }
                 }
             }
-
         } catch {
             print("Prediction error")
         }
     }
+   private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint, littleTipPoint:VNRecognizedPoint, handBase: VNRecognizedPoint ,ringTipPoint: VNRecognizedPoint, indexPIPPoint: VNRecognizedPoint, littlePIPPoint: VNRecognizedPoint, ringPIPPoint: VNRecognizedPoint, middlePIPPoint: VNRecognizedPoint ) {
+       
+       // Ignore low confidence points.
+       guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.89 && littleDIPPoint.confidence > 0.85 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89 && littleTipPoint.confidence > 0.83 && ringTipPoint.confidence > 0.85 && indexPIPPoint.confidence > 0.81  && littlePIPPoint.confidence > 0.87 && ringPIPPoint.confidence > 0.81 && middlePIPPoint.confidence > 0.81 && handBase.confidence > 0.83
+       else {
+           return
+       }
+       guard let handBaseUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: handBase.toAVFoundationPoint) else {
+           return
+       }
+       guard let thumbTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: thumbTipPoint.toAVFoundationPoint) else {
+           return
+       }
+       
+       guard let indexTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: indexTipPoint.toAVFoundationPoint) else {
+           return
+       }
+       
+       guard let littleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleDIPPoint.toAVFoundationPoint),
+             let littleTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleTipPoint.toAVFoundationPoint) else {
+           return
+       }
+       
+       guard let ringDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringDIPPoint.toAVFoundationPoint),
+             let ringTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringTipPoint.toAVFoundationPoint)
+       else {
+           return
+       }
+       
+       guard let middleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: middleDIPPoint.toAVFoundationPoint) else {
+           return
+       }
+       
+       guard let indexPIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: indexPIPPoint.toAVFoundationPoint) else {
+           return
+       }
+
+       guard let littlePIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littlePIPPoint.toAVFoundationPoint) else {
+           return
+       }
+
+       guard let ringPIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringPIPPoint.toAVFoundationPoint) else {
+           return
+       }
+       guard let middlePIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: middlePIPPoint.toAVFoundationPoint) else {
+           return
+       }
+
+   let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint, ringTip: ringTipUIKitPoint,handBase: handBaseUIKitPoint, littleTip: littleTipUIKitPoint, indexPIP: indexPIPUIKitPoint, littlePIP: littlePIPUIKitPoint, ringPIP: ringPIPUIKitPoint, middlePIP: middlePIPUIKitPoint)
+           
+           switch state {
+           case .capturePhoto:
+               if !CameraViewController.isTimerRunning && !CameraViewController.isCap {
+                   runTimer(seconds: 3, completion: { [weak self] in
+                       guard let self else { return }
+                       CameraViewController.isCap = true
+                       self.captureImage()
+                       DispatchQueue.main.asyncAfter(deadline: .now() + 2.95) {
+                           CameraViewController.isCap = false
+                       }
+                   })
+               }
+           case .quickPhoto:
+               if !CameraViewController.isTimerRunning && !CameraViewController.isCap {
+                   runTimer(seconds: 1, completion: { [weak self] in
+                       guard let self else { return }
+                       
+                       self.captureImage()
+                       CameraViewController.isCap = true
+                       DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                           CameraViewController.isCap = false
+                       }
+                       
+                   }
+                       )
+            }
+           case .vidRec:
+               if !CameraViewController.isTimerRunning {
+                   runTimer(seconds: 3, completion: { [weak self] in
+                       guard let self else { return }
+                       self.startRecGesture()
+                   })
+               }
+           case .vidStop:
+               if !CameraViewController.isTimerRunning {
+                   self.stopRecording()
+               }
+           case .unknown:
+               break
+           }
+       }
+
+
+    
+
+    // Function to check if the hand pose is moving
+    func isHandPoseMoving(previous: MLMultiArray?, current: MLMultiArray) -> Bool {
+        guard let previous = previous else { return true }
+
+        // Compare the previous and current hand pose arrays
+        let poseDistance = calculatePoseDistance(previous, current)
+
+        // Define a threshold for movement detection
+        let movementThreshold: Double = 0.037
+        
+        // If the pose distance is above the threshold, consider it as moving
+        return poseDistance > movementThreshold
+    }
+    
+    
+    func calculatePoseDistance(_ pose1: MLMultiArray, _ pose2: MLMultiArray) -> Double {
+        let numKeypoints = 21
+
+        var distanceSum: Double = 0.0
+
+        for i in 0..<numKeypoints {
+            let pose1X = pose1[i].doubleValue
+            let pose1Y = pose1[i + numKeypoints].doubleValue
+            let pose1Z = pose1[i + (2 * numKeypoints)].doubleValue
+
+            let pose2X = pose2[i].doubleValue
+            let pose2Y = pose2[i + numKeypoints].doubleValue
+            let pose2Z = pose2[i + (2 * numKeypoints)].doubleValue
+
+            // Calculate the Euclidean distance between the keypoints
+            let distance = sqrt(pow(pose2X - pose1X, 2) + pow(pose2Y - pose1Y, 2) + pow(pose2Z - pose1Z, 2))
+
+            // Add the distance to the sum
+            distanceSum += distance
+        }
+
+        // Calculate the average distance
+        let averageDistance = distanceSum / Double(numKeypoints)
+
+        return averageDistance
+    }
+
+
 }
 // output for captured photos
 extension CameraViewController: AVCapturePhotoCaptureDelegate {
@@ -694,7 +1115,6 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
     }
 }
 
-// output for recorded videos, it's added to video queue for pioritizing with activity indicator to show that a video is being saved, and it's added to background tasks so it doesn't get interrupted when users switch to another app or homescreen.
 extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
@@ -702,7 +1122,8 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
 
         videoQueue.async { // adding to queue for piortizing and to proof from interruptions
             DispatchQueue.main.async { // animating on the main thread.
-                self.activityIndicator.startAnimating() //starting the activity loading indicator for when a video is taken.
+                self.activityIndicator.startAnimating()
+                self.activityLabel.isHidden = false
             }
 
             if let error = error {
@@ -738,7 +1159,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
             
             let duration = asset.duration
             let startTime = CMTime.zero
-            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds( 5 , preferredTimescale: 1)) // to make it cut 5 seconds for example, we just put 5 instead of 3.
+            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds( 1 , preferredTimescale: 1)) // to make it cut 5 seconds for example, we just put 5 instead of 3.
             let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
             exportSession.timeRange = timeRange
             
@@ -752,9 +1173,11 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                             }) { success, error in
                                 if success {
                                     print("Video saved to photos")
-                                    UIApplication.shared.endBackgroundTask(recordingTaskIdentifier) // when video saving is complete it will remove the app from background tasks
+                                    UIApplication.shared.endBackgroundTask(recordingTaskIdentifier) 
                                     DispatchQueue.main.async {
-                                        self.activityIndicator.stopAnimating() // when saving video is complete it will stop the animation of the indicator and remove it from the view.
+                                        self.activityIndicator.stopAnimating()
+                                        self.activityLabel.isHidden = true
+                                        CameraViewController.isRecording = false
                                         self.videoSaved()
                                     }
 
@@ -762,6 +1185,8 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                                     print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
                                     DispatchQueue.main.async {
                                         self.activityIndicator.stopAnimating()
+                                        CameraViewController.isRecording = false
+                                        self.activityLabel.isHidden = true
                                     }
 
                                 }
@@ -770,6 +1195,8 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                             print("Access to photo library denied")
                             DispatchQueue.main.async {
                                 self.activityIndicator.stopAnimating()
+                                CameraViewController.isRecording = false
+
                             }
 
                         }
@@ -778,17 +1205,24 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                     print("Export failed: \(exportSession.error?.localizedDescription ?? "unknown error")")
                     DispatchQueue.main.async {
                         self.activityIndicator.stopAnimating()
+                        CameraViewController.isRecording = false
+
                     }
 
                     print("Export error: \(String(describing: exportSession.error))")
                     DispatchQueue.main.async {
                         self.activityIndicator.stopAnimating()
+                        CameraViewController.isRecording = false
+
                     }
 
                 case .cancelled:
                     print("Export cancelled")
                     DispatchQueue.main.async {
                         self.activityIndicator.stopAnimating()
+                        self.activityLabel.isHidden = true
+                        CameraViewController.isRecording = false
+
                     }
 
                 case .exporting:
@@ -801,6 +1235,8 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                     print("Fatal Error")
                     DispatchQueue.main.async {
                         self.activityIndicator.stopAnimating()
+                        CameraViewController.isRecording = false
+                        self.activityLabel.isHidden = true
                     }
 
                 }
@@ -808,9 +1244,4 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
         }
     }
 }
-
-
-    
-
-
 
