@@ -38,6 +38,8 @@
 	<string>we need photo library additions to view gallery</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need Photos access in order to save media!</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app uses speech recognition to enable voice commands for capturing photos and recording videos.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
