@@ -27,7 +27,7 @@
 	<key>NSAppleMusicUsageDescription</key>
 	<string>you need to give app permission in order to view gallery</string>
 	<key>NSCameraUsageDescription</key>
-	<string>We need Camera access in order to launch the app!</string>
+	<string>Camera access is needed in order to record videos and take pictures</string>
 	<key>NSCocoaErrorDomain</key>
 	<string></string>
 	<key>NSFileProviderDomainUsageDescription</key>
