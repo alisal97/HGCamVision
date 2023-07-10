@@ -45,7 +45,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     let model = try? fullyaugmented175cleaned(configuration: MLModelConfiguration())
     private let handGestureProcessor = HandGestureProcessor()
 
-    let segmentedControl = UISegmentedControl(items: ["Pose", "Gesture", "Voice", "Face"])
+    let segmentedControl = UISegmentedControl(items: ["Hand Pose", "Hand Gesture", "Voice Recoognition", "Face Gestures"])
 
     var userSelection: Int = 1
     
@@ -59,7 +59,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     let targetWords = ["cheese", "action", "stop"]
     private var lastSpokenWord: String = ""
 
-    
+    let fontSize: CGFloat = 8.1
+
     let activityLabel: UILabel = {
         let activityLabel = UILabel()
         activityLabel.text = "Saving Video..."
@@ -131,6 +132,9 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         UIApplication.shared.isIdleTimerDisabled = true
         prepareCaptureSession()
         prepareCaptureUI()
+        
+        addAudioInput()
+
         NotificationCenter.default.addObserver(self, selector: #selector(self.handleBackgroundTask(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
         
         if let sound = Bundle.main.path(forResource: "shutter", ofType: "mp3") {
@@ -145,12 +149,15 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
 
         segmentedControl.addTarget(self, action: #selector(segmentedControlValueChanged), for: .valueChanged)
 
-        addAudioInput()
+        
+        let fontAttributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: fontSize)]
+        segmentedControl.setTitleTextAttributes(fontAttributes, for: .normal)
+
+        
         setupActivityIndicator()
         prepareTimerView()
         cameraUI()
         handPoseRequest.maximumHandCount = 1
-        segmentedControl.isEnabled = !(CameraViewController.isRecording && CameraViewController.isCap)
         stopSpeechRecognition()
         
         NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -161,6 +168,19 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
 
     }
     
+    func setupSegmentedControl() {
+        if CameraViewController.isRecording || CameraViewController.isCap || CameraViewController.isTimerRunning {
+            
+            segmentedControl.isEnabled = false
+            segmentedControl.isHidden = true
+        } else if !CameraViewController.isRecording && !CameraViewController.isTimerRunning {
+            segmentedControl.isEnabled = true
+            segmentedControl.isHidden = false
+
+        }
+
+
+    }
     @objc func appDidEnterBackground() {
         // Stop speech recognition when app enters the background
         stopSpeechRecognition()
@@ -199,6 +219,20 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private func startRecognizing() {
         guard !audioEngine.isRunning else { return }
+        
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            // Set the category to record, allowing audio input from Bluetooth devices
+            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+
+            // Set the preferred input port to none, allowing the system to decide the audio routing
+            try audioSession.overrideOutputAudioPort(.none)
+
+            // Activate the audio session
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("Error setting up audio session: \(error.localizedDescription)")
+        }
         
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         guard let recognitionRequest = recognitionRequest else { return }
@@ -431,23 +465,23 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
     }
     func addAudioInput() {
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.playAndRecord, mode: .default)
-            try audioSession.setActive(true, options: .init())
-            let audioDevice = AVCaptureDevice.default(for: AVMediaType.audio)!
-            let audioInput = try AVCaptureDeviceInput(device: audioDevice)
-            if ((captureSession?.canAddInput(audioInput)) != nil) {
-                captureSession!.addInput(audioInput)
-            }
-            
-            
-        } catch {
-            print("Error setting up audio input: \(error.localizedDescription)")
-        }
-    }
-    
-    
+        
+           let audioSession = AVAudioSession.sharedInstance()
+           do {
+               try audioSession.setCategory(.playAndRecord, mode: .videoRecording)
+               try audioSession.setActive(true, options: .init())
+               let audioDevice = AVCaptureDevice.default(for: AVMediaType.audio)!
+               let audioInput = try AVCaptureDeviceInput(device: audioDevice)
+               if ((captureSession?.canAddInput(audioInput)) != nil) {
+                   captureSession!.addInput(audioInput)
+               }
+               
+               
+           } catch {
+               print("Error setting up audio input: \(error.localizedDescription)")
+           }
+       }
+
     @objc private func toggleCamera() {
         
         // Toggle the camera position
@@ -550,9 +584,11 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         self.videoPreviewLayer = videoPreviewLayer
         }
-    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        
+
+        
         if let connection =  self.videoPreviewLayer?.connection {
             let currentDevice: UIDevice = UIDevice.current
             let orientation: UIDeviceOrientation = currentDevice.orientation
@@ -585,6 +621,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
             let fileURL = documentsURL.appendingPathComponent(fileName)
             startTimer()
             CameraViewController.isRecording = true
+            setupSegmentedControl()
+
             movieOutput.startRecording(to: fileURL, recordingDelegate: self)
             
         }
@@ -600,6 +638,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 CameraViewController.isRecording = true
+                self.setupSegmentedControl()
 
             }
 
@@ -656,8 +695,9 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     private func runTimer(seconds: Int, completion: @escaping () -> Void) {
         CameraViewController.isTimerRunning = true
         
+        setupSegmentedControl()
+
         var timeLeft = seconds
-        
         let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
         timer.schedule(deadline: .now(), repeating: .seconds(1))
         
@@ -669,7 +709,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
                 timer.cancel()
                 CameraViewController.isTimerRunning = false
                 self?.timerLabel?.text = nil
-                
+                self?.setupSegmentedControl()
+
                 completion()
             }
         }
@@ -849,7 +890,6 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                         let isLeftEyeClosed = leftEyeOpenDistance <= eyeClosedThreshold
                         
 
-                        print(leftEyeOpenDistance)
 
                         let rightEyeTopPoint = rightEyePoints[1]
                         let rightEyeBottomPoint = rightEyePoints[4]
@@ -1117,130 +1157,43 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
 
 extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     
+    func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
+        print("Started recording to \(fileURL)")
+    }
+    
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-        let recordingTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "SaveVideoToPhotos") // Start the background task
-
-        videoQueue.async { // adding to queue for piortizing and to proof from interruptions
-            DispatchQueue.main.async { // animating on the main thread.
-                self.activityIndicator.startAnimating()
-                self.activityLabel.isHidden = false
-            }
-
-            if let error = error {
-                print("Error recording video: \(error.localizedDescription)")
-                return
-                
-            }
-            
-            let asset = AVAsset(url: outputFileURL)
-            guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
-                print("Export session could not be created")
-                return
-            }
-            
-            guard FileManager.default.fileExists(atPath: outputFileURL.path) else {
-                print("Output file does not exist")
-                return
-            }
-            
-            let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("trimmedVideo.mp4")
-            
-            if FileManager.default.fileExists(atPath: outputURL.path) {
-                do {
-                    try FileManager.default.removeItem(at: outputURL)
-                } catch {
-                    print("Error removing file at path: \(outputURL.path)")
-                }
-            }
-            // method to cut the last 3 seconds of the video.
-            exportSession.outputURL = outputURL
-            exportSession.outputFileType = .mp4
-            exportSession.shouldOptimizeForNetworkUse = true
-            
-            let duration = asset.duration
-            let startTime = CMTime.zero
-            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds( 1 , preferredTimescale: 1)) // to make it cut 5 seconds for example, we just put 5 instead of 3.
-            let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
-            exportSession.timeRange = timeRange
-            
-            exportSession.exportAsynchronously {
-                switch exportSession.status {
-                case .completed:
-                    PHPhotoLibrary.requestAuthorization { status in
-                        if status == .authorized {
-                            PHPhotoLibrary.shared().performChanges({
-                                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)
-                            }) { success, error in
-                                if success {
-                                    print("Video saved to photos")
-                                    UIApplication.shared.endBackgroundTask(recordingTaskIdentifier) 
-                                    DispatchQueue.main.async {
-                                        self.activityIndicator.stopAnimating()
-                                        self.activityLabel.isHidden = true
-                                        CameraViewController.isRecording = false
-                                        self.videoSaved()
-                                    }
-
-                                } else { // starting here are just debugging for error checking.
-                                    print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
-                                    DispatchQueue.main.async {
-                                        self.activityIndicator.stopAnimating()
-                                        CameraViewController.isRecording = false
-                                        self.activityLabel.isHidden = true
-                                    }
-
-                                }
-                            }
-                        } else {
-                            print("Access to photo library denied")
-                            DispatchQueue.main.async {
-                                self.activityIndicator.stopAnimating()
+        if let error = error {
+            print("Error recording video: \(error.localizedDescription)")
+        } else {
+            PHPhotoLibrary.requestAuthorization { status in
+                if status == .authorized {
+                    PHPhotoLibrary.shared().performChanges({
+                        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
+                    }) { success, error in
+                        if success {
+                            DispatchQueue.main.async { [self] in
+                                videoSaved()
                                 CameraViewController.isRecording = false
+                                self.setupSegmentedControl()
 
                             }
+
+                        } else {
+                            print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
+                            CameraViewController.isRecording = false
+                            self.setupSegmentedControl()
+
 
                         }
                     }
-                case .failed:
-                    print("Export failed: \(exportSession.error?.localizedDescription ?? "unknown error")")
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                        CameraViewController.isRecording = false
-
-                    }
-
-                    print("Export error: \(String(describing: exportSession.error))")
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                        CameraViewController.isRecording = false
-
-                    }
-
-                case .cancelled:
-                    print("Export cancelled")
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                        self.activityLabel.isHidden = true
-                        CameraViewController.isRecording = false
-
-                    }
-
-                case .exporting:
-                    print("Exporting...")
-                case .waiting:
-                    print("Waiting...")
-                case .unknown:
-                    print("Unknown status...")
-                @unknown default:
-                    print("Fatal Error")
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                        CameraViewController.isRecording = false
-                        self.activityLabel.isHidden = true
-                    }
+                } else {
+                    print("Access to photo library denied")
+                    CameraViewController.isRecording = false
+                    self.setupSegmentedControl()
 
                 }
             }
+
         }
     }
 }
