@@ -17,7 +17,6 @@ import AVFAudio
 
 class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
-    let videoQueue = DispatchQueue(label: "com.example.videoQueue")
     private var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     var audioPlayer: AVAudioPlayer? //for playing shutter sound
@@ -135,7 +134,6 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         addAudioInput()
 
-        NotificationCenter.default.addObserver(self, selector: #selector(self.handleBackgroundTask(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
         
         if let sound = Bundle.main.path(forResource: "shutter", ofType: "mp3") {
             do {
@@ -322,10 +320,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
     }
     
-    @objc func handleBackgroundTask(_ notification: Notification) {
-        UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
-        
-    }
+
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
@@ -628,24 +623,6 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
     }
 
-    func startRecGesture() {
-        if !movieOutput.isRecording {
-            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            let fileName = "\(UUID().uuidString).mp4"
-            let fileURL = documentsURL.appendingPathComponent(fileName)
-            startTimer()
-            movieOutput.startRecording(to: fileURL, recordingDelegate: self)
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                CameraViewController.isRecording = true
-                self.setupSegmentedControl()
-
-            }
-
-            
-        }
-    }
-
 
     // to stop recording video
     func stopRecording() {
@@ -917,7 +894,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                             
                         } else if isSmiling && ( isLeftEyeClosed || isRightEyeClosed ) && !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
                             self?.runTimer(seconds: 3, completion: {
-                                self?.startRecGesture()
+                                self?.startRecording()
                             })
                         } else if isSmiling && ( isLeftEyeClosed || isRightEyeClosed ) && !CameraViewController.isTimerRunning && CameraViewController.isRecording {
                             self?.stopRecording()
@@ -949,7 +926,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             guard let confidence = prediction.labelProbabilities[label] else { return }
             print("label: \(prediction.label)\nconfidence: \(confidence)")
 
-            if confidence > 0.95 {
+            if confidence > 0.97 {
                 DispatchQueue.main.async { [self] in
                     let currentPrediction = try? model!.prediction(poses: keypointsMultiArray)
                     let currentLabel = currentPrediction?.label
@@ -958,7 +935,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 
                     previousKeypointsMultiArray = keypointsMultiArray
 
-                    if currentLabel == label && confidence > 0.95 && !isHandMoving {
+                    if currentLabel == label && confidence > 0.97 && !isHandMoving {
                         switch label {
                         case "ok":
                             if !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
@@ -1086,7 +1063,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                if !CameraViewController.isTimerRunning {
                    runTimer(seconds: 3, completion: { [weak self] in
                        guard let self else { return }
-                       self.startRecGesture()
+                       self.startRecording()
                    })
                }
            case .vidStop:
