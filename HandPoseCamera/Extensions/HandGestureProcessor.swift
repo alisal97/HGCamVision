@@ -52,10 +52,10 @@ class HandGestureProcessor: UIViewController {
         } else if distanceIT <= 13.5 && distanceIM >= 7 && distanceRM >= 7 && distanceRL >= 5 && isRec == true {
             currentState = .quickPhoto
         }
-        else if (distanceTR <= 10.3 || distanceRT <= 10.3) && distanceRL <= 11 && distanceIR >= 11 && distanceRM >= 11 && distanceTM >= 11 && distanceIT >= 11 && isRec == false {
+        else if (distanceTR <= 9.3 || distanceRT <= 9.3) && distanceRL <= 11 && distanceIR >= 11 && distanceRM >= 11 && distanceTM >= 11 && distanceIT >= 11 && isRec == false {
             currentState = .vidRec
             
-        } else if (distanceTR <= 10.3 || distanceRT <= 10.3) && distanceRL <= 11 && distanceIR >= 11 && distanceRM >= 11 && distanceTM >= 11 && distanceIT >= 11 && isRec == true {
+        } else if (distanceTR <= 9.3 || distanceRT <= 9.3) && distanceRL <= 11 && distanceIR >= 11 && distanceRM >= 11 && distanceTM >= 11 && distanceIT >= 11 && isRec == true {
             currentState = .vidStop
         } else {
             currentState = .unknown

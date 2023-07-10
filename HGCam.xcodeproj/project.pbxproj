@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		104A12BC2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */; };
-		109A760C2A55AB8400E0F9AA /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A760B2A55AB8400E0F9AA /* CameraViewController.swift */; };
-		109A760F2A55ABDA00E0F9AA /* HandGestureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A760D2A55ABDA00E0F9AA /* HandGestureProcessor.swift */; };
 		109A76102A55ABDA00E0F9AA /* VNRecognizedPoint+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A760E2A55ABDA00E0F9AA /* VNRecognizedPoint+.swift */; };
+		109A761C2A5C01AD00E0F9AA /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */; };
+		109A761E2A5C01EC00E0F9AA /* HandGestureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A761D2A5C01EC00E0F9AA /* HandGestureProcessor.swift */; };
 		ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */; };
 		ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */; };
 		ACBD85F324A4E3A7002F7C9C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ACBD85F124A4E3A7002F7C9C /* Main.storyboard */; };
@@ -21,9 +21,9 @@
 /* Begin PBXFileReference section */
 		104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = fullyaugmented175cleaned.mlmodel; sourceTree = "<group>"; };
 		10874CD929A7C837004B68FC /* HGCamRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCamRelease.entitlements; sourceTree = "<group>"; };
-		109A760B2A55AB8400E0F9AA /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CameraViewController.swift; path = ../../CameraViewController.swift; sourceTree = "<group>"; };
-		109A760D2A55ABDA00E0F9AA /* HandGestureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HandGestureProcessor.swift; path = ../../../../Downloads/HandGestureProcessor.swift; sourceTree = "<group>"; };
 		109A760E2A55ABDA00E0F9AA /* VNRecognizedPoint+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "VNRecognizedPoint+.swift"; path = "../../../../Downloads/VNRecognizedPoint+.swift"; sourceTree = "<group>"; };
+		109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
+		109A761D2A5C01EC00E0F9AA /* HandGestureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HandGestureProcessor.swift; sourceTree = "<group>"; };
 		10A9CE3229AEB5C900EEA4CA /* HGCam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCam.entitlements; sourceTree = "<group>"; };
 		ACBD85E824A4E3A7002F7C9C /* HGCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HGCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -48,7 +48,7 @@
 		AC5F900F24C36CD000C85582 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				109A760D2A55ABDA00E0F9AA /* HandGestureProcessor.swift */,
+				109A761D2A5C01EC00E0F9AA /* HandGestureProcessor.swift */,
 				109A760E2A55ABDA00E0F9AA /* VNRecognizedPoint+.swift */,
 			);
 			path = Extensions;
@@ -77,8 +77,8 @@
 			children = (
 				AC5F900F24C36CD000C85582 /* Extensions */,
 				ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */,
+				109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */,
 				104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */,
-				109A760B2A55AB8400E0F9AA /* CameraViewController.swift */,
 				ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */,
 				ACBD85F124A4E3A7002F7C9C /* Main.storyboard */,
 				ACBD85F424A4E3AC002F7C9C /* Assets.xcassets */,
@@ -164,12 +164,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				109A760F2A55ABDA00E0F9AA /* HandGestureProcessor.swift in Sources */,
 				ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */,
+				109A761E2A5C01EC00E0F9AA /* HandGestureProcessor.swift in Sources */,
 				109A76102A55ABDA00E0F9AA /* VNRecognizedPoint+.swift in Sources */,
-				109A760C2A55AB8400E0F9AA /* CameraViewController.swift in Sources */,
 				ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */,
 				104A12BC2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel in Sources */,
+				109A761C2A5C01AD00E0F9AA /* CameraViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
