@@ -92,9 +92,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         label.text = "00:00"
         label.font = UIFont.systemFont(ofSize: 39, weight: .regular)
         label.textColor = UIColor.white
-        //        label.backgroundColor = UIColor.systemRed
         label.textAlignment = .center
-        //        label.isHidden = true
         return label
     }()
     
@@ -102,17 +100,22 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
 
     
     
-    //      camera switch button
     let switchCameraButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        let config = UIImage.SymbolConfiguration(pointSize: 35)
-        button.setImage(UIImage(systemName: "arrow.triangle.2.circlepath", withConfiguration: config), for: .normal)
-        button.tintColor = .white
+        let config = UIImage.SymbolConfiguration(pointSize: 39)
+        let image = UIImage(systemName: "arrow.triangle.2.circlepath", withConfiguration: config)?.withTintColor(.white, renderingMode: .alwaysOriginal)
+        
+        let circleConfig = UIImage.SymbolConfiguration(pointSize: 87)
+
+        let circleImage = UIImage(systemName: "circle.fill", withConfiguration: circleConfig)?.withTintColor(.darkGray, renderingMode: .alwaysOriginal)
+        
+        let combinedImage = circleImage?.overlayWith(image: image!, offsetX: 0, offsetY: 0)
+        
+        button.setImage(combinedImage, for: .normal)
         return button
     }()
-    
-    
+
     
     private func setupActivityIndicator() {
         activityIndicator = UIActivityIndicatorView(style: .large)
@@ -493,10 +496,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         guard let input = try? AVCaptureDeviceInput(device: captureDevice) else { return }
         captureSession?.addInput(input)
         
-        // Add audio input
         addAudioInput()
-        // Restart the capture session
-        
+
         DispatchQueue.global(qos: .background).async { [self] in
             captureSession?.startRunning()
         }
@@ -508,29 +509,29 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         // Create a new view for the grey rectangle
         let topView = UIView()
         topView.translatesAutoresizingMaskIntoConstraints = false
-        topView.backgroundColor = UIColor.black.withAlphaComponent(0.79) // set the background color to transparent grey
+        topView.backgroundColor = UIColor.black.withAlphaComponent(0.83) // set the background color to transparent grey
         view.addSubview(topView)
         
         topView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         topView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         topView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        topView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.15).isActive = true
+        topView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.17).isActive = true
         
         // Create a new view for the grey rectangle
         let bottomView = UIView()
         bottomView.translatesAutoresizingMaskIntoConstraints = false
-        bottomView.backgroundColor = UIColor.black.withAlphaComponent(0.79) // set the background color to transparent grey
+        bottomView.backgroundColor = UIColor.black.withAlphaComponent(0.83) // set the background color to transparent grey
         view.addSubview(bottomView)
         
         bottomView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         bottomView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         bottomView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        bottomView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.17).isActive = true
+        bottomView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.19).isActive = true
         
         view.addSubview(CameraViewController.recordLabel)
         CameraViewController.recordLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            CameraViewController.recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -49),
+            CameraViewController.recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -25),
             CameraViewController.recordLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
 
@@ -541,10 +542,10 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         switchCameraButton.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            switchCameraButton.widthAnchor.constraint(equalToConstant: 44),
-            switchCameraButton.heightAnchor.constraint(equalToConstant: 44),
+            switchCameraButton.widthAnchor.constraint(equalToConstant: 45),
+            switchCameraButton.heightAnchor.constraint(equalToConstant: 45),
             switchCameraButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            switchCameraButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+            switchCameraButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -15)
         ])
         
         
@@ -564,7 +565,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         segmentedControl.translatesAutoresizingMaskIntoConstraints = false
 
         segmentedControl.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-        segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        segmentedControl.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -85 ).isActive = true
 
 
     }

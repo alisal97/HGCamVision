@@ -11,6 +11,7 @@
 		109A76102A55ABDA00E0F9AA /* VNRecognizedPoint+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A760E2A55ABDA00E0F9AA /* VNRecognizedPoint+.swift */; };
 		109A761C2A5C01AD00E0F9AA /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */; };
 		109A761E2A5C01EC00E0F9AA /* HandGestureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A761D2A5C01EC00E0F9AA /* HandGestureProcessor.swift */; };
+		109A76202A5C1A0F00E0F9AA /* viewHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A761F2A5C1A0F00E0F9AA /* viewHelpers.swift */; };
 		ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */; };
 		ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */; };
 		ACBD85F324A4E3A7002F7C9C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ACBD85F124A4E3A7002F7C9C /* Main.storyboard */; };
@@ -24,6 +25,7 @@
 		109A760E2A55ABDA00E0F9AA /* VNRecognizedPoint+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "VNRecognizedPoint+.swift"; path = "../../../../Downloads/VNRecognizedPoint+.swift"; sourceTree = "<group>"; };
 		109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		109A761D2A5C01EC00E0F9AA /* HandGestureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HandGestureProcessor.swift; sourceTree = "<group>"; };
+		109A761F2A5C1A0F00E0F9AA /* viewHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = viewHelpers.swift; sourceTree = "<group>"; };
 		10A9CE3229AEB5C900EEA4CA /* HGCam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCam.entitlements; sourceTree = "<group>"; };
 		ACBD85E824A4E3A7002F7C9C /* HGCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HGCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -50,6 +52,7 @@
 			children = (
 				109A761D2A5C01EC00E0F9AA /* HandGestureProcessor.swift */,
 				109A760E2A55ABDA00E0F9AA /* VNRecognizedPoint+.swift */,
+				109A761F2A5C1A0F00E0F9AA /* viewHelpers.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -165,6 +168,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */,
+				109A76202A5C1A0F00E0F9AA /* viewHelpers.swift in Sources */,
 				109A761E2A5C01EC00E0F9AA /* HandGestureProcessor.swift in Sources */,
 				109A76102A55ABDA00E0F9AA /* VNRecognizedPoint+.swift in Sources */,
 				ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */,
