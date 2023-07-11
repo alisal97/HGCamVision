@@ -526,12 +526,10 @@ class CameraViewController: UIViewController {
 //  to record video
     func startRecording() {
        if !movieOutput.isRecording {
-           let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-           let fileName = "\(UUID().uuidString).mp4"
-           let fileURL = documentsURL.appendingPathComponent(fileName)
+           let outputPath = NSTemporaryDirectory() + "output.mov"
+           let outputFileURL = URL(fileURLWithPath: outputPath)
+           movieOutput.startRecording(to: outputFileURL, recordingDelegate: self)
            startTimer()
-           movieOutput.startRecording(to: fileURL, recordingDelegate: self)
-           
        }
    }
 // to stop recording video
