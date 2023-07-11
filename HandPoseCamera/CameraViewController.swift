@@ -228,7 +228,6 @@ class CameraViewController: UIViewController {
         UIApplication.shared.isIdleTimerDisabled = true
         prepareCaptureSession()
         prepareCaptureUI()
-        NotificationCenter.default.addObserver(self, selector: #selector(self.handleBackgroundTask(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
 
         if let sound = Bundle.main.path(forResource: "shutter", ofType: "mp3") {
             do {
@@ -298,11 +297,6 @@ class CameraViewController: UIViewController {
         flashButton.addTarget(self, action: #selector(toggleFlash), for: .touchUpInside)
 
 
-    }
-    // enabling backgroundTask, this way video saving will keep on working even if the user switches to another app or to home screen
-    @objc func handleBackgroundTask(_ notification: Notification) {
-       UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
-        
     }
 //  adding support for landscape views.
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -670,7 +664,8 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
     }
 }
-// output for captured photos
+
+
 extension CameraViewController: AVCapturePhotoCaptureDelegate {
     
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
@@ -680,123 +675,31 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
     }
 }
 
-// output for recorded videos, it's added to video queue for pioritizing with activity indicator to show that a video is being saved, and it's added to background tasks so it doesn't get interrupted when users switch to another app or homescreen.
 extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     
+    func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
+        print("Started recording to \(fileURL)")
+    }
+    
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-        let recordingTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "SaveVideoToPhotos") // Start the background task
+        if let error = error {
+            print("Error recording video: \(error.localizedDescription)")
+        } else {
+            PHPhotoLibrary.requestAuthorization { status in
+                if status == .authorized {
+                    PHPhotoLibrary.shared().performChanges({
+                        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
+                    }) { success, error in
+                        if success {
 
-        videoQueue.async { // adding to queue for piortizing and to proof from interruptions
-            DispatchQueue.main.async { // animating on the main thread.
-                self.activityIndicator.startAnimating() //starting the activity loading indicator for when a video is taken.
-            }
-
-            if let error = error {
-                print("Error recording video: \(error.localizedDescription)")
-                return
-                
-            }
-            
-            let asset = AVAsset(url: outputFileURL)
-            guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
-                print("Export session could not be created")
-                return
-            }
-            
-            guard FileManager.default.fileExists(atPath: outputFileURL.path) else {
-                print("Output file does not exist")
-                return
-            }
-            
-            let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("trimmedVideo.mp4")
-            
-            if FileManager.default.fileExists(atPath: outputURL.path) {
-                do {
-                    try FileManager.default.removeItem(at: outputURL)
-                } catch {
-                    print("Error removing file at path: \(outputURL.path)")
-                }
-            }
-            // method to cut the last 3 seconds of the video.
-            exportSession.outputURL = outputURL
-            exportSession.outputFileType = .mp4
-            exportSession.shouldOptimizeForNetworkUse = true
-            
-            let duration = asset.duration
-            let startTime = CMTime.zero
-            let endTime = CMTimeSubtract(duration, CMTimeMakeWithSeconds( 5 , preferredTimescale: 1)) // to make it cut 5 seconds for example, we just put 5 instead of 3.
-            let timeRange = CMTimeRangeFromTimeToTime(start: startTime, end: endTime)
-            exportSession.timeRange = timeRange
-            
-            exportSession.exportAsynchronously {
-                switch exportSession.status {
-                case .completed:
-                    PHPhotoLibrary.requestAuthorization { status in
-                        if status == .authorized {
-                            PHPhotoLibrary.shared().performChanges({
-                                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)
-                            }) { success, error in
-                                if success {
-                                    print("Video saved to photos")
-                                    UIApplication.shared.endBackgroundTask(recordingTaskIdentifier) // when video saving is complete it will remove the app from background tasks
-                                    DispatchQueue.main.async {
-                                        self.activityIndicator.stopAnimating() // when saving video is complete it will stop the animation of the indicator and remove it from the view.
-                                        self.videoSaved()
-                                    }
-
-                                } else { // starting here are just debugging for error checking.
-                                    print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
-                                    DispatchQueue.main.async {
-                                        self.activityIndicator.stopAnimating()
-                                    }
-
-                                }
-                            }
                         } else {
-                            print("Access to photo library denied")
-                            DispatchQueue.main.async {
-                                self.activityIndicator.stopAnimating()
-                            }
-
+                            print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
                         }
                     }
-                case .failed:
-                    print("Export failed: \(exportSession.error?.localizedDescription ?? "unknown error")")
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                    }
-
-                    print("Export error: \(String(describing: exportSession.error))")
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                    }
-
-                case .cancelled:
-                    print("Export cancelled")
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                    }
-
-                case .exporting:
-                    print("Exporting...")
-                case .waiting:
-                    print("Waiting...")
-                case .unknown:
-                    print("Unknown status...")
-                @unknown default:
-                    print("Fatal Error")
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                    }
-
+                } else {
+                    print("Access to photo library denied")
                 }
             }
         }
     }
 }
-
-
-    
-
-
-

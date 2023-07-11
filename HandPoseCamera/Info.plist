@@ -26,18 +26,16 @@
 	<string>We need Camera access in order to launch the app!</string>
 	<key>NSCocoaErrorDomain</key>
 	<string></string>
-	<key>NSFileProviderDomainUsageDescription</key>
-	<string>We need file access in order to enable iCloud sync.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>We need Microphone access in order to record videos!</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>we need photo library additions to view gallery</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need Microphone access in order to record videos!</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need Photos access in order to save media!</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
-		<false/>
+		<true/>
 		<key>UISceneConfigurations</key>
 		<dict>
 			<key>UIWindowSceneSessionRoleApplication</key>
@@ -55,12 +53,6 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>audio</string>
-		<string>fetch</string>
-		<string>processing</string>
-	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>UILaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
