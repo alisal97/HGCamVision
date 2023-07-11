@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		104A12BC2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */; };
-		10B07B1E2A559ECB00CBD509 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B07B1D2A559ECB00CBD509 /* CameraViewController.swift */; };
+		109A76262A5D5B9E00E0F9AA /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A76252A5D5B9E00E0F9AA /* CameraViewController.swift */; };
 		ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */; };
 		ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */; };
 		ACBD85F324A4E3A7002F7C9C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ACBD85F124A4E3A7002F7C9C /* Main.storyboard */; };
@@ -19,8 +19,8 @@
 /* Begin PBXFileReference section */
 		104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = fullyaugmented175cleaned.mlmodel; sourceTree = "<group>"; };
 		10874CD929A7C837004B68FC /* HGCamRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCamRelease.entitlements; sourceTree = "<group>"; };
+		109A76252A5D5B9E00E0F9AA /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		10A9CE3229AEB5C900EEA4CA /* HGCam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCam.entitlements; sourceTree = "<group>"; };
-		10B07B1D2A559ECB00CBD509 /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CameraViewController.swift; path = ../../../Downloads/release/CameraViewController.swift; sourceTree = "<group>"; };
 		ACBD85E824A4E3A7002F7C9C /* HGCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HGCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -72,12 +72,12 @@
 				AC5F900F24C36CD000C85582 /* Extensions */,
 				ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */,
 				104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */,
-				10B07B1D2A559ECB00CBD509 /* CameraViewController.swift */,
 				ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */,
 				ACBD85F124A4E3A7002F7C9C /* Main.storyboard */,
 				ACBD85F424A4E3AC002F7C9C /* Assets.xcassets */,
 				ACBD85F624A4E3AC002F7C9C /* LaunchScreen.storyboard */,
 				ACBD85F924A4E3AC002F7C9C /* Info.plist */,
+				109A76252A5D5B9E00E0F9AA /* CameraViewController.swift */,
 			);
 			path = HandPoseCamera;
 			sourceTree = "<group>";
@@ -159,7 +159,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */,
-				10B07B1E2A559ECB00CBD509 /* CameraViewController.swift in Sources */,
+				109A76262A5D5B9E00E0F9AA /* CameraViewController.swift in Sources */,
 				ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */,
 				104A12BC2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel in Sources */,
 			);

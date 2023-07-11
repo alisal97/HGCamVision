@@ -1,16 +1,3 @@
-//
-//  CameraViewController.swift
-//  HGCam
-//
-//  Created by Aly Salman on 18/02/23.
-//  Copyright © 2023 CB Gang. All rights reserved.
-////
-//  CameraViewController.swift
-//  HGCam
-//
-//  Created by Aly Salman on 18/02/23.
-//  Copyright © 2023 CB Gang. All rights reserved.
-//
 
 import UIKit
 import AVKit
@@ -18,7 +5,6 @@ import Foundation
 import AVFoundation
 import Vision
 import Photos
-import SnapKit
 
 class CameraViewController: UIViewController {
     
@@ -263,7 +249,7 @@ class CameraViewController: UIViewController {
         view.addSubview(recordLabel)
         recordLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -16),
+            recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 15),
             recordLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
@@ -563,17 +549,17 @@ class CameraViewController: UIViewController {
        }
    }
     
-// view for countdown timer for when taking a photo or a video
     private func prepareTimerView() {
         let timerLabel = UILabel()
         timerLabel.textAlignment = .center
-        timerLabel.font = UIFont.systemFont(ofSize: 41)
+        timerLabel.font = UIFont.systemFont(ofSize: 300)
         
         view.addSubview(timerLabel)
-        timerLabel.snp.makeConstraints { maker in
-            maker.center.equalToSuperview()
-        }
-        
+        timerLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            timerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            timerLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
         self.timerLabel = timerLabel
     }
     // capturing images
@@ -606,7 +592,7 @@ class CameraViewController: UIViewController {
         var timeLeft = seconds
         
         let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { timer in
-            self.timerLabel?.text = "Action in... \(timeLeft) "
+            self.timerLabel?.text = "\(timeLeft) "
             timeLeft -= 1
             
             if timeLeft < 0 {
