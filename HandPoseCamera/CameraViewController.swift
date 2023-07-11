@@ -44,9 +44,9 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     let model = try? fullyaugmented175cleaned(configuration: MLModelConfiguration())
     private let handGestureProcessor = HandGestureProcessor()
 
-    let segmentedControl = UISegmentedControl(items: ["Hand Pose", "Hand Gesture", "Voice Recoognition", "Face Gestures"])
+    let segmentedControl = UISegmentedControl(items: ["Hand Pose", "Hand Gesture", "Voice Activation", "Face Gestures"])
 
-    var userSelection: Int = 1
+    var userSelection: Int = 2
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))!
     
@@ -58,7 +58,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     let targetWords = ["cheese", "action", "stop"]
     private var lastSpokenWord: String = ""
 
-    let fontSize: CGFloat = 8.1
+    let fontSize: CGFloat = 10.3
 
     let activityLabel: UILabel = {
         let activityLabel = UILabel()
@@ -146,7 +146,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
             }
             
         }
-        segmentedControl.selectedSegmentIndex = 1
+        segmentedControl.selectedSegmentIndex = userSelection
 
         segmentedControl.addTarget(self, action: #selector(segmentedControlValueChanged), for: .valueChanged)
 
@@ -224,10 +224,13 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         let audioSession = AVAudioSession.sharedInstance()
         do {
             // Set the category to record, allowing audio input from Bluetooth devices
+//            try audioSession.setCategory(.record, mode: .measurement, options: [.duckOthers, .allowBluetooth, .allowBluetoothA2DP])
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+
 
             // Set the preferred input port to none, allowing the system to decide the audio routing
             try audioSession.overrideOutputAudioPort(.none)
+            
 
             // Activate the audio session
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
@@ -466,7 +469,10 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         
            let audioSession = AVAudioSession.sharedInstance()
            do {
+               
                try audioSession.setCategory(.playAndRecord, mode: .videoRecording)
+
+//               try audioSession.setCategory(.playAndRecord, mode: .videoRecording, options: [.allowBluetooth, .allowBluetoothA2DP, .defaultToSpeaker])
                try audioSession.setActive(true, options: .init())
                let audioDevice = AVCaptureDevice.default(for: AVMediaType.audio)!
                let audioInput = try AVCaptureDeviceInput(device: audioDevice)
@@ -609,21 +615,16 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     }
     
     
-    //  to record video
     func startRecording() {
-        if !movieOutput.isRecording {
-            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            let fileName = "\(UUID().uuidString).mp4"
-            let fileURL = documentsURL.appendingPathComponent(fileName)
-            startTimer()
-            CameraViewController.isRecording = true
-            setupSegmentedControl()
-
-            movieOutput.startRecording(to: fileURL, recordingDelegate: self)
-            
-        }
-    }
-
+       if !movieOutput.isRecording {
+           let outputPath = NSTemporaryDirectory() + "output.mov"
+           let outputFileURL = URL(fileURLWithPath: outputPath)
+           movieOutput.startRecording(to: outputFileURL, recordingDelegate: self)
+           startTimer()
+           CameraViewController.isRecording = true
+           setupSegmentedControl()
+       }
+   }
 
     // to stop recording video
     func stopRecording() {
@@ -818,23 +819,23 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 
                 for observation in observations {
                     if let landmarks = observation.landmarks,
-//                       let faceContour = landmarks.faceContour,
+                       let faceContour = landmarks.faceContour,
                        let leftEye = landmarks.leftEye,
                        let rightEye = landmarks.rightEye,
-//                       let outerLips = landmarks.outerLips,
-//                       let rightBrow = landmarks.rightEyebrow,
-//                       let leftBrow = landmarks.leftEyebrow
+                       let outerLips = landmarks.outerLips,
+                       let rightBrow = landmarks.rightEyebrow,
+                       let leftBrow = landmarks.leftEyebrow,
                         let innerLips = landmarks.innerLips {
                         
                         
-//                        let faceContourPoints = faceContour.normalizedPoints
+                        let faceContourPoints = faceContour.normalizedPoints
                         let leftEyePoints = leftEye.normalizedPoints
                         let rightEyePoints = rightEye.normalizedPoints
-//                        let outerLipsPoints = outerLips.normalizedPoints
+                        let outerLipsPoints = outerLips.normalizedPoints
                         let innerLipsPoints = innerLips.normalizedPoints
-//                        let leftEyebrowPoints = leftBrow.normalizedPoints
-//                        let rightEyebrowPoints = rightBrow.normalizedPoints
-//
+                        let leftEyebrowPoints = leftBrow.normalizedPoints
+                        let rightEyebrowPoints = rightBrow.normalizedPoints
+
 //                        let eyebrowRaiseThreshold: CGFloat = 0.06 // Adjust the threshold value as needed
 //
 //

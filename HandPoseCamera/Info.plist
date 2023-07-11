@@ -25,13 +25,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera access is needed in order to record videos and take pictures</string>
+	<string>To capture photos and videos, camera access is needed for the app.</string>
 	<key>NSCocoaErrorDomain</key>
 	<string></string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Microphone access is needed in order to record audible videos.</string>
+	<string>Microphone access is needed in order to record audible videos and to use voice activation.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Photos access is needed in order to save media taken by this app.</string>
+	<string>Access to your photo library is needed  to save photos and videos created using the app.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>This app uses speech recognition to enable voice commands for capturing photos and recording videos.</string>
 	<key>UIApplicationSceneManifest</key>
@@ -67,7 +67,7 @@
 		<string>armv7</string>
 	</array>
 	<key>UIStatusBarStyle</key>
-	<string></string>
+	<string>UIStatusBarStyleDefault</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
