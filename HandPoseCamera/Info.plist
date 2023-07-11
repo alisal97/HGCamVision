@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>aly.CB.Gang.HGCam</string>
-	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -33,7 +29,7 @@
 	<key>NSFileProviderDomainUsageDescription</key>
 	<string>We need file access in order to enable iCloud sync.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>we need mic access in order to recrod videos!</string>
+	<string>We need Microphone access in order to record videos!</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>we need photo library additions to view gallery</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -57,6 +53,8 @@
 			</array>
 		</dict>
 	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
