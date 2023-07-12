@@ -12,6 +12,8 @@
 		109A761C2A5C01AD00E0F9AA /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */; };
 		109A761E2A5C01EC00E0F9AA /* HandGestureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A761D2A5C01EC00E0F9AA /* HandGestureProcessor.swift */; };
 		109A76202A5C1A0F00E0F9AA /* viewHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A761F2A5C1A0F00E0F9AA /* viewHelpers.swift */; };
+		109A76352A5EC73900E0F9AA /* FaceTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A76332A5EC73900E0F9AA /* FaceTrigger.swift */; };
+		109A76362A5EC73900E0F9AA /* FaceTriggerEvaluators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A76342A5EC73900E0F9AA /* FaceTriggerEvaluators.swift */; };
 		ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */; };
 		ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */; };
 		ACBD85F324A4E3A7002F7C9C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ACBD85F124A4E3A7002F7C9C /* Main.storyboard */; };
@@ -26,6 +28,8 @@
 		109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		109A761D2A5C01EC00E0F9AA /* HandGestureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HandGestureProcessor.swift; sourceTree = "<group>"; };
 		109A761F2A5C1A0F00E0F9AA /* viewHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = viewHelpers.swift; sourceTree = "<group>"; };
+		109A76332A5EC73900E0F9AA /* FaceTrigger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FaceTrigger.swift; sourceTree = "<group>"; };
+		109A76342A5EC73900E0F9AA /* FaceTriggerEvaluators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FaceTriggerEvaluators.swift; sourceTree = "<group>"; };
 		10A9CE3229AEB5C900EEA4CA /* HGCam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCam.entitlements; sourceTree = "<group>"; };
 		ACBD85E824A4E3A7002F7C9C /* HGCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HGCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -83,6 +87,8 @@
 				109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */,
 				104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */,
 				ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */,
+				109A76332A5EC73900E0F9AA /* FaceTrigger.swift */,
+				109A76342A5EC73900E0F9AA /* FaceTriggerEvaluators.swift */,
 				ACBD85F124A4E3A7002F7C9C /* Main.storyboard */,
 				ACBD85F424A4E3AC002F7C9C /* Assets.xcassets */,
 				ACBD85F624A4E3AC002F7C9C /* LaunchScreen.storyboard */,
@@ -171,9 +177,11 @@
 				109A76202A5C1A0F00E0F9AA /* viewHelpers.swift in Sources */,
 				109A761E2A5C01EC00E0F9AA /* HandGestureProcessor.swift in Sources */,
 				109A76102A55ABDA00E0F9AA /* VNRecognizedPoint+.swift in Sources */,
+				109A76362A5EC73900E0F9AA /* FaceTriggerEvaluators.swift in Sources */,
 				ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */,
 				104A12BC2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel in Sources */,
 				109A761C2A5C01AD00E0F9AA /* CameraViewController.swift in Sources */,
+				109A76352A5EC73900E0F9AA /* FaceTrigger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

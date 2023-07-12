@@ -38,6 +38,9 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     var previousKeypointsMultiArray: MLMultiArray?
     
+    
+    var faceTrigger: FaceTrigger?
+
     var frameCounter = 0
     let handPosePredictionInterval = 9
     
@@ -128,7 +131,12 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         
     }
     
-    
+    override func viewDidAppear(_ animated: Bool) {
+      super.viewDidAppear(animated)
+
+      faceTrigger = FaceTrigger(hostView: view, delegate: self)
+      faceTrigger?.start()
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         UIApplication.shared.isIdleTimerDisabled = true
@@ -818,22 +826,22 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 
                 for observation in observations {
                     if let landmarks = observation.landmarks,
-                       let faceContour = landmarks.faceContour,
+//                       let faceContour = landmarks.faceContour,
                        let leftEye = landmarks.leftEye,
                        let rightEye = landmarks.rightEye,
-                       let outerLips = landmarks.outerLips,
-                       let rightBrow = landmarks.rightEyebrow,
-                       let leftBrow = landmarks.leftEyebrow,
+//                       let outerLips = landmarks.outerLips,
+//                       let rightBrow = landmarks.rightEyebrow,
+//                       let leftBrow = landmarks.leftEyebrow,
                         let innerLips = landmarks.innerLips {
                         
                         
-                        let faceContourPoints = faceContour.normalizedPoints
+//                            let faceContourPoints = faceContour.normalizedPoints
                         let leftEyePoints = leftEye.normalizedPoints
                         let rightEyePoints = rightEye.normalizedPoints
-                        let outerLipsPoints = outerLips.normalizedPoints
+//                        let outerLipsPoints = outerLips.normalizedPoints
                         let innerLipsPoints = innerLips.normalizedPoints
-                        let leftEyebrowPoints = leftBrow.normalizedPoints
-                        let rightEyebrowPoints = rightBrow.normalizedPoints
+//                        let leftEyebrowPoints = leftBrow.normalizedPoints
+//                        let rightEyebrowPoints = rightBrow.normalizedPoints
 
 //                        let eyebrowRaiseThreshold: CGFloat = 0.06 // Adjust the threshold value as needed
 //
@@ -861,7 +869,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 
                         
                         // Check if the left eye is closed
-                        let eyeClosedThreshold: CGFloat = 0.0639
+                        let eyeClosedThreshold: CGFloat = 0.0635
                         let leftEyeTopPoint = leftEyePoints[1]
                         let leftEyeBottomPoint = leftEyePoints[4]
                         let leftEyeOpenDistance = abs(leftEyeBottomPoint.y - leftEyeTopPoint.y)
@@ -1175,3 +1183,18 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     }
 }
 
+extension CameraViewController: FaceTriggerDelegate {
+    
+    func onBrowUp() {
+        print("browup")
+    }
+    func onBlinkLeft() {
+        print("blink left")
+    }
+    func onBlinkRight() {
+        print("blink right")
+    }
+    func onSmile() {
+        print("Smile")
+    }
+}
