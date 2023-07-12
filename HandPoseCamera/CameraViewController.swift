@@ -224,11 +224,10 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         let audioSession = AVAudioSession.sharedInstance()
         do {
             // Set the category to record, allowing audio input from Bluetooth devices
-//            try audioSession.setCategory(.record, mode: .measurement, options: [.duckOthers, .allowBluetooth, .allowBluetoothA2DP])
+//            try audioSession.setCategory(. , mode: .measurement, options: [.duckOthers, .allowBluetooth, .allowBluetoothA2DP])
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
 
 
-            // Set the preferred input port to none, allowing the system to decide the audio routing
             try audioSession.overrideOutputAudioPort(.none)
             
 
@@ -853,28 +852,27 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 
                         
                         
-                        let smileThreshold: CGFloat = 0.15
+                        let smileThreshold: CGFloat = 0.143
                         let topLipCenter = innerLipsPoints[3].y
                         let bottomLipCenter = innerLipsPoints[0].y
                         let mouthOpenDistance = topLipCenter - bottomLipCenter
                         let isSmiling = mouthOpenDistance > smileThreshold
-                        
+                        print(mouthOpenDistance)
 
                         
                         // Check if the left eye is closed
-                        let eyeClosedThreshold: CGFloat = 0.06
+                        let eyeClosedThreshold: CGFloat = 0.0639
                         let leftEyeTopPoint = leftEyePoints[1]
                         let leftEyeBottomPoint = leftEyePoints[4]
-                        let leftEyeOpenDistance = abs(leftEyeTopPoint.y - leftEyeBottomPoint.y)
+                        let leftEyeOpenDistance = abs(leftEyeBottomPoint.y - leftEyeTopPoint.y)
                         let isLeftEyeClosed = leftEyeOpenDistance <= eyeClosedThreshold
                         
 
-
                         let rightEyeTopPoint = rightEyePoints[1]
                         let rightEyeBottomPoint = rightEyePoints[4]
-                        let rightEyeOpenDistance = abs(rightEyeTopPoint.y - rightEyeBottomPoint.y)
+                        let rightEyeOpenDistance = abs(rightEyeBottomPoint.y - rightEyeTopPoint.y)
                         let isRightEyeClosed = rightEyeOpenDistance <= eyeClosedThreshold
-                        
+
 
 
                         if !isSmiling && (isLeftEyeClosed && isRightEyeClosed) && !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
