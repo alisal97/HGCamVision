@@ -3,7 +3,7 @@
 //  HGCam
 //
 //  Created by Aly Salman on 18/02/23.
-//  Copyright © 2023 CB Gang. All rights reserved.
+//  Copyright © 2023 Aly. All rights reserved.
 
 
 import UIKit
@@ -19,7 +19,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
-    var audioPlayer: AVAudioPlayer? //for playing shutter sound
+    var audioPlayer: AVAudioPlayer?
     private let movieOutput = AVCaptureMovieFileOutput()
     
     private var videoDeviceInput: AVCaptureDeviceInput!
@@ -42,11 +42,10 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     let handPosePredictionInterval = 9
     
     let model = try? fullyaugmented175cleaned(configuration: MLModelConfiguration())
-    private let handGestureProcessor = HandGestureProcessor()
 
-    let segmentedControl = UISegmentedControl(items: ["Hand Pose", "Hand Gesture", "Voice Activation", "Face Gestures"])
+    let segmentedControl = UISegmentedControl(items: ["Hand Pose", "Voice Activation", "Face Gestures"])
 
-    var userSelection: Int = 2
+    var userSelection: Int = 1
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))!
     
@@ -58,8 +57,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     let targetWords = ["cheese", "action", "stop"]
     private var lastSpokenWord: String = ""
 
-    let fontSize: CGFloat = 10.3
-
+    let fontSize: CGFloat = 13
+    
     let activityLabel: UILabel = {
         let activityLabel = UILabel()
         activityLabel.text = "Saving Video..."
@@ -113,6 +112,29 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         let combinedImage = circleImage?.overlayWith(image: image!, offsetX: 0, offsetY: 0)
         
         button.setImage(combinedImage, for: .normal)
+        return button
+    }()
+
+    
+    let questionButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Configure the question mark image
+        let questionConfig = UIImage.SymbolConfiguration(pointSize: 39)
+        let questionImage = UIImage(systemName: "questionmark", withConfiguration: questionConfig)?.withTintColor(.white, renderingMode: .alwaysOriginal)
+        
+        // Configure the circle background image
+        let circleConfig = UIImage.SymbolConfiguration(pointSize: 87)
+        let circleImage = UIImage(systemName: "circle.fill", withConfiguration: circleConfig)?.withTintColor(.darkGray, renderingMode: .alwaysOriginal)
+        
+        // Combine the circle background and question mark images
+        let combinedImage = circleImage?.overlayWith(image: questionImage!, offsetX: 0, offsetY: 0)
+        
+        // Set the combined image as the button's image for the normal state
+        button.setImage(combinedImage, for: .normal)
+        
+
         return button
     }()
 
@@ -188,13 +210,30 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     }
 
     @objc func appWillEnterForeground() {
-        // Start speech recognition if userSelection == 2 when app enters the foreground
-        if userSelection == 2 {
+        if userSelection == 1 {
             startSpeechRecognition()
         }
     }
 
-    
+    @objc func questionButtonTapped() {
+        if userSelection == 0 {
+            let instructionsVC = InstructionsViewController()
+            instructionsVC.modalPresentationStyle = .overFullScreen
+            present(instructionsVC, animated: true, completion: nil)
+        }
+
+        else if userSelection == 1 {
+            let instructionsVC = InstructionsViewController2()
+            instructionsVC.modalPresentationStyle = .overFullScreen
+            present(instructionsVC, animated: true, completion: nil)
+        }
+        else {
+            let instructionsVC = InstructionsViewController3()
+            instructionsVC.modalPresentationStyle = .overFullScreen
+            present(instructionsVC, animated: true, completion: nil)
+        }
+    }
+
     
     func stopSpeechRecognition() {
         audioEngine.stop()
@@ -211,7 +250,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         SFSpeechRecognizer.requestAuthorization { authStatus in
             OperationQueue.main.addOperation {
-                if authStatus == .authorized && self.userSelection == 2 {
+                if authStatus == .authorized && self.userSelection == 1 {
                     self.startRecognizing()
                 }
             }
@@ -223,8 +262,6 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         let audioSession = AVAudioSession.sharedInstance()
         do {
-            // Set the category to record, allowing audio input from Bluetooth devices
-//            try audioSession.setCategory(. , mode: .measurement, options: [.duckOthers, .allowBluetooth, .allowBluetoothA2DP])
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
 
 
@@ -562,6 +599,19 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
             activityLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             activityLabel.centerYAnchor.constraint(equalTo: self.view.centerYAnchor)
         ])
+        
+        
+        view.addSubview(questionButton)
+
+
+        NSLayoutConstraint.activate([
+            questionButton.widthAnchor.constraint(equalToConstant: 45),
+            questionButton.heightAnchor.constraint(equalToConstant: 45),
+            questionButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            questionButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15)
+        ])
+        
+        questionButton.addTarget(self, action: #selector(questionButtonTapped), for: .touchUpInside)
 
         
         view.addSubview(segmentedControl)
@@ -571,8 +621,6 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
 
         segmentedControl.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         segmentedControl.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -85 ).isActive = true
-
-
     }
     
     
@@ -708,17 +756,17 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 
         case 1:
             userSelection = 1
-            stopSpeechRecognition()
+            startSpeechRecognition()
 
         case 2:
             userSelection = 2
             if userSelection == 2 {
-                startSpeechRecognition()
+                stopSpeechRecognition()
             }
 
-        case 3:
-            userSelection = 3
-            stopSpeechRecognition()
+//        case 3:
+//            userSelection = 3
+//            stopSpeechRecognition()
         default:
             break
         }
@@ -746,70 +794,8 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 frameCounter = 0
             }
         }
-        else if userSelection == 1 {
             
-            let handler = VNImageRequestHandler(cmSampleBuffer: sampleBuffer, options: [:])
-            
-            do {
-                try handler.perform([handPoseRequest])
-                guard let observation = handPoseRequest.results?.first else {
-                    return
-                }
-                
-                let thumbPoints = try observation.recognizedPoints(.thumb)
-                guard let thumbTipPoint = thumbPoints[.thumbTip]
-                else {
-                    return
-                }
-                let handBase = try observation.recognizedPoint(.wrist)
-                
-                let indexPoints =  try observation.recognizedPoints(.indexFinger)
-                guard let indexTipPoint = indexPoints[.indexTip],
-                      let indexPIPPoint = indexPoints[.indexPIP]
-                else {
-                    return
-                }
-                
-                let littlePoints = try observation.recognizedPoints(.littleFinger)
-                guard let littleDIPPoint = littlePoints[.littleDIP],
-                      let littleTipPoint = littlePoints[.littleTip],
-                      let littlePIPPoint = littlePoints[.littlePIP]
-                else {
-                    return
-                }
-                let ringPoints =  try observation.recognizedPoints(.ringFinger)
-                guard let ringDIPPoint = ringPoints[.ringDIP],
-                      let ringTipPoint = ringPoints[.ringTip],
-                      let ringPIPPoint = ringPoints[.ringPIP]
-                else {
-                    return
-                }
-                
-                let middlePoints =  try observation.recognizedPoints(.middleFinger)
-                guard let middleDIPPoint = middlePoints[.middleDIP],
-                      let middlePIPPoint = middlePoints[.middlePIP]
-                else {
-                    return
-                }
-                
-                self.processPoints(thumbTipPoint: thumbTipPoint,
-                                   indexTipPoint: indexTipPoint,
-                                   littleDIPPoint: littleDIPPoint,
-                                   ringDIPPoint: ringDIPPoint,
-                                   middleDIPPoint: middleDIPPoint,
-                                   littleTipPoint: littleTipPoint,
-                                   handBase: handBase,
-                                   ringTipPoint: ringTipPoint,
-                                   indexPIPPoint: indexPIPPoint,
-                                   littlePIPPoint: littlePIPPoint,
-                                   ringPIPPoint: ringPIPPoint,
-                                   middlePIPPoint: middlePIPPoint )
-            } catch {
-                print(error)
-            }
-            
-        }
-        else if userSelection == 3 {
+        else if userSelection == 2 {
             
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
             
@@ -983,99 +969,6 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             print("Prediction error")
         }
     }
-   private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint, littleTipPoint:VNRecognizedPoint, handBase: VNRecognizedPoint ,ringTipPoint: VNRecognizedPoint, indexPIPPoint: VNRecognizedPoint, littlePIPPoint: VNRecognizedPoint, ringPIPPoint: VNRecognizedPoint, middlePIPPoint: VNRecognizedPoint ) {
-       
-       // Ignore low confidence points.
-       guard thumbTipPoint.confidence > 0.95 && indexTipPoint.confidence > 0.93 && littleDIPPoint.confidence > 0.85 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89 && littleTipPoint.confidence > 0.93 && ringTipPoint.confidence > 0.85 && indexPIPPoint.confidence > 0.81  && littlePIPPoint.confidence > 0.87 && ringPIPPoint.confidence > 0.81 && middlePIPPoint.confidence > 0.81 && handBase.confidence > 0.83
-       else {
-           return
-       }
-       guard let handBaseUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: handBase.toAVFoundationPoint) else {
-           return
-       }
-       guard let thumbTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: thumbTipPoint.toAVFoundationPoint) else {
-           return
-       }
-       
-       guard let indexTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: indexTipPoint.toAVFoundationPoint) else {
-           return
-       }
-       
-       guard let littleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleDIPPoint.toAVFoundationPoint),
-             let littleTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littleTipPoint.toAVFoundationPoint) else {
-           return
-       }
-       
-       guard let ringDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringDIPPoint.toAVFoundationPoint),
-             let ringTipUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringTipPoint.toAVFoundationPoint)
-       else {
-           return
-       }
-       
-       guard let middleDIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: middleDIPPoint.toAVFoundationPoint) else {
-           return
-       }
-       
-       guard let indexPIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: indexPIPPoint.toAVFoundationPoint) else {
-           return
-       }
-
-       guard let littlePIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: littlePIPPoint.toAVFoundationPoint) else {
-           return
-       }
-
-       guard let ringPIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: ringPIPPoint.toAVFoundationPoint) else {
-           return
-       }
-       guard let middlePIPUIKitPoint = videoPreviewLayer?.layerPointConverted(fromCaptureDevicePoint: middlePIPPoint.toAVFoundationPoint) else {
-           return
-       }
-
-   let state = handGestureProcessor.getHandState(thumbTip: thumbTipUIKitPoint, indexTip: indexTipUIKitPoint, littleDIP: littleDIPUIKitPoint, ringDIP: ringDIPUIKitPoint, middleDIP: middleDIPUIKitPoint, ringTip: ringTipUIKitPoint,handBase: handBaseUIKitPoint, littleTip: littleTipUIKitPoint, indexPIP: indexPIPUIKitPoint, littlePIP: littlePIPUIKitPoint, ringPIP: ringPIPUIKitPoint, middlePIP: middlePIPUIKitPoint)
-           
-           switch state {
-           case .capturePhoto:
-               if !CameraViewController.isTimerRunning && !CameraViewController.isCap {
-                   runTimer(seconds: 3, completion: { [weak self] in
-                       guard let self else { return }
-                       CameraViewController.isCap = true
-                       self.captureImage()
-                       DispatchQueue.main.asyncAfter(deadline: .now() + 2.95) {
-                           CameraViewController.isCap = false
-                       }
-                   })
-               }
-           case .quickPhoto:
-               if !CameraViewController.isTimerRunning && !CameraViewController.isCap {
-                   runTimer(seconds: 1, completion: { [weak self] in
-                       guard let self else { return }
-                       
-                       self.captureImage()
-                       CameraViewController.isCap = true
-                       DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                           CameraViewController.isCap = false
-                       }
-                       
-                   }
-                       )
-            }
-           case .vidRec:
-               if !CameraViewController.isTimerRunning {
-                   runTimer(seconds: 3, completion: { [weak self] in
-                       guard let self else { return }
-                       self.startRecording()
-                   })
-               }
-           case .vidStop:
-               if !CameraViewController.isTimerRunning {
-                   self.stopRecording()
-               }
-           case .unknown:
-               break
-           }
-       }
-
-
     
 
     // Function to check if the hand pose is moving
