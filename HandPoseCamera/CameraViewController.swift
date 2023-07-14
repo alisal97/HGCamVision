@@ -857,23 +857,23 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                         let bottomLipCenter = innerLipsPoints[0].y
                         let mouthOpenDistance = topLipCenter - bottomLipCenter
                         let isSmiling = mouthOpenDistance > smileThreshold
-                        print(mouthOpenDistance)
 
                         
                         // Check if the left eye is closed
-                        let eyeClosedThreshold: CGFloat = 0.0639
+                        let LeyeClosedThreshold: CGFloat = 0.0671
                         let leftEyeTopPoint = leftEyePoints[1]
                         let leftEyeBottomPoint = leftEyePoints[4]
                         let leftEyeOpenDistance = abs(leftEyeBottomPoint.y - leftEyeTopPoint.y)
-                        let isLeftEyeClosed = leftEyeOpenDistance <= eyeClosedThreshold
+                        let isLeftEyeClosed = leftEyeOpenDistance <= LeyeClosedThreshold
                         
-
+                        
+                        let ReyeClosedThreshold: CGFloat = 0.0613
                         let rightEyeTopPoint = rightEyePoints[1]
                         let rightEyeBottomPoint = rightEyePoints[4]
                         let rightEyeOpenDistance = abs(rightEyeBottomPoint.y - rightEyeTopPoint.y)
-                        let isRightEyeClosed = rightEyeOpenDistance <= eyeClosedThreshold
+                        let isRightEyeClosed = rightEyeOpenDistance <= ReyeClosedThreshold
 
-
+                        print("right eye \(rightEyeOpenDistance)...left eye \(leftEyeOpenDistance)")
 
                         if !isSmiling && (isLeftEyeClosed && isRightEyeClosed) && !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
                             self?.runTimer(seconds: 3, completion: {
@@ -986,7 +986,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
    private func processPoints(thumbTipPoint: VNRecognizedPoint, indexTipPoint: VNRecognizedPoint, littleDIPPoint: VNRecognizedPoint, ringDIPPoint: VNRecognizedPoint, middleDIPPoint: VNRecognizedPoint, littleTipPoint:VNRecognizedPoint, handBase: VNRecognizedPoint ,ringTipPoint: VNRecognizedPoint, indexPIPPoint: VNRecognizedPoint, littlePIPPoint: VNRecognizedPoint, ringPIPPoint: VNRecognizedPoint, middlePIPPoint: VNRecognizedPoint ) {
        
        // Ignore low confidence points.
-       guard thumbTipPoint.confidence > 0.91 && indexTipPoint.confidence > 0.89 && littleDIPPoint.confidence > 0.85 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89 && littleTipPoint.confidence > 0.83 && ringTipPoint.confidence > 0.85 && indexPIPPoint.confidence > 0.81  && littlePIPPoint.confidence > 0.87 && ringPIPPoint.confidence > 0.81 && middlePIPPoint.confidence > 0.81 && handBase.confidence > 0.83
+       guard thumbTipPoint.confidence > 0.95 && indexTipPoint.confidence > 0.93 && littleDIPPoint.confidence > 0.85 && ringDIPPoint.confidence > 0.85 && middleDIPPoint.confidence > 0.89 && littleTipPoint.confidence > 0.93 && ringTipPoint.confidence > 0.85 && indexPIPPoint.confidence > 0.81  && littlePIPPoint.confidence > 0.87 && ringPIPPoint.confidence > 0.81 && middlePIPPoint.confidence > 0.81 && handBase.confidence > 0.83
        else {
            return
        }
