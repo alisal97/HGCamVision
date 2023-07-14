@@ -818,22 +818,22 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 
                 for observation in observations {
                     if let landmarks = observation.landmarks,
-                       let faceContour = landmarks.faceContour,
+//                       let faceContour = landmarks.faceContour,
                        let leftEye = landmarks.leftEye,
                        let rightEye = landmarks.rightEye,
-                       let outerLips = landmarks.outerLips,
-                       let rightBrow = landmarks.rightEyebrow,
-                       let leftBrow = landmarks.leftEyebrow,
+//                       let outerLips = landmarks.outerLips,
+//                       let rightBrow = landmarks.rightEyebrow,
+//                       let leftBrow = landmarks.leftEyebrow,
                         let innerLips = landmarks.innerLips {
                         
                         
-                        let faceContourPoints = faceContour.normalizedPoints
+//                        let faceContourPoints = faceContour.normalizedPoints
                         let leftEyePoints = leftEye.normalizedPoints
                         let rightEyePoints = rightEye.normalizedPoints
-                        let outerLipsPoints = outerLips.normalizedPoints
+//                        let outerLipsPoints = outerLips.normalizedPoints
                         let innerLipsPoints = innerLips.normalizedPoints
-                        let leftEyebrowPoints = leftBrow.normalizedPoints
-                        let rightEyebrowPoints = rightBrow.normalizedPoints
+//                        let leftEyebrowPoints = leftBrow.normalizedPoints
+//                        let rightEyebrowPoints = rightBrow.normalizedPoints
 
 //                        let eyebrowRaiseThreshold: CGFloat = 0.06 // Adjust the threshold value as needed
 //

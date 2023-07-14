@@ -26,14 +26,14 @@ class HandGestureProcessor: UIViewController {
         let distanceIT = abs(indexTip.y - thumbTip.y) // index and thumb
         let distanceTM = abs(thumbTip.y - middleDIP.y)// middle finger and thumb
         let distanceRM = abs(ringDIP.y - middleDIP.y) // ring finger and middle finger
-        let distanceTR = abs(ringTip.y - thumbTip.y) // thumb and ring finger tips
-        let distanceRT = abs(ringDIP.y - thumbTip.y) // ringdip and thumb tip
+        let distanceTR = abs(thumbTip.y - ringTip.y) // thumb and ring finger tips
+//        let distanceRT = abs(ringDIP.y - thumbTip.y) // ringdip and thumb tip
         let distanceRL = abs(ringDIP.y - littleDIP.y) // ring finger and little finger
         let distanceIM = abs(indexTip.y - middleDIP.y) // index and middle finger
-//        let distanceTL = abs(thumbTip.y - littleTip.y) // thumb and little finger
+        let distanceTL = abs(littleTip.y - thumbTip.y) // thumb and little finger
 //        let distanceBL = abs(handBase.y - littleTip.y) // wrist and little finger tip
 //        let distanceBR = abs(handBase.y - ringTip.y) // wrist and ring finger tip
-        let distanceIR = abs(ringDIP.y - indexTip.y) // middle finger and index finger
+        let distanceMT = abs(ringDIP.y - indexTip.y) // middle finger and index finger
         
         // pip distances for fist
 //        let distanceIMP = abs(indexPIP.y - middlePIP.y)
@@ -45,17 +45,17 @@ class HandGestureProcessor: UIViewController {
         
         let isRec = CameraViewController.isRecording
         
-
-        if distanceIT <= 13.5 && distanceIM >= 7 && distanceRM >= 7 && distanceRL >= 5 && isRec == false {
+        print(distanceTR)
+        if distanceIT <= 15 && distanceIM >= 7 && distanceRM >= 7 && distanceRL >= 5 && isRec == false {
             currentState = .capturePhoto
             
-        } else if distanceIT <= 13.5 && distanceIM >= 7 && distanceRM >= 7 && distanceRL >= 5 && isRec == true {
+        } else if distanceIT <= 15 && distanceIM >= 7 && distanceRM >= 7 && distanceRL >= 5 && isRec == true {
             currentState = .quickPhoto
         }
-        else if (distanceTR <= 9.3 || distanceRT <= 9.3) && distanceRL <= 11 && distanceIR >= 11 && distanceRM >= 11 && distanceTM >= 11 && distanceIT >= 11 && isRec == false {
+        else if distanceTR <= 77 && distanceTM >= 11 && distanceIT >= 11 && !isRec {
             currentState = .vidRec
             
-        } else if (distanceTR <= 9.3 || distanceRT <= 9.3) && distanceRL <= 11 && distanceIR >= 11 && distanceRM >= 11 && distanceTM >= 11 && distanceIT >= 11 && isRec == true {
+        } else if distanceTR <= 77 && distanceTM >= 11 && distanceIT >= 11 && !isRec {
             currentState = .vidStop
         } else {
             currentState = .unknown
