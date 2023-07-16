@@ -54,7 +54,12 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     private var recognitionTask: SFSpeechRecognitionTask?
     
     private let audioEngine = AVAudioEngine()
-    let targetWords = ["cheese", "action", "stop"]
+    
+    static var word1 = "cheese"
+    static var word2 = "action"
+    static var word3 = "stop"
+    
+    var targetWords = [word1 , word2 , word3]
     private var lastSpokenWord: String = ""
 
     let fontSize: CGFloat = 13
@@ -223,14 +228,14 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
 
         else if userSelection == 1 {
-            let instructionsVC = InstructionsViewController2()
+            let instructionsVC = ConfigurationViewController()
             instructionsVC.modalPresentationStyle = .overFullScreen
             present(instructionsVC, animated: true, completion: nil)
         }
         else {
-            let instructionsVC = InstructionsViewController3()
-            instructionsVC.modalPresentationStyle = .overFullScreen
-            present(instructionsVC, animated: true, completion: nil)
+            let configurationVC = ConfigurationViewController()
+            configurationVC.delegate = self
+            present(configurationVC, animated: true, completion: nil)
         }
     }
 
@@ -314,7 +319,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
                 if currentWord.lowercased().contains(targetWord) {
                     switch targetWord {
                         
-                    case "cheese":
+                    case CameraViewController.word1:
                         if !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
                             runTimer(seconds: 3, completion: { [weak self] in
                                 guard let self else { return }
@@ -339,14 +344,14 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
                             }
                                 )
                                      }
-                    case "action":
+                    case CameraViewController.word2:
                         if !CameraViewController.isTimerRunning && !CameraViewController.isRecording {
                             runTimer(seconds: 3, completion: { [weak self] in
                                 guard let self else { return }
                                 self.startRecording()
                             })
                         }
-                    case "stop":
+                    case CameraViewController.word3:
                         if !CameraViewController.isTimerRunning && CameraViewController.isRecording {
                             self.stopRecording()
                         }
@@ -884,6 +889,11 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                             })
                         } else if isSmiling && ( isLeftEyeClosed || isRightEyeClosed ) && !CameraViewController.isTimerRunning && CameraViewController.isRecording {
                             self?.stopRecording()
+                            CameraViewController.isRecording = true
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.7) {
+                                CameraViewController.isCap = false
+                            }
                         }
                     }
                 }
@@ -1066,5 +1076,18 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
 
         }
     }
+}
+
+extension CameraViewController: ConfigurationViewControllerDelegate {
+    func wordsDidChange(word1: String, word2: String, word3: String) {
+        CameraViewController.word1 = word1
+        CameraViewController.word2 = word2
+        CameraViewController.word3 = word3
+        updateTargetWords()
+    }
+    private func updateTargetWords() {
+        targetWords = [CameraViewController.word1, CameraViewController.word2, CameraViewController.word3]
+    }
+
 }
 
