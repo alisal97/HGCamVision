@@ -30,3 +30,15 @@ extension UIImage {
     }
 }
 
+extension UILabel {
+    var padding: UIEdgeInsets {
+        get {
+            return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        }
+        set {
+            let padding = newValue
+            let rect = self.bounds.inset(by: padding)
+            self.drawText(in: rect)
+        }
+    }
+}

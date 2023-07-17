@@ -15,6 +15,7 @@ import Photos
 import Speech
 import AVFAudio
 
+
 class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private var captureSession: AVCaptureSession?
@@ -24,7 +25,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private var videoDeviceInput: AVCaptureDeviceInput!
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
-    
+    @IBOutlet private var feedbackLabel: UILabel!
+
     static var isRecording = false
     private weak var timerLabel: UILabel?
     static var isTimerRunning = false
@@ -163,6 +165,22 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         prepareCaptureUI()
         
         addAudioInput()
+
+        
+        feedbackLabel = UILabel()
+        feedbackLabel.translatesAutoresizingMaskIntoConstraints = false
+        feedbackLabel.font = UIFont.boldSystemFont(ofSize: 24)
+        feedbackLabel.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        feedbackLabel.textColor = UIColor.white
+        feedbackLabel.padding = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+
+        view.addSubview(feedbackLabel)
+
+        // Add constraints for the feedback label (adjust them as needed)
+        NSLayoutConstraint.activate([
+            feedbackLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            feedbackLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 150)
+        ])
 
         
         if let sound = Bundle.main.path(forResource: "shutter", ofType: "mp3") {
@@ -926,11 +944,13 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 DispatchQueue.main.async { [self] in
                     let currentPrediction = try? model!.prediction(poses: keypointsMultiArray)
                     let currentLabel = currentPrediction?.label
-
+                    
                     let isHandMoving = isHandPoseMoving(previous: previousKeypointsMultiArray, current: keypointsMultiArray)
-
+                    
                     previousKeypointsMultiArray = keypointsMultiArray
-
+                    
+                    self.feedbackLabel.text = isHandMoving ? "Hold your hands still" : "Well done!"
+                    
                     if currentLabel == label && confidence > 0.97 && !isHandMoving {
                         switch label {
                         case "ok":
@@ -1000,6 +1020,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         let numKeypoints = 21
 
         var distanceSum: Double = 0.0
+        
 
         for i in 0..<numKeypoints {
             let pose1X = pose1[i].doubleValue
@@ -1021,6 +1042,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         let averageDistance = distanceSum / Double(numKeypoints)
 
         return averageDistance
+        
     }
 
 
