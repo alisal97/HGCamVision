@@ -12,6 +12,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Reset the isFirstLaunch flag to true on every launch
+        UserDefaults.standard.set(true, forKey: "isFirstLaunch")
+        
+        // Present the onboarding screen
+        let onboardingViewController = OnboardingViewController()
+        window?.rootViewController = onboardingViewController
+        window?.makeKeyAndVisible()
+        
+        return true
+    }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
