@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		104A12BC2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */; };
+		109000BB2A66B5B100E61BDC /* ConfigurationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109000BA2A66B5B100E61BDC /* ConfigurationViewController.swift */; };
 		109A761C2A5C01AD00E0F9AA /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */; };
 		109A76202A5C1A0F00E0F9AA /* viewHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A761F2A5C1A0F00E0F9AA /* viewHelpers.swift */; };
 		109A763B2A61D73200E0F9AA /* InstructionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109A763A2A61D73200E0F9AA /* InstructionsViewController.swift */; };
@@ -21,6 +22,7 @@
 /* Begin PBXFileReference section */
 		104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = fullyaugmented175cleaned.mlmodel; sourceTree = "<group>"; };
 		10874CD929A7C837004B68FC /* HGCamRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCamRelease.entitlements; sourceTree = "<group>"; };
+		109000BA2A66B5B100E61BDC /* ConfigurationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationViewController.swift; sourceTree = "<group>"; };
 		109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		109A761F2A5C1A0F00E0F9AA /* viewHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = viewHelpers.swift; sourceTree = "<group>"; };
 		109A763A2A61D73200E0F9AA /* InstructionsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstructionsViewController.swift; sourceTree = "<group>"; };
@@ -50,6 +52,7 @@
 			children = (
 				109A761F2A5C1A0F00E0F9AA /* viewHelpers.swift */,
 				109A763A2A61D73200E0F9AA /* InstructionsViewController.swift */,
+				109000BA2A66B5B100E61BDC /* ConfigurationViewController.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -168,6 +171,7 @@
 				ACBD85EC24A4E3A7002F7C9C /* AppDelegate.swift in Sources */,
 				109A76202A5C1A0F00E0F9AA /* viewHelpers.swift in Sources */,
 				ACBD85EE24A4E3A7002F7C9C /* SceneDelegate.swift in Sources */,
+				109000BB2A66B5B100E61BDC /* ConfigurationViewController.swift in Sources */,
 				104A12BC2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel in Sources */,
 				109A761C2A5C01AD00E0F9AA /* CameraViewController.swift in Sources */,
 			);

@@ -45,9 +45,9 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     let model = try? fullyaugmented175cleaned(configuration: MLModelConfiguration())
 
-    let segmentedControl = UISegmentedControl(items: ["Hand Pose", "Voice Activation", "Face Gestures"])
+    let segmentedControl = UISegmentedControl(items: ["Hand Pose", "Voice Commands", "Face Control"])
 
-    var userSelection: Int = 1
+    var userSelection: Int = 0
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))!
     
@@ -57,11 +57,11 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private let audioEngine = AVAudioEngine()
     
-    static var word1 = "cheese"
-    static var word2 = "action"
-    static var word3 = "stop"
+    static var word1: String = "cheese"
+    static var word2: String = "action"
+    static var word3: String = "stop"
     
-    var targetWords = [word1 , word2 , word3]
+    var targetWords = [word1, word2, word3].map { $0.trimmingCharacters(in: .whitespaces).lowercased() }
     private var lastSpokenWord: String = ""
 
     let fontSize: CGFloat = 13
@@ -160,12 +160,30 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
+        let defaults = UserDefaults.standard
+        if let savedWord1 = defaults.string(forKey: "Word1") {
+            CameraViewController.word1 = savedWord1
+        }
+        if let savedWord2 = defaults.string(forKey: "Word2") {
+            CameraViewController.word2 = savedWord2
+        }
+        if let savedWord3 = defaults.string(forKey: "Word3") {
+            CameraViewController.word3 = savedWord3
+        }
+        
+        updateTargetWords()
+
+        
+        
+        
+        
         UIApplication.shared.isIdleTimerDisabled = true
         prepareCaptureSession()
         prepareCaptureUI()
         
         addAudioInput()
-
         
         feedbackLabel = UILabel()
         feedbackLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -235,25 +253,28 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     @objc func appWillEnterForeground() {
         if userSelection == 1 {
             startSpeechRecognition()
+            updateTargetWords()
+
         }
     }
 
     @objc func questionButtonTapped() {
         if userSelection == 0 {
             let instructionsVC = InstructionsViewController()
-            instructionsVC.modalPresentationStyle = .overFullScreen
+            instructionsVC.modalPresentationStyle = .formSheet
             present(instructionsVC, animated: true, completion: nil)
         }
 
         else if userSelection == 1 {
-            let instructionsVC = ConfigurationViewController()
-            instructionsVC.modalPresentationStyle = .overFullScreen
-            present(instructionsVC, animated: true, completion: nil)
-        }
-        else {
             let configurationVC = ConfigurationViewController()
             configurationVC.delegate = self
+            configurationVC.modalPresentationStyle = .formSheet
             present(configurationVC, animated: true, completion: nil)
+        }
+        else if userSelection == 2 {
+            let instructionsVC = InstructionsViewController3()
+            instructionsVC.modalPresentationStyle = .formSheet
+            present(instructionsVC, animated: true, completion: nil)
         }
     }
 
@@ -275,6 +296,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
             OperationQueue.main.addOperation {
                 if authStatus == .authorized && self.userSelection == 1 {
                     self.startRecognizing()
+                    self.updateTargetWords()
+
                 }
             }
         }
@@ -332,48 +355,42 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         if let lastSegment = result.bestTranscription.segments.last {
             let currentWord = lastSegment.substring
             print("Last spoken word: \(currentWord)")
+            print(targetWords)
             
             for targetWord in targetWords {
-                if currentWord.lowercased().contains(targetWord) {
+                if currentWord.lowercased().contains(targetWord.lowercased()) {
                     switch targetWord {
-                        
                     case CameraViewController.word1:
                         if !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
-                            runTimer(seconds: 3, completion: { [weak self] in
-                                guard let self else { return }
+                            runTimer(seconds: 3) { [weak self] in
+                                guard let self = self else { return }
                                 CameraViewController.isCap = true
                                 self.captureImage()
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.95) {
                                     CameraViewController.isCap = false
                                 }
-                            })
-                        }
-                        else if !CameraViewController.isTimerRunning && CameraViewController.isRecording && !CameraViewController.isCap {
-                            
-                            runTimer(seconds: 1, completion: { [weak self] in
-                                guard let self else { return }
-                                
+                            }
+                        } else if !CameraViewController.isTimerRunning && CameraViewController.isRecording && !CameraViewController.isCap {
+                            runTimer(seconds: 1) { [weak self] in
+                                guard let self = self else { return }
                                 self.captureImage()
                                 CameraViewController.isCap = true
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                                     CameraViewController.isCap = false
                                 }
-                                
                             }
-                                )
-                                     }
+                        }
                     case CameraViewController.word2:
                         if !CameraViewController.isTimerRunning && !CameraViewController.isRecording {
-                            runTimer(seconds: 3, completion: { [weak self] in
-                                guard let self else { return }
+                            runTimer(seconds: 3) { [weak self] in
+                                guard let self = self else { return }
                                 self.startRecording()
-                            })
+                            }
                         }
                     case CameraViewController.word3:
                         if !CameraViewController.isTimerRunning && CameraViewController.isRecording {
                             self.stopRecording()
                         }
-                    
                     default:
                         break
                     }
@@ -385,7 +402,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
     }
     
-
+    
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
@@ -776,16 +793,21 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         case 0:
             userSelection = 0
             stopSpeechRecognition()
+            feedbackLabel.isHidden = false
 
         case 1:
             userSelection = 1
             startSpeechRecognition()
+            feedbackLabel.isHidden = true
+            updateTargetWords()
+
 
         case 2:
             userSelection = 2
-            if userSelection == 2 {
-                stopSpeechRecognition()
-            }
+            stopSpeechRecognition()
+            feedbackLabel.isHidden = true
+
+            
 
 //        case 3:
 //            userSelection = 3
@@ -882,7 +904,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                         let rightEyeOpenDistance = abs(rightEyeBottomPoint.y - rightEyeTopPoint.y)
                         let isRightEyeClosed = rightEyeOpenDistance <= ReyeClosedThreshold
 
-                        print("right eye \(rightEyeOpenDistance)...left eye \(leftEyeOpenDistance)")
+//                        print("right eye \(rightEyeOpenDistance)...left eye \(leftEyeOpenDistance)")
 
                         if !isSmiling && (isLeftEyeClosed && isRightEyeClosed) && !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
                             self?.runTimer(seconds: 3, completion: {
@@ -949,7 +971,20 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                     
                     previousKeypointsMultiArray = keypointsMultiArray
                     
-                    self.feedbackLabel.text = isHandMoving ? "Hold your hands still" : "Well done!"
+                    self.feedbackLabel.text = isHandMoving ? "Show a hand pose & hold it still": ""
+                    
+                    if CameraViewController.isTimerRunning || CameraViewController.isRecording || CameraViewController.isCap {
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3 ) {
+                            
+                            self.feedbackLabel.isHidden = true
+                            
+                        }
+                        
+                    } else if !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
+                        feedbackLabel.isHidden = false
+                    }
+
                     
                     if currentLabel == label && confidence > 0.97 && !isHandMoving {
                         switch label {
@@ -1107,9 +1142,8 @@ extension CameraViewController: ConfigurationViewControllerDelegate {
         CameraViewController.word3 = word3
         updateTargetWords()
     }
+
     private func updateTargetWords() {
-        targetWords = [CameraViewController.word1, CameraViewController.word2, CameraViewController.word3]
+        targetWords = [CameraViewController.word1, CameraViewController.word2, CameraViewController.word3].map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
     }
-
 }
-
