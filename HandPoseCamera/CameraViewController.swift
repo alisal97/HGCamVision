@@ -179,6 +179,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         updateTargetWords()
         
         
+        
         UIApplication.shared.isIdleTimerDisabled = true
         prepareCaptureSession()
         prepareCaptureUI()

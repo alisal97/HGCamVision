@@ -73,11 +73,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
 
-        if let cameraViewController = window?.rootViewController as? CameraViewController {
-            cameraViewController.startSpeechRecognition()
-        }
+        sceneDidBecomeActive(scene)
     }
-
+    
     func sceneDidEnterBackground(_ scene: UIScene) {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
