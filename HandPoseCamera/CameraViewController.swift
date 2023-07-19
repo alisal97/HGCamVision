@@ -222,13 +222,11 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         prepareTimerView()
         cameraUI()
         handPoseRequest.maximumHandCount = 1
-        stopSpeechRecognition()
         
         NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
 
         // Add observer for entering foreground
         NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-
 
     }
     
@@ -283,9 +281,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()
-        recognitionRequest = nil
         recognitionTask?.cancel()
-        recognitionTask = nil
     }
 
     
@@ -673,6 +669,16 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         self.videoPreviewLayer = videoPreviewLayer
         }
+    
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if userSelection == 1 {
+            appWillEnterForeground()
+        }
+    }
+
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         

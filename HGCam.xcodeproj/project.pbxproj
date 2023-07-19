@@ -330,7 +330,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 43KKKRBAP2;
 				INFOPLIST_FILE = HandPoseCamera/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Say Cheese!";
+				INFOPLIST_KEY_CFBundleDisplayName = "Say Cheese: Hands Free Camera";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -357,7 +357,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 43KKKRBAP2;
 				INFOPLIST_FILE = HandPoseCamera/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Say Cheese!";
+				INFOPLIST_KEY_CFBundleDisplayName = "Say Cheese: Hands Free Camera";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
