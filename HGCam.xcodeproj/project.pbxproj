@@ -49,12 +49,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		107603512A6806C5000BDB99 /* Delegates */ = {
+			isa = PBXGroup;
+			children = (
+				ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */,
+				ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */,
+			);
+			path = Delegates;
+			sourceTree = "<group>";
+		};
 		AC5F900F24C36CD000C85582 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
 				109A761F2A5C1A0F00E0F9AA /* viewHelpers.swift */,
 				109A763A2A61D73200E0F9AA /* InstructionsViewController.swift */,
 				109000BA2A66B5B100E61BDC /* ConfigurationViewController.swift */,
+				1076034F2A66E2B7000BDB99 /* OnboardingViewController.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -81,11 +91,9 @@
 			isa = PBXGroup;
 			children = (
 				AC5F900F24C36CD000C85582 /* Extensions */,
-				ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */,
 				109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */,
 				104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */,
-				ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */,
-				1076034F2A66E2B7000BDB99 /* OnboardingViewController.swift */,
+				107603512A6806C5000BDB99 /* Delegates */,
 				ACBD85F124A4E3A7002F7C9C /* Main.storyboard */,
 				ACBD85F424A4E3AC002F7C9C /* Assets.xcassets */,
 				ACBD85F624A4E3AC002F7C9C /* LaunchScreen.storyboard */,
