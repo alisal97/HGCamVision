@@ -21,13 +21,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>To capture photos and videos, camera access is needed for the app.</string>
+	<string>To capture photos and videos, camera access is needed for the app to function.</string>
 	<key>NSCocoaErrorDomain</key>
 	<string></string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Microphone access is needed in order to record audible videos and to use voice activation.</string>
+	<string>Microphone access is needed in order to record audible videos and to use voice commands.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Access to your photo library is needed  to save photos and videos created using the app.</string>
+	<string>Access to your photo library is needed to save photos and videos created using the app.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>This app uses speech recognition to enable voice commands for capturing photos and recording videos.</string>
 	<key>UIApplicationSceneManifest</key>
@@ -57,6 +57,8 @@
 	<array>
 		<string>armv7</string>
 	</array>
+	<key>UIStatusBarHidden</key>
+	<true/>
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleDefault</string>
 	<key>UISupportedInterfaceOrientations</key>
@@ -64,13 +66,13 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 </dict>
 </plist>
