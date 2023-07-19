@@ -65,6 +65,9 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     private var lastSpokenWord: String = ""
 
     let fontSize: CGFloat = 13
+    var isRecognitionTaskRunning = false
+
+    
     
     let activityLabel: UILabel = {
         let activityLabel = UILabel()
@@ -174,9 +177,6 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
         
         updateTargetWords()
-
-        
-        
         
         
         UIApplication.shared.isIdleTimerDisabled = true
@@ -281,71 +281,84 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()
+        recognitionRequest = nil
         recognitionTask?.cancel()
+        recognitionTask = nil
+        print("recognizing stopped")
     }
 
-    
     func startSpeechRecognition() {
         speechRecognizer.delegate = self
-        
+
         SFSpeechRecognizer.requestAuthorization { authStatus in
             OperationQueue.main.addOperation {
                 if authStatus == .authorized && self.userSelection == 1 {
                     self.startRecognizing()
                     self.updateTargetWords()
-
                 }
             }
         }
     }
+
     
     private func startRecognizing() {
         guard !audioEngine.isRunning else { return }
         
+        // Print a message to indicate that recognition is starting
+        print("Recognizing started")
+
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-
-
             try audioSession.overrideOutputAudioPort(.none)
-            
 
             // Activate the audio session
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
             print("Error setting up audio session: \(error.localizedDescription)")
         }
-        
+
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         guard let recognitionRequest = recognitionRequest else { return }
         recognitionRequest.shouldReportPartialResults = true
-        
+
         let inputNode = audioEngine.inputNode
         let format = inputNode.outputFormat(forBus: 0)
-        
+
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
-            recognitionRequest.append(buffer)
+            self.recognitionRequest?.append(buffer)
         }
-        
+
         audioEngine.prepare()
-        
+
         do {
             try audioEngine.start()
         } catch {
             print("Failed to start audio engine: \(error.localizedDescription)")
         }
-        
-        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { result, error in
+
+        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
+            guard let self = self else { return }
+
             if let result = result {
                 self.processRecognitionResult(result)
             }
-            
+
             if let error = error {
                 print("Speech recognition error: \(error.localizedDescription)")
+                // Handle the error appropriately, e.g., display an error message to the user
+            }
+
+            // Print a message to indicate that recognition task has completed
+            print("Recognizing stopped")
+
+            // Restart the recognition task if it's still running
+            if self.isRecognitionTaskRunning {
+                self.startRecognizing()
             }
         }
     }
-    
+
     private func processRecognitionResult(_ result: SFSpeechRecognitionResult) {
         
         if let lastSegment = result.bestTranscription.segments.last {
@@ -674,10 +687,14 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if userSelection == 1 {
-            appWillEnterForeground()
+            startSpeechRecognition()
         }
     }
 
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        stopSpeechRecognition()
+    }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
