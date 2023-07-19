@@ -25,8 +25,8 @@ class OnboardingViewController: UIViewController {
         onboardingLabel.textAlignment = .center
         onboardingLabel.numberOfLines = 0
         onboardingLabel.text = """
-            Welcome to SayCheese!\n
-            \nSayCheese is a camera app designed to make content creation accessible, choose your preferred camera control mode using the menu at the bottom, then tap the '?' button in the bottom left corner for instructions!
+            Welcome to Say Cheese!\n
+            \nSay Cheese! is a camera app designed to make content creation accessible and as simple as possible, choose your preferred camera control mode using the menu at the bottom, then tap the '?' button in the bottom left corner for instructions!
             """
 
         // Add the label to the view

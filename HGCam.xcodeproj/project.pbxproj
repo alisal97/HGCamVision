@@ -29,7 +29,7 @@
 		109A761F2A5C1A0F00E0F9AA /* viewHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = viewHelpers.swift; sourceTree = "<group>"; };
 		109A763A2A61D73200E0F9AA /* InstructionsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstructionsViewController.swift; sourceTree = "<group>"; };
 		10A9CE3229AEB5C900EEA4CA /* HGCam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HGCam.entitlements; sourceTree = "<group>"; };
-		ACBD85E824A4E3A7002F7C9C /* HGCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HGCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ACBD85E824A4E3A7002F7C9C /* Say Cheese!.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Say Cheese!.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACBD85EB24A4E3A7002F7C9C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		ACBD85F224A4E3A7002F7C9C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -72,7 +72,7 @@
 		ACBD85E924A4E3A7002F7C9C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				ACBD85E824A4E3A7002F7C9C /* HGCam.app */,
+				ACBD85E824A4E3A7002F7C9C /* Say Cheese!.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -113,7 +113,7 @@
 			packageProductDependencies = (
 			);
 			productName = HandPoseCamera;
-			productReference = ACBD85E824A4E3A7002F7C9C /* HGCam.app */;
+			productReference = ACBD85E824A4E3A7002F7C9C /* Say Cheese!.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -337,9 +337,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.01;
-				PRODUCT_BUNDLE_IDENTIFIER = com.cheese.aly;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.SayCheese.Aly;
+				PRODUCT_NAME = "Say Cheese!";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -364,9 +364,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.01;
-				PRODUCT_BUNDLE_IDENTIFIER = com.cheese.aly;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.SayCheese.Aly;
+				PRODUCT_NAME = "Say Cheese!";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
