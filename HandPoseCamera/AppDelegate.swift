@@ -7,50 +7,33 @@
 //
 import UIKit
 
+//
+//  AppDelegate.swift
+//  HGCam
+//
+//  Created by Aly Salman on 18/02/23.
+//  Copyright © 2023 CB Gang. All rights reserved.
+//
+import UIKit
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    var window: UIWindow?
+
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Reset the isFirstLaunch flag to true on every launch
-        UserDefaults.standard.set(true, forKey: "isFirstLaunch")
-        
-        // Present the onboarding screen
-        let onboardingViewController = OnboardingViewController()
-        window?.rootViewController = onboardingViewController
-        window?.makeKeyAndVisible()
+        // Set the initial value of isFirstLaunch
+        if UserDefaults.standard.object(forKey: "isFirstLaunch") == nil {
+            UserDefaults.standard.set(true, forKey: "isFirstLaunch")
+        }
         
         return true
     }
-
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        guard let windowScene = scene as? UIWindowScene else { return }
-        
-        // Check if it's the first launch
-        let isFirstLaunch = UserDefaults.standard.bool(forKey: "isFirstLaunch")
-        
-        if isFirstLaunch {
-            // First launch, present the onboarding screen
-            let onboardingViewController = OnboardingViewController()
-            let window = UIWindow(windowScene: windowScene)
-            window.rootViewController = onboardingViewController
-            self.window = window
-            
-            // Set the flag to false to indicate that the onboarding has been completed
-            UserDefaults.standard.set(false, forKey: "isFirstLaunch")
-        } else {
-            // Not the first launch, proceed with your app's main view controller
-            let mainViewController = CameraViewController()
-            let window = UIWindow(windowScene: windowScene)
-            window.rootViewController = mainViewController
-            self.window = window
-        }
-        
-        window?.makeKeyAndVisible()
-    }
     
-    // MARK: UISceneSession Lifecycle
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // Reset isFirstLaunch when the app becomes active
+        UserDefaults.standard.set(true, forKey: "isFirstLaunch")
+    }
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         // Called when a new scene session is being created.
@@ -66,4 +49,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 }
-

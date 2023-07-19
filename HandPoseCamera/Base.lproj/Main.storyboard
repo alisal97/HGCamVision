@@ -31,6 +31,7 @@
         <!--Video Editor Controller-->
         <scene sceneID="Sd4-l2-eCr">
             <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="kES-SV-deG" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="1nd-Sc-oQi" customClass="UIVideoEditorController" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="F6H-mt-X4J">
@@ -42,7 +43,6 @@
                         <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="cpt-Jg-WAg"/>
                     </connections>
                 </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="kES-SV-deG" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="92.753623188405811" y="87.723214285714278"/>
         </scene>

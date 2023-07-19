@@ -93,9 +93,9 @@ class InstructionsViewController3: UIViewController {
         instructionsLabel.text = """
         Disclaimer: this feature is relatively new and experimental, make sure you are in a well lit environment, and provide the developer with any feedback, thank you!
         
-        When the timer starts, you can 
+        For best performance, keep the phone as steady as possible!.
         
-        Smile and close one eye (or both, but works with just one eye) "😉" to start/stop recording video
+        Smile and close one eye (or both, but works with just one eye) "😉" to start/stop recording video. For recording, hold it until the timer starts!
         
         Blink/close both of your eyes  "👁️👁️" to take a picture
         

@@ -289,7 +289,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     }
 
     
-    private func startSpeechRecognition() {
+    func startSpeechRecognition() {
         speechRecognizer.delegate = self
         
         SFSpeechRecognizer.requestAuthorization { authStatus in
@@ -613,7 +613,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         view.addSubview(CameraViewController.recordLabel)
         CameraViewController.recordLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            CameraViewController.recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -25),
+            CameraViewController.recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 23),
             CameraViewController.recordLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
 

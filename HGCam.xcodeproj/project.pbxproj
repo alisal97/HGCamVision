@@ -85,11 +85,11 @@
 				109A761B2A5C01AD00E0F9AA /* CameraViewController.swift */,
 				104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */,
 				ACBD85ED24A4E3A7002F7C9C /* SceneDelegate.swift */,
+				1076034F2A66E2B7000BDB99 /* OnboardingViewController.swift */,
 				ACBD85F124A4E3A7002F7C9C /* Main.storyboard */,
 				ACBD85F424A4E3AC002F7C9C /* Assets.xcassets */,
 				ACBD85F624A4E3AC002F7C9C /* LaunchScreen.storyboard */,
 				ACBD85F924A4E3AC002F7C9C /* Info.plist */,
-				1076034F2A66E2B7000BDB99 /* OnboardingViewController.swift */,
 			);
 			path = HandPoseCamera;
 			sourceTree = "<group>";
