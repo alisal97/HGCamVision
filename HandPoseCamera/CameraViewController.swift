@@ -41,7 +41,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     var previousKeypointsMultiArray: MLMultiArray?
     
     var frameCounter = 0
-    let handPosePredictionInterval = 9
+    let handPosePredictionInterval = 15
     
     let model = try? fullyaugmented175cleaned(configuration: MLModelConfiguration())
 
@@ -316,7 +316,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
 
         let audioSession = AVAudioSession.sharedInstance()
         do { //playAndRecord mode is required for relaunching the audio session after background then foreground
-            try audioSession.setCategory(.playAndRecord , mode: .measurement, options: .defaultToSpeaker)
+            try audioSession.setCategory(.playAndRecord, mode: .measurement, options: .defaultToSpeaker)
             try audioSession.overrideOutputAudioPort(.none)
             
             // Activate the audio session
@@ -329,6 +329,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         guard let recognitionRequest = recognitionRequest else { return }
         recognitionRequest.shouldReportPartialResults = true
+        recognitionRequest.taskHint = .dictation
 
         let inputNode = audioEngine.inputNode
         let format = inputNode.outputFormat(forBus: 0)
