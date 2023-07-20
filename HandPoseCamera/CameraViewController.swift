@@ -303,16 +303,22 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
 
     
     private func startRecognizing() {
+        
+        if recognitionTask != nil {
+            recognitionTask?.cancel()
+            recognitionTask = nil
+        }
+
         guard !audioEngine.isRunning else { return }
         
         // Print a message to indicate that recognition is starting
         print("Recognizing started")
 
         let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+        do { //playAndRecord mode is required for relaunching the audio session after background then foreground
+            try audioSession.setCategory(.playAndRecord , mode: .measurement, options: .duckOthers)
             try audioSession.overrideOutputAudioPort(.none)
-
+            
             // Activate the audio session
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
@@ -320,6 +326,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
 
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+        
         guard let recognitionRequest = recognitionRequest else { return }
         recognitionRequest.shouldReportPartialResults = true
 
@@ -344,6 +351,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
             if let result = result {
                 self.processRecognitionResult(result)
             }
+            
 
             if let error = error {
                 print("Speech recognition error: \(error.localizedDescription)")
@@ -351,7 +359,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
             }
 
             // Print a message to indicate that recognition task has completed
-            print("Recognizing stopped")
+            print("Recognizing completed")
 
             // Restart the recognition task if it's still running
             if self.isRecognitionTaskRunning {
