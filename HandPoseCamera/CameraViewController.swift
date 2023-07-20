@@ -316,7 +316,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
 
         let audioSession = AVAudioSession.sharedInstance()
         do { //playAndRecord mode is required for relaunching the audio session after background then foreground
-            try audioSession.setCategory(.playAndRecord , mode: .measurement, options: .duckOthers)
+            try audioSession.setCategory(.playAndRecord , mode: .measurement, options: .defaultToSpeaker)
             try audioSession.overrideOutputAudioPort(.none)
             
             // Activate the audio session
