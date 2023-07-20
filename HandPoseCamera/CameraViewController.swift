@@ -41,7 +41,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     var previousKeypointsMultiArray: MLMultiArray?
     
     var frameCounter = 0
-    let handPosePredictionInterval = 15
+    let handPosePredictionInterval = 11
     
     let model = try? fullyaugmented175cleaned(configuration: MLModelConfiguration())
 
