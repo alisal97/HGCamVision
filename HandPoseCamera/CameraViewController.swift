@@ -98,8 +98,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     // Declare a UILabel to display the time elapsed
     static let recordLabel: UILabel = {
         let label = UILabel()
-        label.text = "00:00"
-        label.font = UIFont.systemFont(ofSize: 39, weight: .regular)
+        label.text = "00:00:00"
+        label.font = UIFont.systemFont(ofSize: 37, weight: .regular)
         label.textColor = UIColor.white
         label.textAlignment = .center
         return label
@@ -466,11 +466,11 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         updateTimerLabel()
     }
     func updateTimerLabel() {
-        let minutes = counter / 60
+        let hours = counter / 3600
+        let minutes = (counter % 3600) / 60
         let seconds = counter % 60
-        CameraViewController.recordLabel.text = String(format: "%02d:%02d", minutes, seconds)
+        CameraViewController.recordLabel.text = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
-    
 
     func videoSaved() {
         let alert = UIAlertController(title: nil, message: "Video added to Photos successfully", preferredStyle: .alert)
@@ -482,12 +482,11 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
     }
 
-    // for every 60 seconds it will add a minute
-    func formattedTime() -> String {
-        let minutes = counter / 60
-        let seconds = counter % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
+//    func formattedTime() -> String {
+//        let minutes = counter / 60
+//        let seconds = counter % 60
+//        return String(format: "%02d:%02d", minutes, seconds)
+//    }
     // to keep screen on when recording.
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
