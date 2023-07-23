@@ -993,7 +993,8 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             let label = prediction.label
             guard let confidence = prediction.labelProbabilities[label] else { return }
             print("label: \(prediction.label)\nconfidence: \(confidence)")
-
+        
+            
             if confidence > 0.97 {
                 DispatchQueue.main.async { [self] in
                     let currentPrediction = try? model!.prediction(poses: keypointsMultiArray)
@@ -1003,9 +1004,11 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                     
                     previousKeypointsMultiArray = keypointsMultiArray
                     
-                    self.feedbackLabel.text = isHandMoving ? "Show a hand pose & hold it still": ""
+                    self.feedbackLabel.text = isHandMoving ? "Hold still until you see the timer!": ""
                     
                     if CameraViewController.isTimerRunning || CameraViewController.isRecording || CameraViewController.isCap {
+                        
+                        self.feedbackLabel.text = "Now you can lower your hand!"
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 3 ) {
                             
@@ -1016,7 +1019,9 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                     } else if !CameraViewController.isTimerRunning && !CameraViewController.isRecording && !CameraViewController.isCap {
                         feedbackLabel.isHidden = false
                     }
-
+                    
+                    
+                    
                     
                     if currentLabel == label && confidence > 0.97 && !isHandMoving {
                         switch label {
@@ -1055,13 +1060,26 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                             else if !CameraViewController.isTimerRunning && CameraViewController.isRecording {
                                 self.stopRecording()
                             }
-                        
+
                         default:
                             break
                         }
                     }
+                    switch label {
+                    case "backgrounds":
+                        if !self.feedbackLabel.isHidden {
+                            
+                            self.feedbackLabel.isHidden = true
+                        }
+
+
+                    default:
+                        break
+                    }
+
                 }
             }
+            
         } catch {
             print("Prediction error")
         }
