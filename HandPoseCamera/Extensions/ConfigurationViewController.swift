@@ -26,13 +26,15 @@ class ConfigurationViewController: UIViewController, UITextFieldDelegate {
         instructionsLabel.translatesAutoresizingMaskIntoConstraints = false
         instructionsLabel.textColor = .white
         instructionsLabel.font = UIFont.systemFont(ofSize: 18)
-        instructionsLabel.numberOfLines = 0
+        instructionsLabel.numberOfLines = 25
         instructionsLabel.textAlignment = .center
         instructionsLabel.text = """
-        You can change the voice command words here
-        You must write one word.
+        Change voice command words here 👇
         
-        for better functionality, use English words.
+        For best performance:
+        
+        -use one word.
+        -use English words.
         """
         
         // Word 1 Label
@@ -50,7 +52,9 @@ class ConfigurationViewController: UIViewController, UITextFieldDelegate {
         word1TextField.placeholder = "To Take Pictures"
         word1TextField.textColor = .white
         word1TextField.backgroundColor = .darkGray
-        word1TextField.layer.cornerRadius = 8
+        word1TextField.layer.cornerRadius = 6
+        word1TextField.isUserInteractionEnabled = true
+        word1TextField.autocapitalizationType = .none
         word1TextField.delegate = self // Set the text field delegate
         
         // Word 2 Label
@@ -68,7 +72,9 @@ class ConfigurationViewController: UIViewController, UITextFieldDelegate {
         word2TextField.placeholder = "To Start Recording Video"
         word2TextField.textColor = .white
         word2TextField.backgroundColor = .darkGray
-        word2TextField.layer.cornerRadius = 8
+        word2TextField.layer.cornerRadius = 6
+        word2TextField.isUserInteractionEnabled = true
+        word2TextField.autocapitalizationType = .none
         word2TextField.delegate = self // Set the text field delegate
         
         // Word 3 Label
@@ -86,7 +92,9 @@ class ConfigurationViewController: UIViewController, UITextFieldDelegate {
         word3TextField.placeholder = "To Stop Recording Video"
         word3TextField.textColor = .white
         word3TextField.backgroundColor = .darkGray
-        word3TextField.layer.cornerRadius = 8
+        word3TextField.layer.cornerRadius = 6
+        word3TextField.isUserInteractionEnabled = true
+        word3TextField.autocapitalizationType = .none
         word3TextField.delegate = self // Set the text field delegate
         
         // Save Button

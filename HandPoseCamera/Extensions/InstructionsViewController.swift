@@ -20,7 +20,7 @@ class InstructionsViewController: UIViewController {
         // Create and configure the label for the instructions
         let instructionsLabel = UILabel()
         instructionsLabel.translatesAutoresizingMaskIntoConstraints = false
-        instructionsLabel.numberOfLines = 0
+        instructionsLabel.numberOfLines = 25
         instructionsLabel.textAlignment = .center
         instructionsLabel.textColor = UIColor.white
         instructionsLabel.font = UIFont.systemFont(ofSize: 17)
@@ -86,7 +86,7 @@ class InstructionsViewController3: UIViewController {
         // Create and configure the label for the instructions
         let instructionsLabel = UILabel()
         instructionsLabel.translatesAutoresizingMaskIntoConstraints = false
-        instructionsLabel.numberOfLines = 0
+        instructionsLabel.numberOfLines = 25
         instructionsLabel.textAlignment = .center
         instructionsLabel.textColor = UIColor.white
         instructionsLabel.font = UIFont.systemFont(ofSize: 18)

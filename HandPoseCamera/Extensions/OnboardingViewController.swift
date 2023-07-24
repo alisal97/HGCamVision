@@ -23,7 +23,8 @@ class OnboardingViewController: UIViewController {
         onboardingLabel.textColor = .white
         onboardingLabel.font = UIFont.systemFont(ofSize: 25)
         onboardingLabel.textAlignment = .center
-        onboardingLabel.numberOfLines = 0
+        onboardingLabel.numberOfLines = 17
+        onboardingLabel.isHighlighted = true
         onboardingLabel.text = """
             Welcome to Say Cheese!\n
             \nSay Cheese! is a camera app designed to make content creation accessible and as simple as possible, choose your preferred camera control mode using the menu at the bottom, then tap the '?' button in the bottom left corner for instructions!
