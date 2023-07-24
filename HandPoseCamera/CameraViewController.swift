@@ -66,6 +66,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
 
     let fontSize: CGFloat = 13
     var isRecognitionTaskRunning = false
+    private var flashMode: AVCaptureDevice.FlashMode = .off
+    private var flashButton: UIButton!
 
     
     
@@ -679,6 +681,23 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
 
         segmentedControl.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         segmentedControl.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -85 ).isActive = true
+        
+        
+        flashButton = UIButton(type: .custom)
+        let flashConfig = UIImage.SymbolConfiguration(pointSize: 35)
+        
+        flashButton.translatesAutoresizingMaskIntoConstraints = false
+        flashButton.setImage(UIImage(systemName: "bolt.slash.circle", withConfiguration: flashConfig)?.withTintColor(.white, renderingMode: .alwaysOriginal), for: .normal)
+        flashButton.addTarget(self, action: #selector(flashButtonTapped(_:)), for: .touchUpInside)
+        view.addSubview(flashButton)
+        
+        flashButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20.0).isActive = true
+        flashButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 75).isActive = true
+        flashButton.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
+        flashButton.heightAnchor.constraint(equalToConstant: 40.0).isActive = true
+        flashButton.clipsToBounds = true
+
+
     }
     
     
@@ -789,6 +808,43 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         })
         audioPlayer?.play()
         
+    }
+    
+    
+    private func toggleFlash() {
+        
+        switch flashMode {
+        case .off:
+            flashMode = .on
+        case .on:
+            flashMode = .auto
+        case .auto:
+            flashMode = .off
+        default:
+            break
+        }
+        
+        updateFlashButtonAppearance()
+        
+    }
+    
+    private func updateFlashButtonAppearance() {
+        let flashConfig = UIImage.SymbolConfiguration(pointSize: 35)
+        
+        switch flashMode {
+        case .off:
+            flashButton.setImage(UIImage(systemName: "bolt.slash.circle", withConfiguration: flashConfig)?.withTintColor(.white, renderingMode: .alwaysOriginal), for: .normal)
+        case .on:
+            flashButton.setImage(UIImage(systemName: "bolt.circle.fill", withConfiguration: flashConfig)?.withTintColor(.white, renderingMode: .alwaysOriginal), for: .normal)
+        case .auto:
+            flashButton.setImage(UIImage(systemName: "a.circle.fill", withConfiguration: flashConfig)?.withTintColor(.white, renderingMode: .alwaysOriginal), for: .normal)
+        default:
+            break
+        }
+    }
+    
+    @IBAction func flashButtonTapped(_ sender: Any) {
+        toggleFlash()
     }
     private func runTimer(seconds: Int, completion: @escaping () -> Void) {
         CameraViewController.isTimerRunning = true
