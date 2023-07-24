@@ -26,6 +26,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     private var videoDeviceInput: AVCaptureDeviceInput!
     private let handPoseRequest = VNDetectHumanHandPoseRequest()
     @IBOutlet private var feedbackLabel: UILabel!
+    private var captureDevice: AVCaptureDevice?
 
     static var isRecording = false
     private weak var timerLabel: UILabel?
@@ -684,7 +685,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         
         flashButton = UIButton(type: .custom)
-        let flashConfig = UIImage.SymbolConfiguration(pointSize: 35)
+        let flashConfig = UIImage.SymbolConfiguration(pointSize: 27)
         
         flashButton.translatesAutoresizingMaskIntoConstraints = false
         flashButton.setImage(UIImage(systemName: "bolt.slash.circle", withConfiguration: flashConfig)?.withTintColor(.white, renderingMode: .alwaysOriginal), for: .normal)
@@ -789,7 +790,11 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     // capturing images
     private func captureImage() {
         guard let photoOutput = captureSession?.outputs.first(where: { $0 is AVCapturePhotoOutput }) as? AVCapturePhotoOutput else { return }
+        
+        // Create AVCapturePhotoSettings with the appropriate flash mode
         let settings = AVCapturePhotoSettings()
+        settings.flashMode = flashMode
+        
         photoOutput.capturePhoto(with: settings, delegate: self)
         
         let shutterView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
@@ -807,12 +812,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
             })
         })
         audioPlayer?.play()
-        
     }
-    
-    
     private func toggleFlash() {
-        
         switch flashMode {
         case .off:
             flashMode = .on
@@ -823,13 +824,11 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         default:
             break
         }
-        
         updateFlashButtonAppearance()
-        
     }
     
     private func updateFlashButtonAppearance() {
-        let flashConfig = UIImage.SymbolConfiguration(pointSize: 35)
+        let flashConfig = UIImage.SymbolConfiguration(pointSize: 27)
         
         switch flashMode {
         case .off:
