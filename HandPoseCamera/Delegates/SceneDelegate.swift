@@ -47,6 +47,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let cameraViewController = window?.rootViewController as? CameraViewController else {
             return
         }
+        
+        cameraViewController.stopRecording()
 
         cameraViewController.stopSpeechRecognition()
     }
@@ -84,7 +86,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let cameraViewController = window?.rootViewController as? CameraViewController else {
             return
         }
-
+        cameraViewController.stopRecording()
         cameraViewController.stopSpeechRecognition()
     }
 
