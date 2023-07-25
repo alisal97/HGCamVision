@@ -555,6 +555,9 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
             fatalError("Could not create video device input: \(error.localizedDescription)")
         }
         
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleInterruption(_:)), name: AVAudioSession.interruptionNotification, object: nil)
+
         captureSession.sessionPreset = .high
         self.captureSession = captureSession
         captureSession.addOutput(movieOutput)
@@ -562,6 +565,24 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
             self?.captureSession?.startRunning()
         }
     }
+    
+    
+    @objc func handleInterruption(_ notification: Notification) {
+        guard let interruptionType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt else {
+            return
+        }
+
+        let interruptionTypeValue = AVAudioSession.InterruptionType(rawValue: interruptionType)
+
+        if interruptionTypeValue == .began {
+            // Recording interrupted, stop the recording
+            if movieOutput.isRecording {
+                stopTimer()
+                movieOutput.stopRecording()
+            }
+        }
+    }
+
     func addAudioInput() {
         
            let audioSession = AVAudioSession.sharedInstance()
@@ -755,15 +776,16 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     
     func startRecording() {
-       if !movieOutput.isRecording {
-           let outputPath = NSTemporaryDirectory() + "output.mov"
-           let outputFileURL = URL(fileURLWithPath: outputPath)
-           movieOutput.startRecording(to: outputFileURL, recordingDelegate: self)
-           startTimer()
-           CameraViewController.isRecording = true
-           setupSegmentedControl()
-       }
-   }
+        if !movieOutput.isRecording {
+            let outputPath = NSTemporaryDirectory() + "output\(Date().timeIntervalSince1970).mov"
+            let outputFileURL = URL(fileURLWithPath: outputPath)
+
+            movieOutput.startRecording(to: outputFileURL, recordingDelegate: self)
+            startTimer()
+            CameraViewController.isRecording = true
+            setupSegmentedControl()
+        }
+    }
 
     // to stop recording video
     func stopRecording() {
@@ -1049,7 +1071,6 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             guard let confidence = prediction.labelProbabilities[label] else { return }
             print("label: \(prediction.label)\nconfidence: \(confidence)")
         
-            
             if confidence > 0.97 {
                 DispatchQueue.main.async { [self] in
                     let currentPrediction = try? model!.prediction(poses: keypointsMultiArray)
@@ -1206,6 +1227,9 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if let error = error {
             print("Error recording video: \(error.localizedDescription)")
+            CameraViewController.isRecording = false
+            stopTimer()
+            
         } else {
             PHPhotoLibrary.requestAuthorization { status in
                 if status == .authorized {
