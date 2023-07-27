@@ -179,6 +179,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
             CameraViewController.word3 = savedWord3
         }
         
+        
+        
         updateTargetWords()
         
         
@@ -242,11 +244,23 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         } else if !CameraViewController.isRecording && !CameraViewController.isTimerRunning {
             segmentedControl.isEnabled = true
             segmentedControl.isHidden = false
-
+            
+        }
+    }
+        
+    func updateUI() {
+            if CameraViewController.isRecording || CameraViewController.isCap || CameraViewController.isTimerRunning {
+                
+                switchCameraButton.isEnabled = false
+                switchCameraButton.isHidden = true
+            } else if !CameraViewController.isRecording && !CameraViewController.isTimerRunning {
+                switchCameraButton.isEnabled = true
+                switchCameraButton.isHidden = false
+                
+            }
         }
 
 
-    }
     @objc func appDidEnterBackground() {
         // Stop speech recognition when app enters the background
         stopSpeechRecognition()
@@ -784,6 +798,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
             startTimer()
             CameraViewController.isRecording = true
             setupSegmentedControl()
+            updateUI()
         }
     }
 
@@ -792,6 +807,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         if movieOutput.isRecording {
             movieOutput.stopRecording()
             stopTimer()
+            updateUI()
         }
     }
     
@@ -871,7 +887,8 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
         CameraViewController.isTimerRunning = true
         
         setupSegmentedControl()
-
+        updateUI()
+        
         var timeLeft = seconds
         let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
         timer.schedule(deadline: .now(), repeating: .seconds(1))
@@ -885,7 +902,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
                 CameraViewController.isTimerRunning = false
                 self?.timerLabel?.text = nil
                 self?.setupSegmentedControl()
-
+                self?.updateUI()
                 completion()
             }
         }
@@ -1229,6 +1246,8 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
             print("Error recording video: \(error.localizedDescription)")
             CameraViewController.isRecording = false
             stopTimer()
+            updateUI()
+            setupSegmentedControl()
             
         } else {
             PHPhotoLibrary.requestAuthorization { status in
@@ -1241,14 +1260,14 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                                 videoSaved()
                                 CameraViewController.isRecording = false
                                 self.setupSegmentedControl()
-
+                                self.updateUI()
                             }
 
                         } else {
                             print("Error saving video to photos: \(error?.localizedDescription ?? "unknown error")")
                             CameraViewController.isRecording = false
                             self.setupSegmentedControl()
-
+                            self.updateUI()
 
                         }
                     }
@@ -1256,6 +1275,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                     print("Access to photo library denied")
                     CameraViewController.isRecording = false
                     self.setupSegmentedControl()
+                    self.updateUI()
 
                 }
             }
