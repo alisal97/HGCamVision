@@ -238,7 +238,6 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     func setupSegmentedControl() {
         if CameraViewController.isRecording || CameraViewController.isCap || CameraViewController.isTimerRunning {
-            
             segmentedControl.isEnabled = false
             segmentedControl.isHidden = true
         } else if !CameraViewController.isRecording && !CameraViewController.isTimerRunning {
