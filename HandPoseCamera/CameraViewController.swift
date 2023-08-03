@@ -3,7 +3,6 @@
 //  HGCam
 //
 //  Created by Aly Salman on 18/02/23.
-//  Copyright © 2023 Aly. All rights reserved.
 
 
 import UIKit

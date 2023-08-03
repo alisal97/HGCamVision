@@ -3,7 +3,6 @@
 //  HGCam
 //
 //  Created by Aly Salman on 14/07/23.
-//  Copyright © 2023 CB Gang. All rights reserved.
 //
 
 import Foundation

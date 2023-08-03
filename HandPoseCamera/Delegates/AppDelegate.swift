@@ -4,7 +4,6 @@
 //  HGCam
 //
 //  Created by Aly Salman on 18/02/23.
-//  Copyright © 2023 CB Gang. All rights reserved.
 //
 import UIKit
 
