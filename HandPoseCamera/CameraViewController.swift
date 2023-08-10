@@ -1253,7 +1253,9 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
         guard let imageData = photo.fileDataRepresentation() else { return }
         guard let image = UIImage(data: imageData) else { return }
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-        runAd()
+        if !CameraViewController.isRecording {
+            runAd()
+        }
     }
 }
 
@@ -1283,6 +1285,8 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                                 CameraViewController.isRecording = false
                                 self.setupSegmentedControl()
                                 self.updateUI()
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
                                 runAd()
                             }
 

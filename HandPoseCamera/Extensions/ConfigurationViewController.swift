@@ -7,17 +7,31 @@
 
 import Foundation
 import UIKit
+import GoogleMobileAds
 
-
-class ConfigurationViewController: UIViewController, UITextFieldDelegate {
+class ConfigurationViewController: UIViewController, UITextFieldDelegate, GADFullScreenContentDelegate {
     weak var delegate: ConfigurationViewControllerDelegate?
     private var word1TextField: UITextField!
     private var word2TextField: UITextField!
     private var word3TextField: UITextField!
-    
+    private var interstitial: GADInterstitialAd?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let request = GADRequest()
+        GADInterstitialAd.load(withAdUnitID: "ca-app-pub-3940256099942544/4411468910",
+                                    request: request,
+                          completionHandler: { [self] ad, error in
+                            if let error = error {
+                              print("Failed to load interstitial ad with error: \(error.localizedDescription)")
+                              return
+                            }
+                            interstitial = ad
+                            interstitial?.fullScreenContentDelegate = self
+                          }
+        )
+
         view.backgroundColor = UIColor.black.withAlphaComponent(0.95)
         
         // Instructions Label
@@ -188,6 +202,8 @@ class ConfigurationViewController: UIViewController, UITextFieldDelegate {
         defaults.set(word3, forKey: "Word3")
         
         delegate?.wordsDidChange(word1: word1, word2: word2, word3: word3)
+        
+        CameraViewController().runAd()
         dismiss(animated: true, completion: nil)
     }
 

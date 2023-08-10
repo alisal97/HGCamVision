@@ -7,12 +7,26 @@
 
 import Foundation
 import UIKit
+import GoogleMobileAds
 
-class InstructionsViewController: UIViewController {
-    
+class InstructionsViewController: UIViewController, GADFullScreenContentDelegate {
+    private var interstitial: GADInterstitialAd?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let request = GADRequest()
+        GADInterstitialAd.load(withAdUnitID: "ca-app-pub-3940256099942544/4411468910",
+                                    request: request,
+                          completionHandler: { [self] ad, error in
+                            if let error = error {
+                              print("Failed to load interstitial ad with error: \(error.localizedDescription)")
+                              return
+                            }
+                            interstitial = ad
+                            interstitial?.fullScreenContentDelegate = self
+                          }
+        )
         // Configure the view
         view.backgroundColor = UIColor.black.withAlphaComponent(0.95)
 
@@ -68,17 +82,33 @@ class InstructionsViewController: UIViewController {
     }
     
     @objc func dismissButtonTapped() {
+        CameraViewController().runAd()
+
         dismiss(animated: true, completion: nil)
     }
 
 }
 
 
-class InstructionsViewController3: UIViewController {
-    
+class InstructionsViewController3: UIViewController, GADFullScreenContentDelegate {
+    private var interstitial: GADInterstitialAd?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let request = GADRequest()
+        GADInterstitialAd.load(withAdUnitID: "ca-app-pub-3940256099942544/4411468910",
+                                    request: request,
+                          completionHandler: { [self] ad, error in
+                            if let error = error {
+                              print("Failed to load interstitial ad with error: \(error.localizedDescription)")
+                              return
+                            }
+                            interstitial = ad
+                            interstitial?.fullScreenContentDelegate = self
+                          }
+        )
+
         // Configure the view
         view.backgroundColor = UIColor.black.withAlphaComponent(0.95)
 
@@ -134,6 +164,7 @@ class InstructionsViewController3: UIViewController {
     }
     
     @objc func dismissButtonTapped() {
+        CameraViewController().runAd()
         dismiss(animated: true, completion: nil)
     }
 
