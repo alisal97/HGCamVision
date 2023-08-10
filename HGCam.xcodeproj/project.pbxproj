@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1046724C2A8531F400B66D27 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 1046724B2A8531F400B66D27 /* GoogleMobileAds */; };
 		104A12BC2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 104A12BB2A3644AA00990438 /* fullyaugmented175cleaned.mlmodel */; };
 		107603502A66E2B7000BDB99 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1076034F2A66E2B7000BDB99 /* OnboardingViewController.swift */; };
 		109000BB2A66B5B100E61BDC /* ConfigurationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109000BA2A66B5B100E61BDC /* ConfigurationViewController.swift */; };
@@ -43,6 +44,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1046724C2A8531F400B66D27 /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,6 +121,7 @@
 			);
 			name = HGCam;
 			packageProductDependencies = (
+				1046724B2A8531F400B66D27 /* GoogleMobileAds */,
 			);
 			productName = HandPoseCamera;
 			productReference = ACBD85E824A4E3A7002F7C9C /* SnapFree.app */;
@@ -150,6 +153,7 @@
 			);
 			mainGroup = ACBD85DF24A4E3A7002F7C9C;
 			packageReferences = (
+				1046724A2A8531F300B66D27 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			productRefGroup = ACBD85E924A4E3A7002F7C9C /* Products */;
 			projectDirPath = "";
@@ -340,7 +344,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 43KKKRBAP2;
 				INFOPLIST_FILE = HandPoseCamera/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "SnapFree Pro";
+				INFOPLIST_KEY_CFBundleDisplayName = SnapFree;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -348,7 +352,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.SnapFreePro.App;
+				"OTHER_LDFLAGS[arch=*]" = "-ObjC";
+				PRODUCT_BUNDLE_IDENTIFIER = com.SnapFree.App;
 				PRODUCT_NAME = SnapFree;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -367,7 +372,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 43KKKRBAP2;
 				INFOPLIST_FILE = HandPoseCamera/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "SnapFree Pro";
+				INFOPLIST_KEY_CFBundleDisplayName = SnapFree;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -375,7 +380,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.SnapFreePro.App;
+				"OTHER_LDFLAGS[arch=*]" = "-ObjC";
+				PRODUCT_BUNDLE_IDENTIFIER = com.SnapFree.App;
 				PRODUCT_NAME = SnapFree;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -407,6 +413,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1046724A2A8531F300B66D27 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1046724B2A8531F400B66D27 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1046724A2A8531F300B66D27 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = ACBD85E024A4E3A7002F7C9C /* Project object */;
 }

@@ -13,9 +13,10 @@ import Vision
 import Photos
 import Speech
 import AVFAudio
+import GoogleMobileAds
 
 
-class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
+class CameraViewController: UIViewController, SFSpeechRecognizerDelegate, GADFullScreenContentDelegate {
     
     private var captureSession: AVCaptureSession?
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
@@ -68,6 +69,7 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     var isRecognitionTaskRunning = false
     private var flashMode: AVCaptureDevice.FlashMode = .off
     private var flashButton: UIButton!
+    private var interstitial: GADInterstitialAd?
 
     
     
@@ -166,6 +168,19 @@ class CameraViewController: UIViewController, SFSpeechRecognizerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let request = GADRequest()
+        GADInterstitialAd.load(withAdUnitID: "ca-app-pub-3940256099942544/4411468910",
+                                    request: request,
+                          completionHandler: { [self] ad, error in
+                            if let error = error {
+                              print("Failed to load interstitial ad with error: \(error.localizedDescription)")
+                              return
+                            }
+                            interstitial = ad
+                            interstitial?.fullScreenContentDelegate = self
+                          }
+        )
+
         
         let defaults = UserDefaults.standard
         if let savedWord1 = defaults.string(forKey: "Word1") {
@@ -1220,6 +1235,14 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         return averageDistance
         
     }
+    func runAd() {
+        if interstitial != nil {
+            interstitial?.present(fromRootViewController: self)
+        } else {
+          print("Ad wasn't ready")
+        }
+
+    }
 
 
 }
@@ -1230,6 +1253,7 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
         guard let imageData = photo.fileDataRepresentation() else { return }
         guard let image = UIImage(data: imageData) else { return }
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+        runAd()
     }
 }
 
@@ -1259,6 +1283,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                                 CameraViewController.isRecording = false
                                 self.setupSegmentedControl()
                                 self.updateUI()
+                                runAd()
                             }
 
                         } else {

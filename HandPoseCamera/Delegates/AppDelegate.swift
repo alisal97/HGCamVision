@@ -6,6 +6,7 @@
 //  Created by Aly Salman on 18/02/23.
 //
 import UIKit
+import GoogleMobileAds
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,7 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if UserDefaults.standard.object(forKey: "isFirstLaunch") == nil {
             UserDefaults.standard.set(true, forKey: "isFirstLaunch")
         }
-        
+        GADMobileAds.sharedInstance().start(completionHandler: nil)
+
         return true
     }
     
