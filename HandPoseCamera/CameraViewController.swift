@@ -1286,7 +1286,7 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                                 self.setupSegmentedControl()
                                 self.updateUI()
                             }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [self] in
                                 runAd()
                             }
 
@@ -1295,6 +1295,8 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                             CameraViewController.isRecording = false
                             self.setupSegmentedControl()
                             self.updateUI()
+                            self.runAd()
+
 
                         }
                     }
@@ -1303,11 +1305,14 @@ extension CameraViewController: AVCaptureFileOutputRecordingDelegate {
                     CameraViewController.isRecording = false
                     self.setupSegmentedControl()
                     self.updateUI()
+                    self.runAd()
+
 
                 }
             }
 
         }
+        self.runAd()
     }
 }
 
